@@ -63,4 +63,17 @@ CREATE TABLE players (
     omniscience INT, /*turns batter hits into outs*/
     tenaciousness INT, /*related to steal attempts in some form*/
     watchfulness INT /*reduces baserunning attempts*/
-)
+);
+
+INSERT INTO players (id, name, peanutAllergy, cinnamon, pressurization, soul, fate, blood, coffee, ritual) VALUES (
+"a1a1a2",
+"Chorby Soul",
+false,
+0.001,
+0.500,
+1777,
+78,
+"AA",
+"Flat White",
+"Staying alive"
+);
