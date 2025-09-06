@@ -4,7 +4,7 @@ var mysql = require('mysql2');
 var con = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "",
+  password: "Star74Bucks!",
   database: "blaseball"
 });
 
@@ -51,10 +51,6 @@ app.get('/database/players', (req, res) => {
         }
     })
 });
-
-
-
-
 
 
 

@@ -1,26 +1,22 @@
-
 function getPlayers(){
-    fetch ("/database/players?id=100000")
+    fetch ("/database/players?id=a1a1a2")
       .then((response) => response.json())
       .then((data) => {
-        var display_text = "Batting: " + calculateBattingRating(data[0]);
-        console.log(data[0]);
-        document.getElementById("_before_current").innerText = display_text;
+        document.getElementById("_before_current").innerText = data;
       });
-  
 }
 
 
 function calculateBattingRating(player) {
   return (
-    (((1 - player.tragicness) * 0.01)) +
-    (player.buoyancy * 0) +
-    (player.thwackability * 0.35) +
-    (player.moxie * 0.075) +
-    (player.divinity * 0.35) +
-    (player.musclitude * 0.075) +
-    ((1 - player.patheticism) * 0.05) +
-    (player.martyrdom * 0.02)
+    Math.pow(1 - e.tragicness, 0.01) *
+    Math.pow(e.buoyancy, 0) *
+    Math.pow(e.thwackability, 0.35) *
+    Math.pow(e.moxie, 0.075) *
+    Math.pow(e.divinity, 0.35) *
+    Math.pow(e.musclitude, 0.075) *
+    Math.pow(1 - e.patheticism, 0.05) *
+    Math.pow(e.martyrdom, 0.02)
   );
 }
 
@@ -53,4 +49,12 @@ function calculateDefenseRating(player) {
     Math.pow(e.anticapitalism, 0.1) *
     Math.pow(e.chasiness, 0.1)
   );
+}
+
+function ratingToStarsUnrounded(rating) {
+  return rating * 5;
+}
+
+function ratingToStarsRounded(rating) {
+  return Math.round(rating * 10) / 2;
 }
