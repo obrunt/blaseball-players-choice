@@ -3,54 +3,13 @@ function getPlayers(){
     fetch ("/database/players?id=100000")
       .then((response) => response.json())
       .then((data) => {
-        var display_text = "Batting: " + calculateBattingRating(data[0]);
+        var display_text = "Batting: " + calculateBattingRating(data[0]) +"\n" +
+                            "Pitching: " + calculateBattingRating(data[0]) +"\n" +
+                            "Baserunning: " + calculateBattingRating(data[0]) +"\n" +
+                            "Defence: " + calculateBattingRating(data[0]);
         console.log(data[0]);
         document.getElementById("_before_current").innerText = display_text;
       });
   
 }
 
-
-function calculateBattingRating(player) {
-  return (
-    (((1 - player.tragicness) * 0.01)) +
-    (player.buoyancy * 0) +
-    (player.thwackability * 0.35) +
-    (player.moxie * 0.075) +
-    (player.divinity * 0.35) +
-    (player.musclitude * 0.075) +
-    ((1 - player.patheticism) * 0.05) +
-    (player.martyrdom * 0.02)
-  );
-}
-
-function calculatePitchingRating(player) {
-  return (
-    Math.pow(e.shakespearianism, 0.1) *
-    Math.pow(e.suppression, 0) *
-    Math.pow(e.unthwackability, 0.5) *
-    Math.pow(e.coldness, 0.025) *
-    Math.pow(e.overpowerment, 0.15) *
-    Math.pow(e.ruthlessness, 0.4)
-  );
-}
-
-function calculateBaserunningRating(player) {
-  return (
-    Math.pow(e.laserlikeness, 0.5) *
-    Math.pow(e.continuation, 0.1) *
-    Math.pow(e.baseThirst, 0.1) *
-    Math.pow(e.indulgence, 0.1) *
-    Math.pow(e.groundFriction, 0.1)
-  );
-}
-
-function calculateDefenseRating(player) {
-  return (
-    Math.pow(e.omniscience, 0.2) *
-    Math.pow(e.tenaciousness, 0.2) *
-    Math.pow(e.watchfulness, 0.1) *
-    Math.pow(e.anticapitalism, 0.1) *
-    Math.pow(e.chasiness, 0.1)
-  );
-}
