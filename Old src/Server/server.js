@@ -60,7 +60,7 @@ app.get('/database/players', (req, res) => {
                     console.error('failed to fetch update database:', error);
                     res.status(500).json({ error: 'failed to change database'})
                 } else if(results.affectedRows === 0) {
-                    res.status(404).json({ message: `No players updated found` });
+                    res.status(404).json({ message: `No player updates found` });
                 } else {
                     res.status(200).json(results);
                 }
@@ -68,6 +68,47 @@ app.get('/database/players', (req, res) => {
         }
     })
 });
+
+
+app.post('/database/insertPlayers', (req, res) => {
+    const { id } = req.query;
+    const player = req.body;
+
+    const query = `SELECT * FROM players WHERE id = ?;`;
+
+    con.query(query, [id], (error, results) => {
+        if (error){
+            console.error('failed to fetch players from database:', error);
+            res.status(500).json({ error: 'failed to fetch players'})
+        } else if(results.affectedRows === 0) {
+            res.status(404).json({ message: `No players found by user: ${id}` });
+        } else {
+            const updateQuery = `UPDATE players SET batting_rating = ?, pitching_rating = ?, baserunning_rating = ?, defense_rating = ? WHERE id = ?;`
+
+            con.query(updateQuery, [calculateBattingRating(results[0]), calculatePitchingRating(results[0]),
+            calculateBaserunningRating(results[0]), calculateDefenseRating(results[0]), id], (error, results) => {
+                if (error){
+                    console.error('failed to fetch update database:', error);
+                    res.status(500).json({ error: 'failed to change database'})
+                } else if(results.affectedRows === 0) {
+                    res.status(404).json({ message: `No player updates found` });
+                } else {
+                    res.status(200).json(results);
+                }
+            })
+        }
+    })
+});
+
+
+
+
+
+
+
+
+
+
 
 
 
