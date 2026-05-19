@@ -3,12 +3,9 @@
 CREATE SCHEMA taxa;
 
 
-COMMENT ON SCHEMA taxa IS 'Manually added tables and data for database functionality and improved lookups.  Please request updates/changes in SIBR''s #datablase channel';
+--COMMENT ON SCHEMA taxa IS 'Manually added tables and data for database functionality and improved lookups.  Please request updates/changes in SIBR''s #datablase channel';
 
 
-SET default_tablespace = '';
-
-SET default_table_access_method = heap;
 
 
 CREATE TABLE taxa.event_types (
@@ -21,6 +18,66 @@ CREATE TABLE taxa.event_types (
     "out" integer
 );
 
+
+CREATE SEQUENCE taxa.event_types_event_type_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE taxa.event_types_event_type_id_seq OWNED BY taxa.event_types.event_type_id;
+
+ALTER TABLE ONLY taxa.event_types ALTER COLUMN event_type_id SET DEFAULT nextval('taxa.event_types_event_type_id_seq');
+
+
+ALTER TABLE ONLY taxa.event_types
+    ADD CONSTRAINT event_types_event_type_key UNIQUE (event_type);
+
+ALTER TABLE ONLY taxa.event_types
+    ADD CONSTRAINT event_types_pkey PRIMARY KEY (event_type_id);
+
+INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (1, 'BLACK_HOLE', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (2, 'CAUGHT_STEALING', 0, 0, 0, 0, 1);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (3, 'CHARM_STRIKEOUT', 1, 1, 0, 0, 1);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (4, 'CHARM_WALK', 1, 0, 0, 1, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (5, 'DOUBLE', 1, 1, 1, 2, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (6, 'ELSEWHERE_ATBAT', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (7, 'FIELDERS_CHOICE', 1, 1, 0, 0, 1);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (8, 'GAME_OVER', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (9, 'HIT_BY_PITCH', 1, 0, 0, 1, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (10, 'HOME_RUN', 1, 1, 1, 4, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (11, 'HOME_RUN_5', 1, 1, 1, 5, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (12, 'IMMATERIA_SWEPT', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (13, 'MIND_TRICK_STRIKEOUT', 1, 1, 0, 0, 1);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (14, 'MIND_TRICK_WALK', 1, 0, 0, 1, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (16, 'OUT', 1, 1, 0, 0, 1);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (18, 'QUADRUPLE', 1, 1, 1, 4, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (19, 'SACRIFICE', 1, 0, 0, 0, 1);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (20, 'SECRET_BASE_ENTER', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (21, 'SECRET_BASE_EXIT', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (22, 'SHELLED_ATBAT', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (23, 'SINGLE', 1, 1, 1, 1, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (24, 'STOLEN_BASE', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (25, 'STRIKEOUT', 1, 1, 0, 0, 1);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (26, 'SUN_2', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (27, 'TRIPLE', 1, 1, 1, 3, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (28, 'UNKNOWN', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (29, 'UNKNOWN_OUT', 0, 0, 0, 0, 1);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (30, 'WALK', 1, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (31, 'WILD_PITCH', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (32, 'INTENTIONAL_WALK', 1, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (33, 'TUNNELS_STOLEN_RUN', 0, 0, 0, 0, 0);
+
+
+
+
+
+
+
+
 CREATE TABLE taxa.division_teams (
     division_teams_id integer NOT NULL,
     division_id character varying,
@@ -29,115 +86,8 @@ CREATE TABLE taxa.division_teams (
     valid_until timestamp without time zone
 );
 
-
 COMMENT ON TABLE taxa.division_teams IS 'To be deprecated and replaced with data.division_teams (currently used on teams_info_expanded_all)';
 
-CREATE TABLE taxa.divisions (
-    division_db_id integer NOT NULL,
-    division_text character varying,
-    league_id integer,
-    valid_until timestamp without time zone,
-    division_seasons integer[],
-    division_id character varying,
-    valid_from timestamp without time zone
-);
-
-COMMENT ON TABLE taxa.divisions IS 'To be deprecated and replaced with data.divisions (currently used on teams_info_expanded_all)';
-
-CREATE TABLE taxa.leagues (
-    league_db_id integer NOT NULL,
-    league_text character varying,
-    league_seasons integer[],
-    valid_until timestamp without time zone,
-    league_id character varying,
-    valid_from timestamp without time zone
-);
-
-
-COMMENT ON TABLE taxa.leagues IS 'To be deprecated and replaced with data.leagues (currently used on teams_info_expanded_all)';
-
-CREATE TABLE taxa.team_additional_info (
-    team_additional_info_id integer NOT NULL,
-    team_id character varying,
-    team_abbreviation character varying,
-    team_current_status character varying
-);
-
-COMMENT ON TABLE taxa.team_additional_info IS 'Data currently not parseable by dB team object. Team short names created by SIBR poll to teams.  Last update: 7/4/2021';
-
-CREATE TABLE taxa.tournament_teams (
-    tournament_team_id integer NOT NULL,
-    tournament_db_id integer,
-    team_id character varying,
-    valid_from timestamp without time zone,
-    valid_until timestamp without time zone
-);
-
-CREATE TABLE taxa.tournaments (
-    tournament_db_id integer NOT NULL,
-    tournament_id integer,
-    tournament_name character varying,
-    valid_from timestamp without time zone,
-    valid_until timestamp without time zone
-);
-
-CREATE TABLE taxa.blood (
-    blood_id integer,
-    blood_type character varying
-);
-
-COMMENT ON TABLE taxa.blood IS 'Used to label blood text on players_info_expanded_all.';
-
-CREATE TABLE taxa.coffee (
-    coffee_id integer,
-    coffee_text character varying
-);
-
-
-ALTER TABLE taxa.coffee OWNER TO postgres;
-
-COMMENT ON TABLE taxa.coffee IS 'Used to label coffee text on players_info_expanded_all.';
-
-CREATE TABLE taxa.position_types (
-    position_type_id integer,
-    position_type character varying
-);
-
-COMMENT ON TABLE taxa.position_types IS 'Used to label position_type text on players_info_expanded_all.';
-
-CREATE TABLE taxa.weather (
-    weather_id integer,
-    weather_text character varying
-);
-
-CREATE TABLE taxa.attributes (
-    attribute_id integer NOT NULL,
-    attribute character varying,
-    attribute_desc character varying,
-    attribute_category character varying,
-    attribute_short character varying,
-    attribute_datatype character varying,
-    attribute_directionality character varying
-);
-
-COMMENT ON TABLE taxa.attributes IS 'Player attributes.  Descriptions determined over time by SIBR research.  IDs line up to stats value on items.';
-
-CREATE SEQUENCE taxa.attributes_attribute_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE taxa.attributes_attribute_id_seq OWNED BY taxa.attributes.attribute_id;
-
-
-CREATE TABLE taxa.card (
-    card_id integer NOT NULL,
-    card character varying,
-    card_desc character varying
-);
 
 CREATE SEQUENCE taxa.division_teams_division_teams_id_seq
     AS integer
@@ -149,325 +99,8 @@ CREATE SEQUENCE taxa.division_teams_division_teams_id_seq
 
 ALTER SEQUENCE taxa.division_teams_division_teams_id_seq OWNED BY taxa.division_teams.division_teams_id;
 
-CREATE SEQUENCE taxa.divisions_division_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
 
-ALTER SEQUENCE taxa.divisions_division_id_seq OWNED BY taxa.divisions.division_db_id;
-
-CREATE SEQUENCE taxa.event_types_event_type_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE taxa.event_types_event_type_id_seq OWNED BY taxa.event_types.event_type_id;
-
-CREATE SEQUENCE taxa.leagues_league_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE taxa.leagues_league_id_seq OWNED BY taxa.leagues.league_db_id;
-
-
-CREATE TABLE taxa.modifications (
-    modification_db_id integer NOT NULL,
-    modification character varying,
-    color character varying,
-    text_color character varying,
-    background character varying,
-    title character varying,
-    description character varying,
-    modification_entity character varying
-);
-
-
-COMMENT ON TABLE taxa.modifications IS 'Manually pulled on occasion from main.js.  Please note some of these Modifications may still be FK. Last update: 5/4/2021';
-
-
-CREATE SEQUENCE taxa.modifications_modification_db_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE taxa.modifications_modification_db_id_seq OWNED BY taxa.modifications.modification_db_id;
-
-CREATE TABLE taxa.phases (
-    phase_id integer,
-    phase_type character varying,
-    phase_type_id integer,
-    valid_from timestamp without time zone,
-    valid_until timestamp without time zone
-);
-
-
-CREATE TABLE taxa.pitch_types (
-    pitch_type character varying(1),
-    pitch character varying,
-    is_ball integer DEFAULT 0,
-    is_strike integer DEFAULT 0
-);
-
-CREATE TABLE taxa.player_incinerations_unrecorded (
-    season integer,
-    day integer,
-    tournament integer,
-    phase character varying,
-    player_name character varying,
-    player_id character varying(36) DEFAULT NULL::character varying
-);
-
-
-COMMENT ON TABLE taxa.player_incinerations_unrecorded IS 'Manually input data for pre-dB player incinerations.';
-
-CREATE TABLE taxa.player_url_slugs (
-    player_url_slug_id integer NOT NULL,
-    player_id character varying,
-    url_slug character varying,
-    player_name character varying
-);
-
-
-COMMENT ON TABLE taxa.player_url_slugs IS 'Manually created unique player url slugs for initial Wyatt Masoning.';
-
-CREATE SEQUENCE taxa.player_url_slugs_player_url_slug_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE taxa.player_url_slugs_player_url_slug_id_seq OWNED BY taxa.player_url_slugs.player_url_slug_id;
-
-
-CREATE TABLE taxa.team_abbreviations (
-    team_abbreviation_id integer NOT NULL,
-    team_abbreviation character varying,
-    team_id character varying
-);
-
-CREATE SEQUENCE taxa.team_abbreviations_team_abbreviation_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE taxa.team_abbreviations_team_abbreviation_id_seq OWNED BY taxa.team_abbreviations.team_abbreviation_id;
-
-CREATE SEQUENCE taxa.team_additional_info_team_additional_info_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE taxa.team_additional_info_team_additional_info_id_seq OWNED BY taxa.team_additional_info.team_additional_info_id;
-
-CREATE TABLE taxa.team_divine_favor (
-    team_divine_favor_id integer NOT NULL,
-    team_id character varying,
-    valid_from timestamp without time zone,
-    valid_until timestamp without time zone,
-    divine_favor integer
-);
-
-CREATE SEQUENCE taxa.team_divine_favor_team_divine_favor_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE taxa.team_divine_favor_team_divine_favor_id_seq OWNED BY taxa.team_divine_favor.team_divine_favor_id;
-
-CREATE TABLE taxa.team_url_slugs (
-    team_url_slug_id integer NOT NULL,
-    team_id character varying,
-    url_slug character varying,
-    team_name character varying
-);
-
-COMMENT ON TABLE taxa.team_url_slugs IS 'Manually created to differentiate between multiple Artists/Crabs teams.  Last update: 6/25/2021';
-
-
-CREATE SEQUENCE taxa.team_url_slugs_team_url_slug_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE taxa.team_url_slugs_team_url_slug_id_seq OWNED BY taxa.team_url_slugs.team_url_slug_id;
-
-CREATE SEQUENCE taxa.tournament_teams_tournament_team_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE taxa.tournament_teams_tournament_team_id_seq OWNED BY taxa.tournament_teams.tournament_team_id;
-
-
-CREATE SEQUENCE taxa.tournaments_tournament_db_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE taxa.tournaments_tournament_db_id_seq OWNED BY taxa.tournaments.tournament_db_id;
-
-
-CREATE TABLE taxa.vibe_to_arrows (
-    vibe_to_arrow_id integer NOT NULL,
-    arrow_count integer,
-    min_vibe numeric,
-    max_vibe numeric
-);
-
-CREATE SEQUENCE taxa.vibe_to_arrows_vibe_to_arrow_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE taxa.vibe_to_arrows_vibe_to_arrow_id_seq OWNED BY taxa.vibe_to_arrows.vibe_to_arrow_id;
-
-
-ALTER TABLE ONLY taxa.attributes ALTER COLUMN attribute_id SET DEFAULT nextval('taxa.attributes_attribute_id_seq'::regclass);
-
-ALTER TABLE ONLY taxa.division_teams ALTER COLUMN division_teams_id SET DEFAULT nextval('taxa.division_teams_division_teams_id_seq'::regclass);
-
-ALTER TABLE ONLY taxa.divisions ALTER COLUMN division_db_id SET DEFAULT nextval('taxa.divisions_division_id_seq'::regclass);
-
-ALTER TABLE ONLY taxa.event_types ALTER COLUMN event_type_id SET DEFAULT nextval('taxa.event_types_event_type_id_seq'::regclass);
-
-ALTER TABLE ONLY taxa.leagues ALTER COLUMN league_db_id SET DEFAULT nextval('taxa.leagues_league_id_seq'::regclass);
-
-ALTER TABLE ONLY taxa.modifications ALTER COLUMN modification_db_id SET DEFAULT nextval('taxa.modifications_modification_db_id_seq'::regclass);
-
-ALTER TABLE ONLY taxa.player_url_slugs ALTER COLUMN player_url_slug_id SET DEFAULT nextval('taxa.player_url_slugs_player_url_slug_id_seq'::regclass);
-
-ALTER TABLE ONLY taxa.team_abbreviations ALTER COLUMN team_abbreviation_id SET DEFAULT nextval('taxa.team_abbreviations_team_abbreviation_id_seq'::regclass);
-
-ALTER TABLE ONLY taxa.team_divine_favor ALTER COLUMN team_divine_favor_id SET DEFAULT nextval('taxa.team_divine_favor_team_divine_favor_id_seq'::regclass);
-
-ALTER TABLE ONLY taxa.team_url_slugs ALTER COLUMN team_url_slug_id SET DEFAULT nextval('taxa.team_url_slugs_team_url_slug_id_seq'::regclass);
-
-
-ALTER TABLE ONLY taxa.vibe_to_arrows ALTER COLUMN vibe_to_arrow_id SET DEFAULT nextval('taxa.vibe_to_arrows_vibe_to_arrow_id_seq'::regclass);
-
-
-INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (9, 'base_thirst', 'Increases stolen base attempts.', 'baserunning', 'Bt', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (11, 'continuation', 'Whether the runner advances 1 or 2 bases on a hit. (also linked to indulgence somewhat).', 'baserunning', 'Cn', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (13, 'ground_friction', 'Appears to govern the rate of triples, slight negative correlation with doubles hit, possibly by stretching them into triples instead?', 'baserunning', 'G', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (12, 'indulgence', 'Seems to be related to runner advancement on an out (base advancement, scoring on a sacrifice), in concert with laserlikeness.', 'baserunning', 'I', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (10, 'laserlikeness', 'Steal success, steal attempts (correlation stronger than base_thirst); along with Indulgence, appears to impact runner advancement on outs (and may just be a general running speed/ability).', 'baserunning', 'L', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (4, 'divinity', 'Home run frequency.  Also part of Soulscream formula.', 'batting', 'Dv', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (7, 'martyrdom', 'Determines whether a runner advances or whether an out is a Fielder’s Choice.', 'batting', 'Mr', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (3, 'moxie', 'Ability to draw walks - (current theory is it represents some kind of plate discipline, as opposed to impacting the rate of pitcher balls).', 'batting', 'Mo', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (5, 'musclitude', 'Extra base hits (specifically seems to be for doubles), also appears to impact fouls.', 'batting', 'Ms', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (6, 'patheticism', 'Likelihood of the batter making contact with the ball; generally correlates with high strikeout rate.', 'batting', 'Pa', 'NUMERIC', 'smaller');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (2, 'thwackability', 'Quality of contact with the ball, reducing the chance of balls being fielded (probably in some kind of thwack vs unthwack contest).', 'batting', 'Tw', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (0, 'tragicness', 'Direct use unknown, but gets set to 0.1 at the start of seasons and upon siestas/delays etc throughout the season.  Also part of Soulscream formula.', 'batting', 'Tr', 'NUMERIC', 'smaller');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (24, 'anticapitalism', 'Related to steal attempts in some form.', 'defense', 'A', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (25, 'chasiness', 'Defensive ability to prevent extra base hits (by holding runners to first?)', 'defense', 'Ch', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (21, 'omniscience', 'Defensive odds on turning a batted ball into an out.', 'defense', 'Om', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (22, 'tenaciousness', 'Related to steal attempts in some form.', 'defense', 'Te', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (23, 'watchfulness', 'Reduces baserunner attempts to steal (impact on success rate not known).', 'defense', 'W', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (17, 'coldness', 'Unknown.', 'pitching', 'Co', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (18, 'overpowerment', 'Lowers home runs - seems to be involved in all hit types, potentially used to counter triples and doubles as well (likely by reducing the power of batted balls).', 'pitching', 'Ov', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (19, 'ruthlessness', 'Reduces walks and increases strikeouts - seems to essentially determine whether a given pitch is in or out of the strike zone.  Also part of Soulscream formula.', 'pitching', 'R', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (14, 'shakespearianism', '“is linked to Tragicness” for whatever use that is (basically none).  Also part of Soulscream formula.  The White Whale of attributes.', 'pitching', 'S', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (15, 'suppression', 'Appears to be opposed to Buoyancy and helps determine if a ball in play will become a groundout or a fly out.  Not part of pitching rating formula.', 'pitching', 'Su', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (16, 'unthwackability', 'Lowers hits allowed - reduces “quality” of batter contact, increasing likelihood of a ball being fielded .', 'pitching', 'Un', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (1, 'buoyancy', 'Determines frequency of curve in Vibes.', 'vibes', 'Bu', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (8, 'cinnamon', 'Determines maximum level of Vibes.', 'vibes', 'Ci', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (20, 'pressurization', 'Determines minimum level of Vibes.  Also part of Soulscream formula.', 'vibes', 'Pr', 'NUMERIC', 'larger');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (94, 'power', 'Grouping of musclitude, ground_friction, and divinity.', 'grouping', NULL, 'N/A', NULL);
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (95, 'speed', 'Grouping of musclitude, ground_friction, continuation, and laserlikeness.', 'grouping', NULL, 'N/A', NULL);
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (96, 'fate', 'Unknown; appears to re-roll for most (but not all) stat, modification or Feedback changes.', NULL, NULL, 'INTEGER', 'See taxonomy');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (97, 'peanut_allergy', 'Determines whether a peanut interaction affects player positively or negatively.', NULL, NULL, 'BOOLEAN', '');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (98, 'soul', 'Determines length of Soulscream/Soulsong; now has Consumer/eDensity/Redacted implications. Beware Chorby Soul.', NULL, NULL, 'INTEGER', 'See taxonomy');
-    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (99, 'total_fingers', 'Represents instances of change to pitching stats. Players impacted by general stat buffs all receive +1 finger, regardless of the size of their buff. EPT seems to not grant fingers.', NULL, NULL, 'INTEGER', 'See taxonomy');
-
-
-INSERT INTO taxa.blood (blood_id, blood_type) VALUES (0, 'A');
-    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (1, 'AAA');
-    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (2, 'AA');
-    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (3, 'Acidic');
-    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (4, 'Basic');
-    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (5, 'O');
-    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (6, 'O No');
-    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (7, 'H₂O');
-    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (8, 'Electric');
-    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (9, 'Love');
-    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (10, 'Fire');
-    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (11, 'Psychic');
-    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (12, 'Grass');
-
-
-INSERT INTO taxa.card (card_id, card, card_desc) VALUES (0, 'I The Magician', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (1, 'II The High Priestess', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (2, 'III The Empress', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (3, 'IIII The Emperor', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (4, 'V The Pope', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (5, 'VI The Lover ', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (6, 'VII The Chariot', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (7, 'VIII Justice', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (8, 'VIIII The Hermit', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (9, 'X The Wheel of Fortune', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (10, 'XI Strength', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (11, 'XII The Hanged Man', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (12, 'XIII', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (13, 'XIIII Temperance', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (14, 'XV The Devil', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (15, 'XVI The Tower', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (16, 'XVII The Star', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (17, 'XVIII The Moon', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (18, 'XVIIII The Sun', NULL);
-    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (19, 'XX Judgment', NULL);
-
-
-INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (0, 'Black');
-    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (1, 'Light & Sweet');
-    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (2, 'Macchiato');
-    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (3, 'Cream & Sugar');
-    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (4, 'Cold Brew');
-    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (5, 'Flat White');
-    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (6, 'Americano');
-    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (7, 'Espresso');
-    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (8, 'Heavy Foam');
-    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (9, 'Latte');
-    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (10, 'Decaf');
-    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (11, 'Milk Substitute');
-    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (12, 'Plenty of Sugar');
-    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (13, 'Anything');
+ALTER TABLE ONLY taxa.division_teams ALTER COLUMN division_teams_id SET DEFAULT nextval('taxa.division_teams_division_teams_id_seq');
 
 
 INSERT INTO taxa.division_teams (division_teams_id, division_id, team_id, valid_from, valid_until) VALUES (1, 'fadc9684-45b3-47a6-b647-3be3f0735a84', '57ec08cc-0411-4643-b304-0e80dbc15ac7', '2020-09-06 15:26:39.925823', '2020-10-19 15:00:01.023128');
@@ -525,6 +158,38 @@ INSERT INTO taxa.division_teams (division_teams_id, division_id, team_id, valid_
     INSERT INTO taxa.division_teams (division_teams_id, division_id, team_id, valid_from, valid_until) VALUES (53, 'd4cc18de-a136-4271-84f1-32516be91a80', 'd9f89a8a-c563-493e-9d64-78e4f9a55d4a', '2021-03-02 18:31:55', NULL);
 
 
+
+
+
+
+
+
+CREATE TABLE taxa.divisions (
+    division_db_id integer NOT NULL,
+    division_text character varying,
+    league_id integer,
+    valid_until timestamp without time zone,
+    division_seasons integer[],
+    division_id character varying,
+    valid_from timestamp without time zone
+);
+
+COMMENT ON TABLE taxa.divisions IS 'To be deprecated and replaced with data.divisions (currently used on teams_info_expanded_all)';
+
+
+CREATE SEQUENCE taxa.divisions_division_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE taxa.divisions_division_id_seq OWNED BY taxa.divisions.division_db_id;
+
+ALTER TABLE ONLY taxa.divisions ALTER COLUMN division_db_id SET DEFAULT nextval('taxa.divisions_division_id_seq');
+
+
 INSERT INTO taxa.divisions (division_db_id, division_text, league_id, valid_until, division_seasons, division_id, valid_from) VALUES (1, 'Lawful Good', 1, '2020-09-06 15:26:39.925823', '{0,1,2,3,4}', 'f711d960-dc28-4ae2-9249-e1f320fec7d7', '2020-07-29 08:12:22.438');
     INSERT INTO taxa.divisions (division_db_id, division_text, league_id, valid_until, division_seasons, division_id, valid_from) VALUES (2, 'Chaotic Good', 1, '2020-09-06 15:26:39.925823', '{0,1,2,3,4}', '5eb2271a-3e49-48dc-b002-9cb615288836', '2020-07-29 08:12:22.438');
     INSERT INTO taxa.divisions (division_db_id, division_text, league_id, valid_until, division_seasons, division_id, valid_from) VALUES (3, 'Lawful Evil', 2, '2020-09-06 15:26:39.925823', '{0,1,2,3,4}', '765a1e03-4101-4e8e-b611-389e71d13619', '2020-07-29 08:12:22.438');
@@ -535,43 +200,453 @@ INSERT INTO taxa.divisions (division_db_id, division_text, league_id, valid_unti
     INSERT INTO taxa.divisions (division_db_id, division_text, league_id, valid_until, division_seasons, division_id, valid_from) VALUES (8, 'Mild Low', 4, NULL, '{5}', 'fadc9684-45b3-47a6-b647-3be3f0735a84', '2020-09-06 15:26:34.254566');
 
 
-INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (1, 'BLACK_HOLE', 0, 0, 0, 0, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (2, 'CAUGHT_STEALING', 0, 0, 0, 0, 1);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (3, 'CHARM_STRIKEOUT', 1, 1, 0, 0, 1);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (4, 'CHARM_WALK', 1, 0, 0, 1, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (5, 'DOUBLE', 1, 1, 1, 2, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (6, 'ELSEWHERE_ATBAT', 0, 0, 0, 0, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (7, 'FIELDERS_CHOICE', 1, 1, 0, 0, 1);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (8, 'GAME_OVER', 0, 0, 0, 0, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (9, 'HIT_BY_PITCH', 1, 0, 0, 1, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (10, 'HOME_RUN', 1, 1, 1, 4, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (11, 'HOME_RUN_5', 1, 1, 1, 5, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (12, 'IMMATERIA_SWEPT', 0, 0, 0, 0, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (13, 'MIND_TRICK_STRIKEOUT', 1, 1, 0, 0, 1);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (14, 'MIND_TRICK_WALK', 1, 0, 0, 1, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (16, 'OUT', 1, 1, 0, 0, 1);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (18, 'QUADRUPLE', 1, 1, 1, 4, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (19, 'SACRIFICE', 1, 0, 0, 0, 1);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (20, 'SECRET_BASE_ENTER', 0, 0, 0, 0, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (21, 'SECRET_BASE_EXIT', 0, 0, 0, 0, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (22, 'SHELLED_ATBAT', 0, 0, 0, 0, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (23, 'SINGLE', 1, 1, 1, 1, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (24, 'STOLEN_BASE', 0, 0, 0, 0, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (25, 'STRIKEOUT', 1, 1, 0, 0, 1);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (26, 'SUN_2', 0, 0, 0, 0, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (27, 'TRIPLE', 1, 1, 1, 3, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (28, 'UNKNOWN', 0, 0, 0, 0, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (29, 'UNKNOWN_OUT', 0, 0, 0, 0, 1);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (30, 'WALK', 1, 0, 0, 0, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (31, 'WILD_PITCH', 0, 0, 0, 0, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (32, 'INTENTIONAL_WALK', 1, 0, 0, 0, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (33, 'TUNNELS_STOLEN_RUN', 0, 0, 0, 0, 0);
+
+
+
+
+
+CREATE TABLE taxa.leagues (
+    league_db_id integer NOT NULL,
+    league_text character varying,
+    league_seasons integer[],
+    valid_until timestamp without time zone,
+    league_id character varying,
+    valid_from timestamp without time zone
+);
+
+
+COMMENT ON TABLE taxa.leagues IS 'To be deprecated and replaced with data.leagues (currently used on teams_info_expanded_all)';
+
+
+CREATE SEQUENCE taxa.leagues_league_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE taxa.leagues_league_id_seq OWNED BY taxa.leagues.league_db_id;
+
+ALTER TABLE ONLY taxa.leagues ALTER COLUMN league_db_id SET DEFAULT nextval('taxa.leagues_league_id_seq');
 
 
 INSERT INTO taxa.leagues (league_db_id, league_text, league_seasons, valid_until, league_id, valid_from) VALUES (1, 'Good', '{0,1,2,3,4}', '2020-09-06 15:26:34.254566', '7d3a3dd6-9ea1-4535-9d91-bde875c85e80', '2020-07-29 08:12:22.438');
     INSERT INTO taxa.leagues (league_db_id, league_text, league_seasons, valid_until, league_id, valid_from) VALUES (2, 'Evil', '{0,1,2,3,4}', '2020-09-06 15:26:34.254566', '93e58443-9617-44d4-8561-e254a1dbd450', '2020-07-29 08:12:22.438');
     INSERT INTO taxa.leagues (league_db_id, league_text, league_seasons, valid_until, league_id, valid_from) VALUES (3, 'Wild', '{5}', NULL, 'aabc11a1-81af-4036-9f18-229c759ca8a9', '2020-09-06 15:26:34.254566');
     INSERT INTO taxa.leagues (league_db_id, league_text, league_seasons, valid_until, league_id, valid_from) VALUES (4, 'Mild', '{5}', NULL, '4fe65afa-804f-4bb2-9b15-1281b2eab110', '2020-09-06 15:26:34.254566');
+
+
+
+
+
+
+
+
+CREATE TABLE taxa.team_additional_info (
+    team_additional_info_id integer NOT NULL,
+    team_id character varying,
+    team_abbreviation character varying,
+    team_current_status character varying
+);
+
+COMMENT ON TABLE taxa.team_additional_info IS 'Data currently not parseable by dB team object. Team short names created by SIBR poll to teams.  Last update: 7/4/2021';
+
+CREATE SEQUENCE taxa.team_additional_info_team_additional_info_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE taxa.team_additional_info_team_additional_info_id_seq OWNED BY taxa.team_additional_info.team_additional_info_id;
+
+
+INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (1, '8d87c468-699a-47a8-b40d-cfb73a5660ad', 'CRAB', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (2, 'c73b705c-40ad-4633-a6ed-d357ee2e2bcf', 'LIFT', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (3, '878c1bf6-0d21-4659-bfee-916c8314d69c', 'TACO', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (4, '7fcb63bc-11f2-40b9-b465-f1d458692a63', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (5, 'e3f90fa1-0bbe-40df-88ce-578d0723a23b', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (6, 'a3ea6358-ce03-4f23-85f9-deb38cb81b20', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (7, 'f29d6e60-8fce-4ac6-8bc2-b5e3cabc5696', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (8, 'b63be8c2-576a-4d6e-8daf-814f8bcea96f', 'DALE', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (9, '3f8bbb15-61c0-4e3f-8e4a-907a5fb1565e', 'BOS', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (10, '36569151-a2fb-43c1-9df7-2df512424c82', 'NYM', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (11, 'eb67ae5e-c4bf-46ca-bbbc-425cd34182ff', 'CAN', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (12, '49181b72-7f1c-4f1c-929f-928d763ad7fb', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (13, '4d921519-410b-41e2-882e-9726a4e54a6a', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (14, 'bfd38797-8404-4b38-8b82-341da28b1f83', 'CHST', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (15, '7966eb04-efcc-499b-8f03-d13916330531', 'YELL', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (16, '9a5ab308-41f2-4889-a3c3-733b9aab806e', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (17, 'b3b9636a-f88a-47dc-a91d-86ecc79f9934', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (18, '3b0a289b-aebd-493c-bc11-96793e7216d5', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (19, 'd2634113-b650-47b9-ad95-673f8e28e687', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (20, 'b024e975-1c4a-4575-8936-a3754a08806a', 'STK', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (21, 'b72f3061-f573-40d7-832a-5ad475bd7909', 'LVRS', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (22, '979aee4a-6d80-4863-bf1c-ee1a78e06024', 'FRI', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (23, 'd8f82163-2e74-496b-8e4b-2ab35b2d3ff1', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (24, 'a7592bd7-1d3c-4ffb-8b3a-0b1e4bc321fd', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (25, '9e42c12a-7561-42a2-b2d0-7cf81a817a5e', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (26, '70eab4ab-6cb1-41e7-ac8b-1050ee12eecc', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (27, '4e5d0063-73b4-440a-b2d1-214a7345cf16', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (28, 'e8f7ffee-ec53-4fe0-8e87-ea8ff1d0b4a9', NULL, 'tournament');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (29, '23e4cbc1-e9cd-47fa-a35b-bfa06f726cb7', 'PIES', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (30, '105bc3ff-1320-4e37-8ef0-8d595cb95dd0', 'SEA', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (31, 'a37f9158-7f82-46bc-908c-c9e2dda7c33b', 'JAZZ', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (32, 'f02aeae2-5e6a-4098-9842-02d2273f25c7', 'HELL', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (33, 'ca3f1c8c-c025-4d8e-8eef-5be6accbeb16', 'CHI', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (34, 'c6c01051-cdd4-47d6-8a98-bb5b754f937f', 'STAR', 'disbanded');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (35, 'adc5b394-8f76-416d-9ce9-813706877b84', 'KCBM', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (36, '747b8e4a-7e50-4638-a973-ea7950a3e739', 'TGRS', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (37, '9debc64f-74b7-4ae1-a4d6-fce0144b6ea5', 'SPY', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (38, '57ec08cc-0411-4643-b304-0e80dbc15ac7', 'CDMX', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (39, '40b9ec2a-cb43-4dbb-b836-5accb62e7c20', 'PODS', 'disbanded');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (40, 'bb4a9de5-c924-4923-a0cb-9d1445f1ee5d', 'OHWO', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (41, '46358869-dce9-4a01-bfba-ac24fc56f57e', 'CORE', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (42, 'd9f89a8a-c563-493e-9d64-78e4f9a55d4a', 'ATL', 'active');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (43, 'd6a352fc-b675-40a0-864d-f4fd50aaeea0', 'CART', 'deceased');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (44, '9494152b-99f6-4adb-9573-f9e084bc813f', 'CLAB', 'deceased');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (45, '71c621eb-85dc-4bd7-a690-0c68c0e6fb90', 'DOG', 'disbanded');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (46, '54d0d0f2-16e0-42a0-9fff-79cfa7c4a157', 'ANT', 'deceased');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (47, '88151292-6c12-4fb8-b2d6-3e64821293b3', 'AL8', 'deceased');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (48, 'a4b23784-0132-4813-b300-f7449cb06493', 'PHO', 'disbanded');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (49, 'c19bb50b-9a22-4dd2-8200-bce639b1b239', 'TRK', 'deceased');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (50, '939db13f-79c9-41c5-9a15-b340b1bea875', 'BBB', 'disbanded');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (51, '3a094991-4cbc-4786-b74c-688876d243f4', 'RUN', 'deceased');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (52, '2e22beba-8e36-42ba-a8bf-975683c52b5f', 'CAR', 'deceased');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (53, 'b6b5df8f-5602-4883-b47d-07e77ed9d5af', 'LAR', 'deceased');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (54, '00245773-6f25-43b1-a863-42b4068888f0', 'LPL', 'disbanded');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (55, '1e04e5cc-80a6-41c0-af0d-7292817eed79', 'LOU', 'deceased');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (56, 'd0762a7e-004b-48a9-a832-a993982b305b', 'KELP', 'deceased');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (57, '3543229a-668c-4ac9-b64a-588422481f12', 'FINS', 'disbanded');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (58, '74966fbd-5d77-48b1-8075-9bf197583775', 'RHO', 'disbanded');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (59, '55c9fee3-79c8-4467-8dfb-ff1e340aae8c', 'COW', 'deceased');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (60, '53d473fb-ffee-4fd3-aa1c-671228adc592', 'AUB', 'disbanded');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (61, '1a51664e-efec-45fa-b0ba-06d04c344628', 'PSY', 'deceased');
+    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (62, 'cbd44c06-231a-4d1a-bb7d-4170b06e566a', 'HRT', 'deceased');
+
+
+
+
+
+
+
+CREATE TABLE taxa.tournament_teams (
+    tournament_team_id integer NOT NULL,
+    tournament_db_id integer,
+    team_id character varying,
+    valid_from timestamp without time zone,
+    valid_until timestamp without time zone
+);
+
+
+CREATE SEQUENCE taxa.tournament_teams_tournament_team_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE taxa.tournament_teams_tournament_team_id_seq OWNED BY taxa.tournament_teams.tournament_team_id;
+
+
+INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (1, 1, '4e5d0063-73b4-440a-b2d1-214a7345cf16', NULL, NULL);
+    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (2, 1, '49181b72-7f1c-4f1c-929f-928d763ad7fb', NULL, NULL);
+    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (3, 1, 'f29d6e60-8fce-4ac6-8bc2-b5e3cabc5696', NULL, NULL);
+    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (4, 1, 'a3ea6358-ce03-4f23-85f9-deb38cb81b20', NULL, NULL);
+    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (5, 1, '4d921519-410b-41e2-882e-9726a4e54a6a', NULL, NULL);
+    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (6, 1, 'b3b9636a-f88a-47dc-a91d-86ecc79f9934', NULL, NULL);
+    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (7, 1, 'e3f90fa1-0bbe-40df-88ce-578d0723a23b', NULL, NULL);
+    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (8, 1, 'e8f7ffee-ec53-4fe0-8e87-ea8ff1d0b4a9', NULL, NULL);
+    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (9, 1, 'd8f82163-2e74-496b-8e4b-2ab35b2d3ff1', NULL, NULL);
+    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (10, 1, '70eab4ab-6cb1-41e7-ac8b-1050ee12eecc', NULL, NULL);
+    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (11, 1, '9e42c12a-7561-42a2-b2d0-7cf81a817a5e', NULL, NULL);
+    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (12, 1, 'a7592bd7-1d3c-4ffb-8b3a-0b1e4bc321fd', NULL, NULL);
+    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (13, 1, '3b0a289b-aebd-493c-bc11-96793e7216d5', NULL, NULL);
+    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (14, 1, '7fcb63bc-11f2-40b9-b465-f1d458692a63', NULL, NULL);
+    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (15, 1, '9a5ab308-41f2-4889-a3c3-733b9aab806e', NULL, NULL);
+    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (16, 1, 'd2634113-b650-47b9-ad95-673f8e28e687', NULL, NULL);
+
+
+
+
+
+
+
+CREATE TABLE taxa.tournaments (
+    tournament_db_id integer NOT NULL,
+    tournament_id integer,
+    tournament_name character varying,
+    valid_from timestamp without time zone,
+    valid_until timestamp without time zone
+);
+
+
+CREATE SEQUENCE taxa.tournaments_tournament_db_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE taxa.tournaments_tournament_db_id_seq OWNED BY taxa.tournaments.tournament_db_id;
+
+INSERT INTO taxa.tournaments (tournament_db_id, tournament_id, tournament_name, valid_from, valid_until) VALUES (1, 0, 'The Coffee Cup', NULL, NULL);
+
+
+
+
+
+
+CREATE TABLE taxa.blood (
+    blood_id integer,
+    blood_type character varying
+);
+
+COMMENT ON TABLE taxa.blood IS 'Used to label blood text on players_info_expanded_all.';
+
+
+INSERT INTO taxa.blood (blood_id, blood_type) VALUES (0, 'A');
+    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (1, 'AAA');
+    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (2, 'AA');
+    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (3, 'Acidic');
+    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (4, 'Basic');
+    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (5, 'O');
+    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (6, 'O No');
+    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (7, 'H₂O');
+    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (8, 'Electric');
+    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (9, 'Love');
+    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (10, 'Fire');
+    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (11, 'Psychic');
+    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (12, 'Grass');
+
+
+
+
+
+
+CREATE TABLE taxa.coffee (
+    coffee_id integer,
+    coffee_text character varying
+);
+
+COMMENT ON TABLE taxa.coffee IS 'Used to label coffee text on players_info_expanded_all.';
+
+
+INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (0, 'Black');
+    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (1, 'Light & Sweet');
+    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (2, 'Macchiato');
+    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (3, 'Cream & Sugar');
+    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (4, 'Cold Brew');
+    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (5, 'Flat White');
+    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (6, 'Americano');
+    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (7, 'Espresso');
+    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (8, 'Heavy Foam');
+    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (9, 'Latte');
+    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (10, 'Decaf');
+    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (11, 'Milk Substitute');
+    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (12, 'Plenty of Sugar');
+    INSERT INTO taxa.coffee (coffee_id, coffee_text) VALUES (13, 'Anything');
+
+
+
+
+
+
+CREATE TABLE taxa.position_types (
+    position_type_id integer,
+    position_type character varying
+);
+
+COMMENT ON TABLE taxa.position_types IS 'Used to label position_type text on players_info_expanded_all.';
+
+
+INSERT INTO taxa.position_types (position_type_id, position_type) VALUES (0, 'BATTER');
+    INSERT INTO taxa.position_types (position_type_id, position_type) VALUES (1, 'PITCHER');
+    INSERT INTO taxa.position_types (position_type_id, position_type) VALUES (2, 'SHADOWS');
+    INSERT INTO taxa.position_types (position_type_id, position_type) VALUES (3, 'SHADOWS');
+    INSERT INTO taxa.position_types (position_type_id, position_type) VALUES (4, 'SHADOWS');
+
+
+
+
+
+
+CREATE TABLE taxa.weather (
+    weather_id integer,
+    weather_text character varying
+);
+
+
+INSERT INTO taxa.weather (weather_id, weather_text) VALUES (0, 'Void');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (1, 'Sun 2');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (2, 'Overcast');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (3, 'Rainy');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (4, 'Sandstorm');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (5, 'Snowy');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (6, 'Acidic');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (7, 'Solar Eclipse');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (8, 'Glitter');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (9, 'Blooddrain');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (10, 'Peanuts');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (11, 'Birds');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (12, 'Feedback');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (13, 'Reverb');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (14, 'Black Hole');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (15, 'Coffee');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (16, 'Coffee 2');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (17, 'Coffee 3s');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (18, 'Flooding');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (19, 'Salmon');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (20, 'Polarity +');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (21, 'Polarity -');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (22, '???');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (23, 'Sun 90');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (24, 'Sun .1');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (25, 'Sum Sun');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (26, '???');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (27, '???');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (28, 'Jazz');
+    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (29, 'Night');
+
+
+
+
+CREATE TABLE taxa.attributes (
+    attribute_id integer NOT NULL,
+    attribute character varying,
+    attribute_desc character varying,
+    attribute_category character varying,
+    attribute_short character varying,
+    attribute_datatype character varying,
+    attribute_directionality character varying
+);
+
+COMMENT ON TABLE taxa.attributes IS 'Player attributes.  Descriptions determined over time by SIBR research.  IDs line up to stats value on items.';
+
+CREATE SEQUENCE taxa.attributes_attribute_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE taxa.attributes_attribute_id_seq OWNED BY taxa.attributes.attribute_id;
+
+ALTER TABLE ONLY taxa.attributes ALTER COLUMN attribute_id SET DEFAULT nextval('taxa.attributes_attribute_id_seq');
+
+
+INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (9, 'base_thirst', 'Increases stolen base attempts.', 'baserunning', 'Bt', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (11, 'continuation', 'Whether the runner advances 1 or 2 bases on a hit. (also linked to indulgence somewhat).', 'baserunning', 'Cn', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (13, 'ground_friction', 'Appears to govern the rate of triples, slight negative correlation with doubles hit, possibly by stretching them into triples instead?', 'baserunning', 'G', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (12, 'indulgence', 'Seems to be related to runner advancement on an out (base advancement, scoring on a sacrifice), in concert with laserlikeness.', 'baserunning', 'I', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (10, 'laserlikeness', 'Steal success, steal attempts (correlation stronger than base_thirst); along with Indulgence, appears to impact runner advancement on outs (and may just be a general running speed/ability).', 'baserunning', 'L', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (4, 'divinity', 'Home run frequency.  Also part of Soulscream formula.', 'batting', 'Dv', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (7, 'martyrdom', 'Determines whether a runner advances or whether an out is a Fielder’s Choice.', 'batting', 'Mr', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (3, 'moxie', 'Ability to draw walks - (current theory is it represents some kind of plate discipline, as opposed to impacting the rate of pitcher balls).', 'batting', 'Mo', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (5, 'musclitude', 'Extra base hits (specifically seems to be for doubles), also appears to impact fouls.', 'batting', 'Ms', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (6, 'patheticism', 'Likelihood of the batter making contact with the ball; generally correlates with high strikeout rate.', 'batting', 'Pa', 'NUMERIC', 'smaller');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (2, 'thwackability', 'Quality of contact with the ball, reducing the chance of balls being fielded (probably in some kind of thwack vs unthwack contest).', 'batting', 'Tw', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (0, 'tragicness', 'Direct use unknown, but gets set to 0.1 at the start of seasons and upon siestas/delays etc throughout the season.  Also part of Soulscream formula.', 'batting', 'Tr', 'NUMERIC', 'smaller');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (24, 'anticapitalism', 'Related to steal attempts in some form.', 'defense', 'A', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (25, 'chasiness', 'Defensive ability to prevent extra base hits (by holding runners to first?)', 'defense', 'Ch', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (21, 'omniscience', 'Defensive odds on turning a batted ball into an out.', 'defense', 'Om', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (22, 'tenaciousness', 'Related to steal attempts in some form.', 'defense', 'Te', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (23, 'watchfulness', 'Reduces baserunner attempts to steal (impact on success rate not known).', 'defense', 'W', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (17, 'coldness', 'Unknown.', 'pitching', 'Co', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (18, 'overpowerment', 'Lowers home runs - seems to be involved in all hit types, potentially used to counter triples and doubles as well (likely by reducing the power of batted balls).', 'pitching', 'Ov', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (19, 'ruthlessness', 'Reduces walks and increases strikeouts - seems to essentially determine whether a given pitch is in or out of the strike zone.  Also part of Soulscream formula.', 'pitching', 'R', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (14, 'shakespearianism', '“is linked to Tragicness” for whatever use that is (basically none).  Also part of Soulscream formula.  The White Whale of attributes.', 'pitching', 'S', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (15, 'suppression', 'Appears to be opposed to Buoyancy and helps determine if a ball in play will become a groundout or a fly out.  Not part of pitching rating formula.', 'pitching', 'Su', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (16, 'unthwackability', 'Lowers hits allowed - reduces “quality” of batter contact, increasing likelihood of a ball being fielded .', 'pitching', 'Un', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (1, 'buoyancy', 'Determines frequency of curve in Vibes.', 'vibes', 'Bu', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (8, 'cinnamon', 'Determines maximum level of Vibes.', 'vibes', 'Ci', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (20, 'pressurization', 'Determines minimum level of Vibes.  Also part of Soulscream formula.', 'vibes', 'Pr', 'NUMERIC', 'larger');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (94, 'power', 'Grouping of musclitude, ground_friction, and divinity.', 'grouping', NULL, 'N/A', NULL);
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (95, 'speed', 'Grouping of musclitude, ground_friction, continuation, and laserlikeness.', 'grouping', NULL, 'N/A', NULL);
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (96, 'fate', 'Unknown; appears to re-roll for most (but not all) stat, modification or Feedback changes.', NULL, NULL, 'INTEGER', 'See taxonomy');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (97, 'peanut_allergy', 'Determines whether a peanut interaction affects player positively or negatively.', NULL, NULL, 'BOOLEAN', '');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (98, 'soul', 'Determines length of Soulscream/Soulsong; now has Consumer/eDensity/Redacted implications. Beware Chorby Soul.', NULL, NULL, 'INTEGER', 'See taxonomy');
+    INSERT INTO taxa.attributes (attribute_id, attribute, attribute_desc, attribute_category, attribute_short, attribute_datatype, attribute_directionality) VALUES (99, 'total_fingers', 'Represents instances of change to pitching stats. Players impacted by general stat buffs all receive +1 finger, regardless of the size of their buff. EPT seems to not grant fingers.', NULL, NULL, 'INTEGER', 'See taxonomy');
+
+
+ALTER TABLE ONLY taxa.attributes
+    ADD CONSTRAINT attributes_pkey PRIMARY KEY (attribute_id);
+
+
+
+
+
+
+
+CREATE TABLE taxa.card (
+    card_id integer NOT NULL,
+    card character varying,
+    card_desc character varying
+);
+
+
+INSERT INTO taxa.card (card_id, card, card_desc) VALUES (0, 'I The Magician', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (1, 'II The High Priestess', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (2, 'III The Empress', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (3, 'IIII The Emperor', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (4, 'V The Pope', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (5, 'VI The Lover ', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (6, 'VII The Chariot', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (7, 'VIII Justice', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (8, 'VIIII The Hermit', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (9, 'X The Wheel of Fortune', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (10, 'XI Strength', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (11, 'XII The Hanged Man', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (12, 'XIII', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (13, 'XIIII Temperance', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (14, 'XV The Devil', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (15, 'XVI The Tower', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (16, 'XVII The Star', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (17, 'XVIII The Moon', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (18, 'XVIIII The Sun', NULL);
+    INSERT INTO taxa.card (card_id, card, card_desc) VALUES (19, 'XX Judgment', NULL);
+
+
+ALTER TABLE ONLY taxa.card
+    ADD CONSTRAINT card_pkey PRIMARY KEY (card_id);
+
+
+
+
+
+
+CREATE TABLE taxa.modifications (
+    modification_db_id integer NOT NULL,
+    modification character varying,
+    color character varying,
+    text_color character varying,
+    background character varying,
+    title character varying,
+    description character varying,
+    modification_entity character varying
+);
+
+
+COMMENT ON TABLE taxa.modifications IS 'Manually pulled on occasion from main.js.  Please note some of these Modifications may still be FK. Last update: 5/4/2021';
+
+
+CREATE SEQUENCE taxa.modifications_modification_db_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE taxa.modifications_modification_db_id_seq OWNED BY taxa.modifications.modification_db_id;
+
+
+ALTER TABLE ONLY taxa.modifications ALTER COLUMN modification_db_id SET DEFAULT nextval('taxa.modifications_modification_db_id_seq');
 
 
 INSERT INTO taxa.modifications (modification_db_id, modification, color, text_color, background, title, description, modification_entity) VALUES (1, 'EXTRA_STRIKE', '#f77c9f', '#f77c9f', '#8c1839', 'The Fourth Strike', 'Those with the Fourth Strike will get an extra strike in each at bat.', NULL);
@@ -787,6 +862,19 @@ INSERT INTO taxa.modifications (modification_db_id, modification, color, text_co
     INSERT INTO taxa.modifications (modification_db_id, modification, color, text_color, background, title, description, modification_entity) VALUES (211, 'RALLY', '#00ff51', '#00ff51', '#1a0112', 'Rally', 'This Team or Player will play 5% better when losing in the 7th inning or later.', NULL);
 
 
+
+
+
+
+CREATE TABLE taxa.phases (
+    phase_id integer,
+    phase_type character varying,
+    phase_type_id integer,
+    valid_from timestamp without time zone,
+    valid_until timestamp without time zone
+);
+
+
 INSERT INTO taxa.phases (phase_id, phase_type, phase_type_id, valid_from, valid_until) VALUES (1, 'PRESEASON', 0, '2020-07-06 12:00:01', '2021-03-01 04:06:04');
     INSERT INTO taxa.phases (phase_id, phase_type, phase_type_id, valid_from, valid_until) VALUES (2, 'GAMEDAY', 1, '2020-07-06 12:00:01', '2021-03-01 04:06:04');
     INSERT INTO taxa.phases (phase_id, phase_type, phase_type_id, valid_from, valid_until) VALUES (3, 'SEASON_END', 2, '2020-07-06 12:00:01', '2021-03-01 04:06:04');
@@ -821,6 +909,17 @@ INSERT INTO taxa.phases (phase_id, phase_type, phase_type_id, valid_from, valid_
     INSERT INTO taxa.phases (phase_id, phase_type, phase_type_id, valid_from, valid_until) VALUES (13, 'ELECTIONS', 5, '2021-03-01 04:06:05', NULL);
 
 
+
+
+
+
+CREATE TABLE taxa.pitch_types (
+    pitch_type character varying(1),
+    pitch character varying,
+    is_ball integer DEFAULT 0,
+    is_strike integer DEFAULT 0
+);
+
 INSERT INTO taxa.pitch_types (pitch_type, pitch, is_ball, is_strike) VALUES ('F', 'Foul Ball', 0, 0);
     INSERT INTO taxa.pitch_types (pitch_type, pitch, is_ball, is_strike) VALUES ('X', 'Ball in play', 0, 0);
     INSERT INTO taxa.pitch_types (pitch_type, pitch, is_ball, is_strike) VALUES ('A', 'Ball - Assumed', 1, 0);
@@ -830,6 +929,23 @@ INSERT INTO taxa.pitch_types (pitch_type, pitch, is_ball, is_strike) VALUES ('F'
     INSERT INTO taxa.pitch_types (pitch_type, pitch, is_ball, is_strike) VALUES ('S', 'Swinging Strike', 0, 1);
     INSERT INTO taxa.pitch_types (pitch_type, pitch, is_ball, is_strike) VALUES ('D', 'Double Strike', 0, 2);
 
+
+
+
+
+
+
+CREATE TABLE taxa.player_incinerations_unrecorded (
+    season integer,
+    day integer,
+    tournament integer,
+    phase character varying,
+    player_name character varying,
+    player_id character varying(36) DEFAULT NULL::character varying
+);
+
+
+COMMENT ON TABLE taxa.player_incinerations_unrecorded IS 'Manually input data for pre-dB player incinerations.';
 
 INSERT INTO taxa.player_incinerations_unrecorded (season, day, tournament, phase, player_name, player_id) VALUES (1, 87, -1, 'GAMEDAY', 'Aldon Anthony', NULL);
     INSERT INTO taxa.player_incinerations_unrecorded (season, day, tournament, phase, player_name, player_id) VALUES (1, 79, -1, 'GAMEDAY', 'Alexandria Dracaena', NULL);
@@ -853,6 +969,34 @@ INSERT INTO taxa.player_incinerations_unrecorded (season, day, tournament, phase
     INSERT INTO taxa.player_incinerations_unrecorded (season, day, tournament, phase, player_name, player_id) VALUES (0, NULL, -1, 'ELECTIONS', 'Jaylen Hotdogfingers', '04e14d7b-5021-4250-a3cd-932ba8e0a889');
 
 
+
+
+
+
+CREATE TABLE taxa.player_url_slugs (
+    player_url_slug_id integer NOT NULL,
+    player_id character varying,
+    url_slug character varying,
+    player_name character varying
+);
+
+
+COMMENT ON TABLE taxa.player_url_slugs IS 'Manually created unique player url slugs for initial Wyatt Masoning.';
+
+CREATE SEQUENCE taxa.player_url_slugs_player_url_slug_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE taxa.player_url_slugs_player_url_slug_id_seq OWNED BY taxa.player_url_slugs.player_url_slug_id;
+
+
+ALTER TABLE ONLY taxa.player_url_slugs ALTER COLUMN player_url_slug_id SET DEFAULT nextval('taxa.player_url_slugs_player_url_slug_id_seq');
+
+
 INSERT INTO taxa.player_url_slugs (player_url_slug_id, player_id, url_slug, player_name) VALUES (2, '0bb35615-63f2-4492-80ec-b6b322dc5450', 'wyatt-mason-2', 'Wyatt Mason');
     INSERT INTO taxa.player_url_slugs (player_url_slug_id, player_id, url_slug, player_name) VALUES (3, '0d5300f6-0966-430f-903f-a4c2338abf00', 'wyatt-mason-3', 'Wyatt Mason');
     INSERT INTO taxa.player_url_slugs (player_url_slug_id, player_id, url_slug, player_name) VALUES (4, '21d52455-6c2c-4ee4-8673-ab46b4b926b4', 'wyatt-mason-4', 'Wyatt Mason');
@@ -869,75 +1013,54 @@ INSERT INTO taxa.player_url_slugs (player_url_slug_id, player_id, url_slug, play
     INSERT INTO taxa.player_url_slugs (player_url_slug_id, player_id, url_slug, player_name) VALUES (15, '80e474a3-7d2b-431d-8192-2f1e27162607', 'wyatt-mason-15', 'Wyatt Mason');
 
 
-INSERT INTO taxa.position_types (position_type_id, position_type) VALUES (0, 'BATTER');
-    INSERT INTO taxa.position_types (position_type_id, position_type) VALUES (1, 'PITCHER');
-    INSERT INTO taxa.position_types (position_type_id, position_type) VALUES (2, 'SHADOWS');
-    INSERT INTO taxa.position_types (position_type_id, position_type) VALUES (3, 'SHADOWS');
-    INSERT INTO taxa.position_types (position_type_id, position_type) VALUES (4, 'SHADOWS');
 
 
-INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (1, '8d87c468-699a-47a8-b40d-cfb73a5660ad', 'CRAB', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (2, 'c73b705c-40ad-4633-a6ed-d357ee2e2bcf', 'LIFT', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (3, '878c1bf6-0d21-4659-bfee-916c8314d69c', 'TACO', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (4, '7fcb63bc-11f2-40b9-b465-f1d458692a63', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (5, 'e3f90fa1-0bbe-40df-88ce-578d0723a23b', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (6, 'a3ea6358-ce03-4f23-85f9-deb38cb81b20', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (7, 'f29d6e60-8fce-4ac6-8bc2-b5e3cabc5696', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (8, 'b63be8c2-576a-4d6e-8daf-814f8bcea96f', 'DALE', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (9, '3f8bbb15-61c0-4e3f-8e4a-907a5fb1565e', 'BOS', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (10, '36569151-a2fb-43c1-9df7-2df512424c82', 'NYM', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (11, 'eb67ae5e-c4bf-46ca-bbbc-425cd34182ff', 'CAN', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (12, '49181b72-7f1c-4f1c-929f-928d763ad7fb', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (13, '4d921519-410b-41e2-882e-9726a4e54a6a', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (14, 'bfd38797-8404-4b38-8b82-341da28b1f83', 'CHST', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (15, '7966eb04-efcc-499b-8f03-d13916330531', 'YELL', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (16, '9a5ab308-41f2-4889-a3c3-733b9aab806e', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (17, 'b3b9636a-f88a-47dc-a91d-86ecc79f9934', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (18, '3b0a289b-aebd-493c-bc11-96793e7216d5', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (19, 'd2634113-b650-47b9-ad95-673f8e28e687', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (20, 'b024e975-1c4a-4575-8936-a3754a08806a', 'STK', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (21, 'b72f3061-f573-40d7-832a-5ad475bd7909', 'LVRS', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (22, '979aee4a-6d80-4863-bf1c-ee1a78e06024', 'FRI', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (23, 'd8f82163-2e74-496b-8e4b-2ab35b2d3ff1', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (24, 'a7592bd7-1d3c-4ffb-8b3a-0b1e4bc321fd', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (25, '9e42c12a-7561-42a2-b2d0-7cf81a817a5e', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (26, '70eab4ab-6cb1-41e7-ac8b-1050ee12eecc', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (27, '4e5d0063-73b4-440a-b2d1-214a7345cf16', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (28, 'e8f7ffee-ec53-4fe0-8e87-ea8ff1d0b4a9', NULL, 'tournament');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (29, '23e4cbc1-e9cd-47fa-a35b-bfa06f726cb7', 'PIES', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (30, '105bc3ff-1320-4e37-8ef0-8d595cb95dd0', 'SEA', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (31, 'a37f9158-7f82-46bc-908c-c9e2dda7c33b', 'JAZZ', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (32, 'f02aeae2-5e6a-4098-9842-02d2273f25c7', 'HELL', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (33, 'ca3f1c8c-c025-4d8e-8eef-5be6accbeb16', 'CHI', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (34, 'c6c01051-cdd4-47d6-8a98-bb5b754f937f', 'STAR', 'disbanded');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (35, 'adc5b394-8f76-416d-9ce9-813706877b84', 'KCBM', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (36, '747b8e4a-7e50-4638-a973-ea7950a3e739', 'TGRS', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (37, '9debc64f-74b7-4ae1-a4d6-fce0144b6ea5', 'SPY', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (38, '57ec08cc-0411-4643-b304-0e80dbc15ac7', 'CDMX', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (39, '40b9ec2a-cb43-4dbb-b836-5accb62e7c20', 'PODS', 'disbanded');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (40, 'bb4a9de5-c924-4923-a0cb-9d1445f1ee5d', 'OHWO', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (41, '46358869-dce9-4a01-bfba-ac24fc56f57e', 'CORE', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (42, 'd9f89a8a-c563-493e-9d64-78e4f9a55d4a', 'ATL', 'active');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (43, 'd6a352fc-b675-40a0-864d-f4fd50aaeea0', 'CART', 'deceased');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (44, '9494152b-99f6-4adb-9573-f9e084bc813f', 'CLAB', 'deceased');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (45, '71c621eb-85dc-4bd7-a690-0c68c0e6fb90', 'DOG', 'disbanded');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (46, '54d0d0f2-16e0-42a0-9fff-79cfa7c4a157', 'ANT', 'deceased');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (47, '88151292-6c12-4fb8-b2d6-3e64821293b3', 'AL8', 'deceased');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (48, 'a4b23784-0132-4813-b300-f7449cb06493', 'PHO', 'disbanded');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (49, 'c19bb50b-9a22-4dd2-8200-bce639b1b239', 'TRK', 'deceased');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (50, '939db13f-79c9-41c5-9a15-b340b1bea875', 'BBB', 'disbanded');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (51, '3a094991-4cbc-4786-b74c-688876d243f4', 'RUN', 'deceased');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (52, '2e22beba-8e36-42ba-a8bf-975683c52b5f', 'CAR', 'deceased');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (53, 'b6b5df8f-5602-4883-b47d-07e77ed9d5af', 'LAR', 'deceased');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (54, '00245773-6f25-43b1-a863-42b4068888f0', 'LPL', 'disbanded');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (55, '1e04e5cc-80a6-41c0-af0d-7292817eed79', 'LOU', 'deceased');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (56, 'd0762a7e-004b-48a9-a832-a993982b305b', 'KELP', 'deceased');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (57, '3543229a-668c-4ac9-b64a-588422481f12', 'FINS', 'disbanded');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (58, '74966fbd-5d77-48b1-8075-9bf197583775', 'RHO', 'disbanded');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (59, '55c9fee3-79c8-4467-8dfb-ff1e340aae8c', 'COW', 'deceased');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (60, '53d473fb-ffee-4fd3-aa1c-671228adc592', 'AUB', 'disbanded');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (61, '1a51664e-efec-45fa-b0ba-06d04c344628', 'PSY', 'deceased');
-    INSERT INTO taxa.team_additional_info (team_additional_info_id, team_id, team_abbreviation, team_current_status) VALUES (62, 'cbd44c06-231a-4d1a-bb7d-4170b06e566a', 'HRT', 'deceased');
+
+CREATE TABLE taxa.team_abbreviations (
+    team_abbreviation_id integer NOT NULL,
+    team_abbreviation character varying,
+    team_id character varying
+);
+
+CREATE SEQUENCE taxa.team_abbreviations_team_abbreviation_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE taxa.team_abbreviations_team_abbreviation_id_seq OWNED BY taxa.team_abbreviations.team_abbreviation_id;
+
+
+ALTER TABLE ONLY taxa.team_abbreviations ALTER COLUMN team_abbreviation_id SET DEFAULT nextval('taxa.team_abbreviations_team_abbreviation_id_seq');
+
+
+
+
+
+
+CREATE TABLE taxa.team_divine_favor (
+    team_divine_favor_id integer NOT NULL,
+    team_id character varying,
+    valid_from timestamp without time zone,
+    valid_until timestamp without time zone,
+    divine_favor integer
+);
+
+CREATE SEQUENCE taxa.team_divine_favor_team_divine_favor_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE taxa.team_divine_favor_team_divine_favor_id_seq OWNED BY taxa.team_divine_favor.team_divine_favor_id;
+
+
+ALTER TABLE ONLY taxa.team_divine_favor ALTER COLUMN team_divine_favor_id SET DEFAULT nextval('taxa.team_divine_favor_team_divine_favor_id_seq');
 
 
 INSERT INTO taxa.team_divine_favor (team_divine_favor_id, team_id, valid_from, valid_until, divine_favor) VALUES (1, 'b72f3061-f573-40d7-832a-5ad475bd7909', '2020-07-29 08:12:22.438', '2020-08-03 07:59:00', 1);
@@ -1022,25 +1145,56 @@ INSERT INTO taxa.team_divine_favor (team_divine_favor_id, team_id, valid_from, v
     INSERT INTO taxa.team_divine_favor (team_divine_favor_id, team_id, valid_from, valid_until, divine_favor) VALUES (99, '9debc64f-74b7-4ae1-a4d6-fce0144b6ea5', '2020-09-26 10:30:06.46395', NULL, 20);
 
 
-INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (1, 1, '4e5d0063-73b4-440a-b2d1-214a7345cf16', NULL, NULL);
-    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (2, 1, '49181b72-7f1c-4f1c-929f-928d763ad7fb', NULL, NULL);
-    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (3, 1, 'f29d6e60-8fce-4ac6-8bc2-b5e3cabc5696', NULL, NULL);
-    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (4, 1, 'a3ea6358-ce03-4f23-85f9-deb38cb81b20', NULL, NULL);
-    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (5, 1, '4d921519-410b-41e2-882e-9726a4e54a6a', NULL, NULL);
-    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (6, 1, 'b3b9636a-f88a-47dc-a91d-86ecc79f9934', NULL, NULL);
-    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (7, 1, 'e3f90fa1-0bbe-40df-88ce-578d0723a23b', NULL, NULL);
-    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (8, 1, 'e8f7ffee-ec53-4fe0-8e87-ea8ff1d0b4a9', NULL, NULL);
-    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (9, 1, 'd8f82163-2e74-496b-8e4b-2ab35b2d3ff1', NULL, NULL);
-    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (10, 1, '70eab4ab-6cb1-41e7-ac8b-1050ee12eecc', NULL, NULL);
-    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (11, 1, '9e42c12a-7561-42a2-b2d0-7cf81a817a5e', NULL, NULL);
-    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (12, 1, 'a7592bd7-1d3c-4ffb-8b3a-0b1e4bc321fd', NULL, NULL);
-    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (13, 1, '3b0a289b-aebd-493c-bc11-96793e7216d5', NULL, NULL);
-    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (14, 1, '7fcb63bc-11f2-40b9-b465-f1d458692a63', NULL, NULL);
-    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (15, 1, '9a5ab308-41f2-4889-a3c3-733b9aab806e', NULL, NULL);
-    INSERT INTO taxa.tournament_teams (tournament_team_id, tournament_db_id, team_id, valid_from, valid_until) VALUES (16, 1, 'd2634113-b650-47b9-ad95-673f8e28e687', NULL, NULL);
 
 
-INSERT INTO taxa.tournaments (tournament_db_id, tournament_id, tournament_name, valid_from, valid_until) VALUES (1, 0, 'The Coffee Cup', NULL, NULL);
+
+
+
+
+
+CREATE TABLE taxa.team_url_slugs (
+    team_url_slug_id integer NOT NULL,
+    team_id character varying,
+    url_slug character varying,
+    team_name character varying
+);
+
+COMMENT ON TABLE taxa.team_url_slugs IS 'Manually created to differentiate between multiple Artists/Crabs teams.  Last update: 6/25/2021';
+
+
+CREATE SEQUENCE taxa.team_url_slugs_team_url_slug_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE taxa.team_url_slugs_team_url_slug_id_seq OWNED BY taxa.team_url_slugs.team_url_slug_id;
+
+
+ALTER TABLE ONLY taxa.team_url_slugs ALTER COLUMN team_url_slug_id SET DEFAULT nextval('taxa.team_url_slugs_team_url_slug_id_seq');
+
+
+
+CREATE TABLE taxa.vibe_to_arrows (
+    vibe_to_arrow_id integer NOT NULL,
+    arrow_count integer,
+    min_vibe numeric,
+    max_vibe numeric
+);
+
+CREATE SEQUENCE taxa.vibe_to_arrows_vibe_to_arrow_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE taxa.vibe_to_arrows_vibe_to_arrow_id_seq OWNED BY taxa.vibe_to_arrows.vibe_to_arrow_id;
+
+ALTER TABLE ONLY taxa.vibe_to_arrows ALTER COLUMN vibe_to_arrow_id SET DEFAULT nextval('taxa.vibe_to_arrows_vibe_to_arrow_id_seq');
 
 
 INSERT INTO taxa.vibe_to_arrows (vibe_to_arrow_id, arrow_count, min_vibe, max_vibe) VALUES (1, 3, 0.8, 999);
@@ -1050,50 +1204,3 @@ INSERT INTO taxa.vibe_to_arrows (vibe_to_arrow_id, arrow_count, min_vibe, max_vi
     INSERT INTO taxa.vibe_to_arrows (vibe_to_arrow_id, arrow_count, min_vibe, max_vibe) VALUES (7, -1, -0.4, -0.1);
     INSERT INTO taxa.vibe_to_arrows (vibe_to_arrow_id, arrow_count, min_vibe, max_vibe) VALUES (8, -2, -0.8, -0.4);
     INSERT INTO taxa.vibe_to_arrows (vibe_to_arrow_id, arrow_count, min_vibe, max_vibe) VALUES (9, 0, -999, -0.8);
-
-
-INSERT INTO taxa.weather (weather_id, weather_text) VALUES (0, 'Void');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (1, 'Sun 2');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (2, 'Overcast');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (3, 'Rainy');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (4, 'Sandstorm');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (5, 'Snowy');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (6, 'Acidic');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (7, 'Solar Eclipse');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (8, 'Glitter');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (9, 'Blooddrain');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (10, 'Peanuts');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (11, 'Birds');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (12, 'Feedback');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (13, 'Reverb');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (14, 'Black Hole');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (15, 'Coffee');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (16, 'Coffee 2');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (17, 'Coffee 3s');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (18, 'Flooding');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (19, 'Salmon');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (20, 'Polarity +');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (21, 'Polarity -');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (22, '???');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (23, 'Sun 90');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (24, 'Sun .1');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (25, 'Sum Sun');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (26, '???');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (27, '???');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (28, 'Jazz');
-    INSERT INTO taxa.weather (weather_id, weather_text) VALUES (29, 'Night');
-
-
-
-ALTER TABLE ONLY taxa.attributes
-    ADD CONSTRAINT attributes_pkey PRIMARY KEY (attribute_id);
-
-ALTER TABLE ONLY taxa.card
-    ADD CONSTRAINT card_pkey PRIMARY KEY (card_id);
-
-ALTER TABLE ONLY taxa.event_types
-    ADD CONSTRAINT event_types_event_type_key UNIQUE (event_type);
-
-ALTER TABLE ONLY taxa.event_types
-    ADD CONSTRAINT event_types_pkey PRIMARY KEY (event_type_id);
-
