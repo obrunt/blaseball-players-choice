@@ -9,66 +9,222 @@ CREATE TABLE IF NOT EXISTS data.applied_patches
     CONSTRAINT applied_patches_pkey PRIMARY KEY (patch_id)
 )
 
-CREATE TABLE IF NOT EXISTS data.chronicler_meta
-(
-    id smallint NOT NULL,
-    season numeric NOT NULL,
-    day numeric NOT NULL,
-    game_timestamp timestamp without time zone,
-    team_timestamp timestamp without time zone,
-    player_timestamp timestamp without time zone,
-    division_timestamp timestamp without time zone,
-    stadium_timestamp timestamp without time zone,
-    CONSTRAINT chronicler_meta_pk PRIMARY KEY (id)
-)
+CREATE SEQUENCE data.applied_patches_patch_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
-CREATE TABLE IF NOT EXISTS data.division_teams
-(
-    division_teams_id integer NOT NULL DEFAULT nextval('data.division_teams_division_teams_id_seq'),
-    league_id character varying(36) COLLATE pg_catalog."default",
-    subleague_id character varying(36) COLLATE pg_catalog."default",
-    division_id character varying(36) COLLATE pg_catalog."default",
-    team_id character varying COLLATE pg_catalog."default",
+ALTER SEQUENCE data.applied_patches_patch_id_seq OWNED BY data.applied_patches.patch_id;
+
+ALTER TABLE ONLY data.applied_patches ALTER COLUMN patch_id SET DEFAULT nextval('data.applied_patches_patch_id_seq'::regclass);
+
+ALTER TABLE ONLY data.applied_patches
+    ADD CONSTRAINT applied_patches_pkey PRIMARY KEY (patch_id);
+
+
+
+
+
+
+
+CREATE TABLE data.games (
+    game_id character varying(36) NOT NULL,
+    day integer,
+    season integer,
+    last_game_event integer,
+    home_odds numeric,
+    away_odds numeric,
+    weather integer,
+    series_index integer,
+    series_length integer,
+    is_postseason boolean,
+    home_team character varying(36),
+    away_team character varying(36),
+    home_score numeric,
+    away_score numeric,
+    number_of_innings integer,
+    ended_on_top_of_inning boolean,
+    ended_in_shame boolean,
+    terminology_id character varying(36),
+    rules_id character varying(36),
+    statsheet_id character varying(36),
+    winning_pitcher_id character varying,
+    losing_pitcher_id character varying
+);
+
+ALTER TABLE ONLY data.games
+    ADD CONSTRAINT game_pkey PRIMARY KEY (game_id);
+
+
+
+
+
+
+
+
+CREATE TABLE data.players (
+    id integer NOT NULL,
+    player_id character varying(36),
     valid_from timestamp without time zone,
-    valid_until timestamp without time zone
-)
+    valid_until timestamp without time zone,
+    player_name character varying,
+    deceased boolean,
+    hash uuid,
+    anticapitalism numeric,
+    base_thirst numeric,
+    buoyancy numeric,
+    chasiness numeric,
+    coldness numeric,
+    continuation numeric,
+    divinity numeric,
+    ground_friction numeric,
+    indulgence numeric,
+    laserlikeness numeric,
+    martyrdom numeric,
+    moxie numeric,
+    musclitude numeric,
+    omniscience numeric,
+    overpowerment numeric,
+    patheticism numeric,
+    ruthlessness numeric,
+    shakespearianism numeric,
+    suppression numeric,
+    tenaciousness numeric,
+    thwackability numeric,
+    tragicness numeric,
+    unthwackability numeric,
+    watchfulness numeric,
+    pressurization numeric,
+    cinnamon numeric,
+    total_fingers smallint,
+    soul smallint,
+    fate smallint,
+    peanut_allergy boolean,
+    armor text,
+    bat text,
+    ritual text,
+    coffee smallint,
+    blood smallint,
+    url_slug character varying
+);
+
+CREATE SEQUENCE data.players_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
 
-CREATE TABLE IF NOT EXISTS data.divisions
-(
-    division_db_id integer NOT NULL DEFAULT nextval('data.divisions_division_db_id_seq'::regclass),
-    division_id character varying(36) COLLATE pg_catalog."default",
-    division_name character varying COLLATE pg_catalog."default",
-    league_id character varying(36) COLLATE pg_catalog."default",
-    subleague_id character varying(36) COLLATE pg_catalog."default",
+ALTER SEQUENCE data.players_id_seq OWNED BY data.players.id;
+
+ALTER TABLE ONLY data.players ALTER COLUMN id SET DEFAULT nextval('data.players_id_seq'::regclass);
+
+ALTER TABLE ONLY data.players
+    ADD CONSTRAINT players_pkey PRIMARY KEY (id);
+
+
+
+CREATE TRIGGER player_insert BEFORE INSERT ON data.players FOR EACH ROW EXECUTE FUNCTION data.player_slug_creation();
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE data.team_roster (
+    team_roster_id integer NOT NULL,
+    team_id character varying,
+    position_id integer,
     valid_from timestamp without time zone,
-    valid_until timestamp without time zone
-)
+    valid_until timestamp without time zone,
+    player_id character varying,
+    position_type_id numeric
+);
 
 
-CREATE TABLE IF NOT EXISTS data.game_event_base_runners
-(
-    id integer NOT NULL DEFAULT nextval('data.game_event_base_runners_id_seq'::regclass),
-    game_event_id integer,
-    runner_id character varying(36) COLLATE pg_catalog."default",
-    responsible_pitcher_id character varying(36) COLLATE pg_catalog."default",
-    base_before_play integer,
-    base_after_play integer,
-    was_base_stolen boolean,
-    was_caught_stealing boolean,
-    was_picked_off boolean,
-    runner_scored boolean DEFAULT false,
-    runs_scored numeric,
-    CONSTRAINT game_event_base_runners_pkey PRIMARY KEY (id),
-    CONSTRAINT game_event_base_runners_game_event_id_fkey FOREIGN KEY (game_event_id)
-        REFERENCES data.game_events (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE CASCADE
-)
+CREATE SEQUENCE data.team_positions_team_position_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
-COMMENT ON TABLE data.game_event_base_runners
-    IS '2nd level table populated by Prophesizer.  Child of data.game_events.';
+
+ALTER SEQUENCE data.team_positions_team_position_id_seq OWNED BY data.team_roster.team_roster_id;
+
+
+
+ALTER TABLE ONLY data.team_roster ALTER COLUMN team_roster_id SET DEFAULT nextval('data.team_positions_team_position_id_seq'::regclass);
+
+
+ALTER TABLE ONLY data.team_roster
+    ADD CONSTRAINT team_roster_pkey PRIMARY KEY (team_roster_id);
+
+
+
+
+
+
+
+CREATE TABLE data.teams (
+    id integer NOT NULL,
+    team_id character varying(36),
+    location text,
+    nickname text,
+    full_name text,
+    valid_from timestamp without time zone,
+    valid_until timestamp without time zone,
+    hash uuid,
+    url_slug character varying,
+    card integer
+);
+
+CREATE SEQUENCE data.teams_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: teams_id_seq; Type: SEQUENCE OWNED BY; Schema: data; Owner: -
+--
+
+ALTER SEQUENCE data.teams_id_seq OWNED BY data.teams.id;
+
+
+ALTER TABLE ONLY data.teams ALTER COLUMN id SET DEFAULT nextval('data.teams_id_seq'::regclass);
+
+ALTER TABLE ONLY data.teams
+    ADD CONSTRAINT teams_pkey PRIMARY KEY (id);
+
+
+CREATE TRIGGER team_insert BEFORE INSERT ON data.teams FOR EACH ROW EXECUTE FUNCTION data.team_slug_creation();
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 CREATE TABLE IF NOT EXISTS data.game_events
@@ -144,6 +300,82 @@ CREATE INDEX IF NOT EXISTS game_events_indx_game_id
     ON data.game_events USING btree
     (game_id COLLATE pg_catalog."default" ASC NULLS LAST)
     TABLESPACE pg_default;
+
+
+
+ALTER TABLE ONLY data.game_events
+    ADD CONSTRAINT game_events_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY data.game_events
+    ADD CONSTRAINT game_events_game_id_fkey FOREIGN KEY (game_id) REFERENCES data.games(game_id) ON DELETE CASCADE;
+
+
+
+
+
+
+
+
+CREATE TABLE IF NOT EXISTS data.chronicler_meta
+(
+    id smallint NOT NULL,
+    season numeric NOT NULL,
+    day numeric NOT NULL,
+    game_timestamp timestamp without time zone,
+    team_timestamp timestamp without time zone,
+    player_timestamp timestamp without time zone,
+    division_timestamp timestamp without time zone,
+    stadium_timestamp timestamp without time zone,
+    CONSTRAINT chronicler_meta_pk PRIMARY KEY (id)
+)
+
+
+CREATE TABLE IF NOT EXISTS data.division_teams
+(
+    division_teams_id integer NOT NULL DEFAULT nextval('data.division_teams_division_teams_id_seq'),
+    league_id character varying(36) COLLATE pg_catalog."default",
+    subleague_id character varying(36) COLLATE pg_catalog."default",
+    division_id character varying(36) COLLATE pg_catalog."default",
+    team_id character varying COLLATE pg_catalog."default",
+    valid_from timestamp without time zone,
+    valid_until timestamp without time zone
+)
+
+
+CREATE TABLE IF NOT EXISTS data.divisions
+(
+    division_db_id integer NOT NULL DEFAULT nextval('data.divisions_division_db_id_seq'::regclass),
+    division_id character varying(36) COLLATE pg_catalog."default",
+    division_name character varying COLLATE pg_catalog."default",
+    league_id character varying(36) COLLATE pg_catalog."default",
+    subleague_id character varying(36) COLLATE pg_catalog."default",
+    valid_from timestamp without time zone,
+    valid_until timestamp without time zone
+)
+
+
+CREATE TABLE IF NOT EXISTS data.game_event_base_runners
+(
+    id integer NOT NULL DEFAULT nextval('data.game_event_base_runners_id_seq'::regclass),
+    game_event_id integer,
+    runner_id character varying(36) COLLATE pg_catalog."default",
+    responsible_pitcher_id character varying(36) COLLATE pg_catalog."default",
+    base_before_play integer,
+    base_after_play integer,
+    was_base_stolen boolean,
+    was_caught_stealing boolean,
+    was_picked_off boolean,
+    runner_scored boolean DEFAULT false,
+    runs_scored numeric,
+    CONSTRAINT game_event_base_runners_pkey PRIMARY KEY (id),
+    CONSTRAINT game_event_base_runners_game_event_id_fkey FOREIGN KEY (game_event_id)
+        REFERENCES data.game_events (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+)
+
+COMMENT ON TABLE data.game_event_base_runners
+    IS '2nd level table populated by Prophesizer.  Child of data.game_events.';
 
 
 CREATE TABLE IF NOT EXISTS data.games
