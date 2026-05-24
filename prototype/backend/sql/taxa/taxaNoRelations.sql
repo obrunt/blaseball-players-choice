@@ -102,7 +102,7 @@ INSERT INTO taxa.blood (blood_id, blood_type) VALUES (0, 'A');
     INSERT INTO taxa.blood (blood_id, blood_type) VALUES (4, 'Basic');
     INSERT INTO taxa.blood (blood_id, blood_type) VALUES (5, 'O');
     INSERT INTO taxa.blood (blood_id, blood_type) VALUES (6, 'O No');
-    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (7, 'H₂O');
+    INSERT INTO taxa.blood (blood_id, blood_type) VALUES (7, 'H2O');
     INSERT INTO taxa.blood (blood_id, blood_type) VALUES (8, 'Electric');
     INSERT INTO taxa.blood (blood_id, blood_type) VALUES (9, 'Love');
     INSERT INTO taxa.blood (blood_id, blood_type) VALUES (10, 'Fire');
