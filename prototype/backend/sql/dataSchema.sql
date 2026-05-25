@@ -52,8 +52,8 @@ CREATE TABLE data.games (
     terminology_id character varying(36),
     rules_id character varying(36),
     statsheet_id character varying(36),
-    winning_pitcher_id character varying,
-    losing_pitcher_id character varying
+    home_team_pitcher_id character varying,
+    away_team_pitcher_id character varying
 );
 
 ALTER TABLE ONLY data.games
@@ -400,8 +400,8 @@ CREATE TABLE IF NOT EXISTS data.games
     terminology_id character varying(36) COLLATE pg_catalog."default",
     rules_id character varying(36) COLLATE pg_catalog."default",
     statsheet_id character varying(36) COLLATE pg_catalog."default",
-    winning_pitcher_id character varying COLLATE pg_catalog."default",
-    losing_pitcher_id character varying COLLATE pg_catalog."default",
+    home_team_pitcher_id character varying COLLATE pg_catalog."default",
+    away_team_pitcher_id character varying COLLATE pg_catalog."default",
     tournament integer,
     outcomes text[] COLLATE pg_catalog."default",
     CONSTRAINT game_pkey PRIMARY KEY (game_id)

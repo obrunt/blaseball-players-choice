@@ -31,11 +31,13 @@ async function getActiveDivisionTeams(){
 async function setSeasonGameMatches(day, season, home_team, away_team){
 
   const query = `
-    INSERT INTO data.games (day, season, home_team, away_team) VALUES () {
+    INSERT INTO data.games (day, season, home_team, away_team, series_length, is_postseason) VALUES () {
       ?,
       ?,
       ?,
-      ?
+      ?,
+      3,
+      false
     };
   `;
 
@@ -165,4 +167,8 @@ function decide_game_play_order(season){
       }
     }
   }
+}
+
+module.export = {
+    decide_game_play_order
 }

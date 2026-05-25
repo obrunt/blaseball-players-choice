@@ -1,10 +1,15 @@
 const { fetch_game_order } = require("../Timings/handleSeasonOrder");
+const { fetch_pitcher, fetcher_batter } = require("handlePlayers");
 
 function start_game_day(season, day){
 
     console.log(`Starting game day s${season+1}d${day+1}`);
 
-    
+    let current_game_order = fetch_game_order(season, day);
+
+    for(let i = 0; i < current_game_order.length(); i++){
+        current_game_order
+    }
 
 }
 
