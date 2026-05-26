@@ -1,5 +1,5 @@
-const { pool } = require("../../../config/db");
-const { roll } = require("../../middleware/randomRoll");
+const { pool } = require("../../../../config/db");
+const { roll } = require("../../../middleware/randomRoll");
 
 
 //Getting all of the teams within the layers of the subleague

@@ -1,4 +1,4 @@
-const { fetch_game_order } = require("../Timings/fetchSeasonDayGames");
+const { fetch_game_order } = require("../../database/Reterive/fetchSeasonDayGames");
 const { fetch_pitcher, set_pitcher } = require("fetchGamePitchers");
 
 function start_game_day(season, day){
@@ -257,3 +257,8 @@ function calc_next_game_odds(game_id){
         return value
 
  */
+
+
+module.export = {
+    start_game_day
+};
