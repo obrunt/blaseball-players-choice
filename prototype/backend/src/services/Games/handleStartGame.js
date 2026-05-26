@@ -1,48 +1,32 @@
-const { fetch_game_order } = require("../Timings/handleSeasonOrder");
-const { fetch_pitcher, fetcher_batter } = require("handlePlayers");
+const { fetch_game_order } = require("../Timings/fetchSeasonDayGames");
+const { fetch_pitcher, set_pitcher } = require("fetchGamePitchers");
 
 function start_game_day(season, day){
 
     console.log(`Starting game day s${season+1}d${day+1}`);
 
+    //Getting the set games for the day and season
     let current_game_order = fetch_game_order(season, day);
 
-    for(let i = 0; i < current_game_order.length(); i++){
-        current_game_order
+    //Looping through the games to set the pitchers for each team
+    for(game in current_game_order){
+        //Getting the two pitchers that are next in the roster
+        let home_pitcher = fetch_pitcher(game_id.home_team);
+        let away_pitcher = fetch_pitcher(game_id.away_team);
+
+        //Updating the game object to incude the pitchers
+        set_pitcher(game.game_id, home_pitcher, away_pitcher);
     }
 
-}
 
+    /**
+     * Will deal with the post season things later
+     * Need to get the basics first
+     */
 
-/**
- * def start_game_day(self, season, day):
-        # happens end of last game day, really
-
-        current_game_order = self.data.fetch_game_order(season, day)
-
-        has_mismatch = False
-
-        for game_id in current_game_order: 
-
-            raw_updates = self.data.get_raw_game_updates(game_id)
-
-            predicted_home_pitcher = [u["data"]["homePitcher"] for u in raw_updates if u["data"]["homePitcher"]][0]
-            real_home_pitcher = [u["data"]["homePitcher"] for u in raw_updates if u["data"]["homePitcher"] and u["data"]["gameStart"]][0]
-            
-            predicted_away_pitcher = [u["data"]["awayPitcher"] for u in raw_updates if u["data"]["awayPitcher"]][0]
-            real_away_pitcher = [u["data"]["awayPitcher"] for u in raw_updates if u["data"]["awayPitcher"] and u["data"]["gameStart"]][0]
-            
-            self.print(f"predicted home pitcher: {predicted_home_pitcher}, predicted away pitcher: {predicted_away_pitcher}")
-            self.print(f"real home pitcher: {real_home_pitcher}, real away pitcher: {real_away_pitcher}")
-            mismatch = predicted_home_pitcher != real_home_pitcher or predicted_away_pitcher != real_away_pitcher
-
-            if mismatch:
-                self.print(f"!!! warn: mispredicted pitchers on {season, day}")
-                has_mismatch = True
-                self.calc_next_game_odds(game_id, use_early_data=False, data_invalid=True)
-
-
-
+    //If the game is in the post daseason
+    if(day >= 99){
+        /**
         if day >= 99:
             for game_id in current_game_order:
                 game = self.data.get_update(game_id, 5)
@@ -51,20 +35,29 @@ function start_game_day(season, day){
                 self.roll(f"postseason weather ({weather.name}) day {day}, upgrades: {stadium.weather}")
 
                 self.calc_next_game_odds(game_id, use_early_data=False)
+*/
+        for (game in current_game_order){
+
+        }
+    }
 
 
-        # happens start of game day
-        # calculating odds for the upcoming batch of games (hence: not on day 99)
-        if day < 98:
-            upcoming_game_order = self.data.fetch_game_order(season, day+1)
-            self.print(f"next day order: {upcoming_game_order}")
-            for upcoming_game_id in upcoming_game_order:
-                self.calc_next_game_odds(upcoming_game_id, data_invalid=has_mismatch)
-        pass
+    //For all regular season games not incuding the last day
+    if(day < 98){
+        //Getting the games for the next day
+        let upcoming_game_order = fetch_game_order(season, day+1);
 
- */
+        //Looping through the next games
+        for(next_game in upcoming_game_order){
+            //Calculating the odds for each team
+            calc_next_game_odds(next_game.game_id);
+        }
 
+    }
+}
 
+//This is less relevent, will do this later
+function calc_next_game_odds(game_id){
 
 /**
  * def calc_next_game_odds(self, game_id, use_early_data=True, data_invalid=False):
@@ -223,6 +216,8 @@ function start_game_day(season, day){
                         seen_odds[rounded] = [game_id]
 
  */
+
+}
 
 
 

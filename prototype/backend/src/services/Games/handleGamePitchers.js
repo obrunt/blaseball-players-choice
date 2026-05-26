@@ -1,7 +1,7 @@
 const { pool } = require("../../../config/db");
 const { roll } = require("../../middleware/randomRoll");
 
-async function fetchTeamRoster(team_id){
+async function fetchTeamRosterPitchers(team_id){
 
     //ordering by the position the players play
         //0 - Batters
@@ -26,29 +26,12 @@ async function fetchTeamRoster(team_id){
   }
 }
 
-async function fetcherPreviousPitcherHome(team_id, season, day){
+async function fetcherPreviousPitcher(team_id, season, day){
     const query = `
-        SELECT home_team_pitcher_id FROM data.games
+        SELECT home_team, away_team, 
+        home_team_pitcher_id, away_team_pitcher_id FROM data.games
         WHERE season = ? AND day = ?
-        AND home_team = ?;
-    `;
-
-    try {
-        const result = await pool.query(query, [season, day, team_id]);
-
-        //The player id of the pitcher is returned
-        return result[0][0];
-
-    } catch (err){
-        console.log(err);
-    }
-}
-
-async function fetcherPreviousPitcherAway(team_id, season, day){
-    const query = `
-        SELECT away_team_pitcher_id FROM data.games
-        WHERE season = ? AND day = ?
-        AND away_team = ?;
+        AND (home_team = ? OR away_team = ?);
     `;
 
     try {
@@ -66,22 +49,26 @@ async function fetcherPreviousPitcherAway(team_id, season, day){
 
 
 function fetch_pitcher(team_id, season, day){
-    const team = fetchTeamRoster(team_id);
+    const team = fetchTeamRosterPitchers(team_id);
     let hasPitcher = false;
     let daySub = 1;
 
     while(!hasPitcher){
-        //Getting the home team pitcher
-        let previousPitcher = fetcherPreviousPitcherHome(team_id, season, day-daySub);
+
+        //Getting the two pitchers that played in the previous game
+        let previousPitcher = fetcherPreviousPitcher(team_id, season, day-daySub);
         
-        //If the team was playing away, then get the pitcher
-            //Currently the pitcher is blank, so change that
-        if(previousPitcher == null){
-            previousPitcher = fetcherPreviousPitcherAway(team_id, season, day-daySub);
+        //Checking which side that team we are queuing for was on
+        if(previousPitcher.home_team == team_id){
+            //Assigning the pitcher
+            previousPitcher = previousPitcher.home_team_pitcher_id;
+        }
+        else if(previousPitcher.away_team == team_id){  //Not technicallly needed, but usefull for readability
+            //Assigning the pitcher
+            previousPitcher = previousPitcher.away_team_pitcher_id;
         }
 
-
-        //Finding the position of the pitchers
+        //Finding the position of the pitcher
         const i = team.findIndex(e => e.player_id == (previousPitcher));
         
         //If a pitcher cannot be found, check a previous day
@@ -104,8 +91,27 @@ function fetch_pitcher(team_id, season, day){
     return team[position].player_id;
 }
 
+function set_pitcher(game_id, home_pitcher, away_pitcher){
+    const query = `
+        UPDATE data.games
+        SET home_team_pitcher_id = ?,
+        away_team_pitcher_id = >
+        WHERE game_id = ?;
+    `;
+
+    try {
+        const result = await pool.query(query, [home_pitcher, away_pitcher, team_id]);
+
+        //Returns ok, is not used
+        return result[0];
+
+    } catch (err){
+        console.log(err);
+    }
+}
+
 
 module.export = {
     fetch_pitcher,
-    fetch_batter
+    set_pitcher
 }
