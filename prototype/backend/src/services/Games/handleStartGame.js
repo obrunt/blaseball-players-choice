@@ -1,4 +1,4 @@
-const { fetch_game_order } = require("../../database/Reterive/fetchSeasonDayGames");
+const { fetch_game_order } = require("../database/Reterive/fetchSeasonDayGames");
 const { fetch_pitcher, set_pitcher } = require("../../database/Games/handleGamePitchers");
 const { set_weather } = require("../../database/Games/handleWeatherSet");
 

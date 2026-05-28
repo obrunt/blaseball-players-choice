@@ -1,15 +1,18 @@
 
+const { send_game_event } = require("sendEvent");
+
 const { fetch_previous_date } = require("../Reterive/fetchPreviousDay");
 const { fetch_game_order } = require("../Reterive/fetchSeasonDayGames");
 
-const { start_game_day } = require("/Events/handleStartGame");
+const { start_game_day } = require("../Games/handleStartGame");
+
 
 function main (){
     //Start day
         //This is under handle misc
-    start();
+    let todayGames = start();
     //Run day
-    run();
+    run(todayGames);
     //End day
         //This is under handle misc
 }
@@ -33,15 +36,8 @@ function start(){
     start_game_day(season, day);
   });
 
+  return games;
 
-    /*
-    //game start
-    if self.update["gameStartPhase"] != self.next_update["gameStartPhase"]:
-            self.print(f"GAME START PHASE: {self.update['gameStartPhase']} -> {self.next_update['gameStartPhase']} phase")
-    //inning start
-    if self.update["newInningPhase"] != self.next_update["newInningPhase"]:
-            self.print(f"NEW INNING PHASE: {self.update['newInningPhase']} -> {self.next_update['newInningPhase']} inphase")
-    */
 }
 
 /**
@@ -110,7 +106,19 @@ function start(){
 
 
 
-function run(){
+function run(games){
+  
+  games.forEach(game => {
+
+    let params = {
+      
+    }
+      
+    send_game_event(game.game_id, "GAME_START", );
+    send_game_event();
+  })
+
+
     /**
      * roll for return-from-elsewhere (end event if it procs) and name unscattering (thresholds TODO?)
 roll for weather, end event if it procs (thresholds TODO)
