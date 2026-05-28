@@ -142,9 +142,6 @@ CREATE TABLE IF NOT EXISTS data.teams
 
 	CONSTRAINT teams_card_id_fkey FOREIGN KEY (card_id)
         REFERENCES taxa.card (card_id) MATCH SIMPLE,	
-    
-    CONSTRAINT teams_stadium_id_fkey FOREIGN KEY (stadium_id)
-        REFERENCES data.stadiums (stadium_id) MATCH SIMPLE
 )
 
 CREATE OR ALTER TRIGGER team_insert

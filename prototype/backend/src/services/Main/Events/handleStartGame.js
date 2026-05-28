@@ -1,5 +1,6 @@
 const { fetch_game_order } = require("../../database/Reterive/fetchSeasonDayGames");
-const { fetch_pitcher, set_pitcher } = require("fetchGamePitchers");
+const { fetch_pitcher, set_pitcher } = require("../../database/Games/handleGamePitchers");
+const { set_weather } = require("../../database/Games/handleWeatherSet");
 
 function start_game_day(season, day){
 
@@ -16,6 +17,12 @@ function start_game_day(season, day){
 
         //Updating the game object to incude the pitchers
         set_pitcher(game.game_id, home_pitcher, away_pitcher);
+        
+        //Rolling for weather and updating game object
+        set_weather(game.game_id);
+
+        //Checking the home team and setting the stadium
+        set_stadium(game.game_id);
     }
 
 
@@ -44,6 +51,7 @@ function start_game_day(season, day){
 
     //For all regular season games not incuding the last day
     if(day < 98){
+
         //Getting the games for the next day
         let upcoming_game_order = fetch_game_order(season, day+1);
 

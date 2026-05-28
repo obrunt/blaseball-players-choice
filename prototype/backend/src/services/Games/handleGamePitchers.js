@@ -73,7 +73,7 @@ function fetch_pitcher(team_id, season, day){
         
         //If a pitcher cannot be found, check a previous day
             //This method of doing things can run into an error where all pitcher have switched
-            //If a full pitcher thesues has occured then this method will fail to return anything
+            //If a full pitcher thesues has occured then this method will fail to return anything (uh oh)
         if (i = -1) {
             daySub++;
             continue;
@@ -95,7 +95,7 @@ function set_pitcher(game_id, home_pitcher, away_pitcher){
     const query = `
         UPDATE data.games
         SET home_team_pitcher_id = ?,
-        away_team_pitcher_id = >
+        away_team_pitcher_id = ?
         WHERE game_id = ?;
     `;
 

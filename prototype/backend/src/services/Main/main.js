@@ -1,6 +1,8 @@
 
-const { start_game_day } = require("/Events/handleStartGame");
+const { fetch_previous_date } = require("../Reterive/fetchPreviousDay");
+const { fetch_game_order } = require("../Reterive/fetchSeasonDayGames");
 
+const { start_game_day } = require("/Events/handleStartGame");
 
 function main (){
     //Start day
@@ -12,9 +14,27 @@ function main (){
         //This is under handle misc
 }
 
+
 function start(){
+
+  //Getting the last game played so we can get the current day
+  let date = fetch_previous_date();
+  date.day += 1;
+
+  //Fetching the currently constructed games
+  let games = fetch_game_order(date.season, date.day);
+
+  games.forEach(game => {
+    //This sets up
+      //Pitchers for both teams
+      //Home and away odds for the next game
+      //Weather
+      //Stadium
+    start_game_day(season, day);
+  });
+
+
     /*
-    
     //game start
     if self.update["gameStartPhase"] != self.next_update["gameStartPhase"]:
             self.print(f"GAME START PHASE: {self.update['gameStartPhase']} -> {self.next_update['gameStartPhase']} phase")
