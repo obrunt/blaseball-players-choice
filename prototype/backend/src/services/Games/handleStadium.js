@@ -87,7 +87,7 @@ function set_stadium_game(game_id, team_id){
 
 
 function get_stadium_team(game_id, team_id){
-    return await getGameStadium(game_id);
+    //return await getGameStadium(game_id);
 }
 
 function set_stadium_team(game_id, team_id){

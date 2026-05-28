@@ -2,6 +2,10 @@ const { fetch_game_order } = require("../../database/Reterive/fetchSeasonDayGame
 const { fetch_pitcher, set_pitcher } = require("../../database/Games/handleGamePitchers");
 const { set_weather } = require("../../database/Games/handleWeatherSet");
 
+
+
+
+
 function start_game_day(season, day){
 
     console.log(`Starting game day s${season+1}d${day+1}`);
@@ -226,45 +230,6 @@ function calc_next_game_odds(game_id){
  */
 
 }
-
-
-
-
-/**
- * def roll(
-        self,
-        label,
-        lower: float = 0,
-        upper: float = 1,
-        passed: Optional[bool] = None,
-        threshold: Optional[float] = None,
-    ) -> float:
-        value = self.rng.next()
-        self.print(f"{label}: {value}")
-        self.emit_roll_to_stream(label, value, passed, threshold)
-
-        if threshold is not None and passed is not None:
-            if passed:
-                upper = threshold
-            else:
-                lower = threshold
-
-        if value < lower or value > upper:
-            self.print(
-                "!!! warn: value {}={} out of bounds (should be within {}-{})".format(label, value, lower, upper)
-            )
-
-        # hacky way to figure out what index this roll is in the overall list
-        idx = 0
-        if self.roll_log:
-            if self.roll_log[-1].event_id == self.event["id"]:
-                idx = self.roll_log[-1].index + 1
-
-        log_obj = LoggedRoll(self.event["id"], idx, self.event["created"], label, lower, upper)
-        self.roll_log.append(log_obj)
-        return value
-
- */
 
 
 module.export = {

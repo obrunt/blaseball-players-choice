@@ -66,7 +66,11 @@ INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_ba
     INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (31, 'WILD_PITCH', 0, 0, 0, 0, 0);
     INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (32, 'INTENTIONAL_WALK', 1, 0, 0, 0, 0);
     INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (33, 'TUNNELS_STOLEN_RUN', 0, 0, 0, 0, 0);
+
     INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (34, 'GAME_START', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (35, 'INNING_START', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (36, 'HALF_INNING', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (37, 'INNING_END', 0, 0, 0, 0, 0);
 
 
 
