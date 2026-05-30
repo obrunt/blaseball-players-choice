@@ -1,7 +1,11 @@
 const { pool } = require("../../../config/db");
 const { roll } = require("../../middleware/randomRoll");
 
-//NEed to get in all the imports
+
+const { sendGameStart } = require("gameStart");
+const { sendNewInning } = require("inningManagement")
+
+//Need to get in all the imports
 //Probably group into files
     //Inning info
     //Weather
@@ -12,12 +16,13 @@ const { roll } = require("../../middleware/randomRoll");
 
 
 function send_game_event (game_id, event_type, params){
+    
     switch(event_type){
         case 'GAME_START':
-            await sendGameStart(game_id);
+            await sendGameStart(game_id, params);
             break;
         case 'INNING_START':
-            await sendNewInning(game_id);
+            await sendNewInning(game_id, params);
             break;
         case 'GAME_START':
             break;

@@ -2,7 +2,7 @@ const { pool } = require("../../../../config/db");
 const { roll } = require("../../../middleware/randomRoll");
 
 
-async function sendInningStart (game_id){
+async function sendInningStart (game_id, params){
 
   const query = `
     INSERT INTO data.game_events (
@@ -11,7 +11,8 @@ async function sendInningStart (game_id){
         event_index,
         inning,
         top_of_inning,
-        batter_team_id, 
+        batter_team_id,
+        batter_id,
         pitcher_team_id,
         pitcher_id,
         event_text
@@ -33,25 +34,28 @@ async function sendInningStart (game_id){
 
         TRUE,   --Is the top of the inning
 
-        (SELECT home_team FROM data.games
-        WHERE game_id = ?),
+        ?,      --batter team (away team)
 
-        (SELECT away_team FROM data.games
-        WHERE game_id = ?),
+        (SELECT player_id FROM data.team_roster  --Batter id, which is always the first in the index of team roster
+        WHERE team_id = ?
+        AND valid_until IS NULL
+        ORDER BY position_type_id, position_id
+        LIMIT 1),   
 
-        (SELECT home_team_pitcher_id from data.games    --Pitcher (top of inning will always be home team)
-        WHERE game_id = ?),   
+        ?,    --Home team
 
-        (SELECT t.full_name FROM data.teams AS t
-        LEFT JOIN data.games AS g
-        ON g.away_team = t.team_id
-        WHERE t.valid_until IS NULL
-        AND g.game_id = ?) + ' batting.'
+        ?,    --Pitcher (top of inning will always be home team)  
+
+        (SELECT full_name FROM data.teams
+        WHERE valid_until IS NULL
+        AND team_id = ?) + ' batting.'
+
+        
     );
   `;
 
   try {
-    const result = await pool.query(query, [game_id, game_id, game_id, game_id, game_id, game_id, game_id]);
+    const result = await pool.query(query, [game_id, game_id, game_id, params.away_team, params.away_team, params.home_team, params.home_team_pitcher_id, params.away_team]);
 
     //Find way to get the number of the inning 
     return `Top of _, ${params.away_team} batting.`;
