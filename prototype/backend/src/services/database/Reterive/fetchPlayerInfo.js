@@ -86,7 +86,7 @@ async function getPlayerStat(stat, player){
 
 }
 
-function getVibes(player, day){
+async function getVibes(player, day){
 
     const buoyancy = await getPlayerStat('bouyancy', player);
     const pressurization = await getPlayerStat('pressurization', player);
@@ -107,6 +107,44 @@ function getVibes(player, day){
     return vibes;
 }
 
+async function isFlinching(player_id, game_id){
+
+  const flinchQuery = `
+  SELECT * FROM data.player_modifications
+  WHERE valid_until IS NULL
+  AND player_id = ?;
+  `
+  try {
+    const result = await pool.query(flinchQuery, [player_id]);
+
+    //IF the player doesn't have the flinch modification
+      //They can't be flinching
+    if (!result[0].includes('FLINCH')){
+      return false;
+    }
+  } catch (err){
+    console.log(err);
+  }
+
+  const strikeQuery = ` 
+    SELECT strikes FROM data.game_events
+    WHERE game_id = ?
+    ORDER BY event_index DESC
+    LIMIT 1;
+  `;
+
+  try {
+    const result = await pool.query(strikeQuery, [game_id]);
+
+    if (result[0] > 0){
+      return false
+    }
+    return true;
+
+  } catch (err){
+    console.log(err);
+  }
+}
 
 
 module.exports = {
@@ -114,5 +152,7 @@ module.exports = {
   getPlayerMods,
   getPlayerStat,
   getPlayerTeam,
-  getPlayerPosition
+  getPlayerPosition,
+
+  isFlinching
 };

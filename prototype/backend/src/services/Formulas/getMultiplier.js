@@ -1,10 +1,10 @@
-const { getBattingTeam } = require("../database/Reterive/fetchGameInfo");
+const { getBattingTeam, isMaximumBaseball, getBatterAppearanceCount, getGameWeather } = require("../database/Reterive/fetchGameInfo");
 const { getPlayerMods, getPlayerTeam, getPlayerPosition } = require("../database/Reterive/fetchPlayerInfo");
 const { getTeamMods, getTeamActivePlayers } = require("../database/Reterive/fetchTeamInfo");
 
 
 
-function getMultiplier(player_id, team_id, stadium_id, day, attribute){
+function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, attribute){
 
     let multiplier = 1;
 
@@ -153,47 +153,105 @@ function getMultiplier(player_id, team_id, stadium_id, day, attribute){
                 }
                 break;
             case 'MINIMALIST':
-                
+                const maxBall = await isMaximumBaseball(game_id);
+
+                if(maxBall){
+                    multiplier -= 0.75;
+                }
+                break;
+            case 'MAXIMALIST':
+                const maxBall = await isMaximumBaseball(game_id);
+
+                if(maxBall){
+                    multiplier += 2.5;
+                }
+                break;
+            case 'SLOW_BUILD':
+                const position = await getPlayerPosition(player_id, team_id);
+
+                //Checking if the player is a batter
+                if(position == 0){
+                    //Getting the times they've been batter up events in the game
+                    const batCount = await getBatterAppearanceCount(game_id, player_id);
+                    
+                    //This is an assumption on how this works
+                    multiplier += batCount * 0.01;
+                }
+                break;
+            case 'SHELLED':
+                const position = await getPlayerPosition(player_id, team_id);
+                const battingTeam = await getBattingTeam(team_id);
+
+                //Cheking to see if they're a fielder
+                if(position == 0 && team_id != battingTeam){
+                    return 0;
+                }
+                break;
+            case 'GUARDED':
+                const fortification = await getStadiumStat('fortification', stadium_id);
+
+                //The original doesn't have the minus
+                //Description says that player should play worse in low fortification
+                //So added the minus by discression
+                    //Can change/remove later 
+                multiplier += 0.2 * (fortification - 0.5);
+
+                break;
+            case 'OUTDOORSY':
+                const grandiosity = await getStadiumStat('grandiosity', stadium_id);
+
+                //The original doesn't have the minus
+                //Description says that player should play worse in low grandiosity
+                //So added the minus by discression
+                    //Can change/remove later 
+                multiplier += 0.2 * (grandiosity - 0.5);
+
+                break;
+            case 'GAUDY':
+                const stadiumMods = (await getStadiumMods(stadium_id)).length();
+
+                multiplier += 0.2 * stadiumMods;
+                break;
+            case 'CLUTTERED':
+                const filthiness = await getStadiumStat('filthiness', stadium_id);
+
+                multiplier += 0.2 * filthiness;
+
+                break;
+            case 'NIGHT_VISION':
+                const weather = await getGameWeather(game_id);
+
+                if(weather == 7){
+                    multiplier += 0.5;
+                }
+                break;
+            case 'MINIMIZED':
+                //Wiki claims that is should be always zero
+                //Also says that inverse stats aren't known if they should also be 0
+                    //Maybe add check for what attribute we're multiplying
+
+                //The formulas might be dividing by this, so just set it to be very, very small
+                return 0.00001;
+            case 'GREEN_LIGHT':
+                const weather = await getGameWeather(game_id);
+
+                //Polarity plus
+                if(weather == 20){
+                    multiplier += 0.5;
+                }
+                //Polarity minus
+                else if(weather == 21){
+                    multiplier -= 0.5;
+                }
                 break;
         }
     }
 
+    return multiplier;
+
+
     /**
-     * def get_multiplier(
-    player: PlayerData, team: TeamData, position: str, attr: str, meta: StatRelevantData, stadium: StadiumData
-):
-        elif mod == Mod.MINIMALIST:
-            if meta.is_maximum_blaseball:
-                multiplier -= 0.75
-        elif mod == Mod.MAXIMALIST:
-            # not "seen in the data" yet
-            if meta.is_maximum_blaseball:
-                multiplier += 2.50
-        elif mod == Mod.SLOW_BUILD and position == "batter":
-            # guessing at how this works
-            multiplier += meta.batter_at_bats * 0.01
-        elif mod == Mod.SHELLED and position == "fielder":
-            # lol
-            return 0
-        elif mod == Mod.GUARDED:
-            multiplier += 0.2 * stadium.fortification
-        elif mod == Mod.OUTDOORSY:
-            multiplier += 0.2 * stadium.grandiosity
-        elif mod == Mod.GAUDY:
-            multiplier += 0.02 * len(stadium.mods)
-        elif mod == Mod.CLUTTERED:
-            multiplier += 0.2 * stadium.filthiness
-        elif mod == Mod.NIGHT_VISION and meta.weather == Weather.ECLIPSE:
-            multiplier += 0.5
-        elif mod == Mod.MINIMIZED:
-            return 0.00001 #Apparently this should just be 0, but it turns out that one of our formulas divides by an attribute. Let's not divide by zero shall we
-        elif mod == Mod.GREEN_LIGHT and meta.weather == Weather.POLARITY_PLUS:
-            multiplier += 0.5
-        elif mod == Mod.GREEN_LIGHT and meta.weather == Weather.POLARITY_MINUS:
-            multiplier -=0.5
-
-
-    if player.bat == "NIGHT_VISION_GOGGLES" and meta.weather == Weather.ECLIPSE:
+    *if player.bat == "NIGHT_VISION_GOGGLES" and meta.weather == Weather.ECLIPSE:
         # Blessing description: Item. Random player on your team hits 50% better during Solar Eclipses.
         if attr == "thwackability":
             multiplier += 0.5

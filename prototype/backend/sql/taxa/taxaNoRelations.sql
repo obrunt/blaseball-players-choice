@@ -71,6 +71,8 @@ INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_ba
     INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (35, 'INNING_START', 0, 0, 0, 0, 0);
     INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (36, 'HALF_INNING', 0, 0, 0, 0, 0);
     INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (37, 'INNING_END', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (38, 'BATTER_UP', 0, 0, 0, 0, 0);
+
 
 
 
