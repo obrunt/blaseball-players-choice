@@ -1,7 +1,67 @@
 const { pool } = require("../../../../config/db");
 
 
+async function getPlayerMods(player){
+    //We want to get all the mods that the player has
+    //This just calls the player mod table and returns the current mods
 
+  const query = `
+    SELECT modification FROM data.player_modifications
+    WHERE player_id = ?
+    AND valid_until IS NULL;
+  `;
+
+  try {
+    const result = await pool.query(query, [player]);
+
+    //Returns an array of modifications
+    return result[0];
+
+  } catch (err){
+    console.log(err);
+  }
+}
+
+async function getPlayerTeam(player_id){
+  const query = `
+    SELECT team_id FROM data.team_roster
+    WHERE player_id = ?
+    AND valid_until IS NULL;
+  `;
+
+  try {
+    const result = await pool.query(query, [player_id, team_id]);
+
+    //Returning the most recent team the player is attached to
+    return result[0];
+
+  } catch (err){
+    console.log(err);
+  }
+}
+
+async function getPlayerPosition(player_id, team_id){
+  const query = `
+    SELECT position_type_id FROM data.team_roster
+    WHERE player_id = ?
+    AND team_id = ?
+    AND valid_until IS NULL;
+  `;
+
+  try {
+    const result = await pool.query(query, [player_id, team_id]);
+
+    //Returns the index
+      //0 - batter
+      //1 - pitcher
+      //2:4 - shadow
+    return result[0];
+
+  } catch (err){
+    console.log(err);
+  }
+
+}
 
 async function getPlayerStat(stat, player){
     //This is a basic generic function that just selects one stat from the player
@@ -10,7 +70,7 @@ async function getPlayerStat(stat, player){
   const query = `
     SELECT ? FROM data.players
     WHERE player_id = ?
-    AND valid_until IS NOT NULL
+    AND valid_until IS NULL
     LIMIT 1;
   `;
 
@@ -50,5 +110,9 @@ function getVibes(player, day){
 
 
 module.exports = {
-    getVibes
+  getVibes,
+  getPlayerMods,
+  getPlayerStat,
+  getPlayerTeam,
+  getPlayerPosition
 };

@@ -1,4 +1,18 @@
+const { getMultiplier } = require("getMultiplier");
 
+const { getVibes } = require("../database/Reterive/fetchPlayerInfo");
+const { fetchGameSeason, fetchGameDay } = require("../database/Reterive/fetchSeasonDayGames");
+
+
+
+function get_strike_threshold(batter_id, pitcher_id, batter_team, pitcher_team, stadium_id, game_id){
+    const season = await fetchGameSeason(game_id);
+    const day = await fetchGameDay(game_id);
+    
+    const pitcher_vibes = getVibes(pitcher_id, game_id);
+    //const pitcher_ruthlessness = ;
+
+}
 
 /**
  * 
@@ -61,6 +75,3 @@ def get_strike_threshold(
     return threshold
  */
 
-function get_strike_threshold(batter_id, pitcher_id, batter_team, pitcher_team, stadium_id){
-
-}

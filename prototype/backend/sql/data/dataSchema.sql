@@ -568,15 +568,6 @@ CREATE TABLE IF NOT EXISTS data.games
 
 
 
-
-
-
-
-
-
-
-
-
 CREATE TABLE IF NOT EXISTS data.game_events
 (
     id INT NOT NULL,
@@ -589,14 +580,15 @@ CREATE TABLE IF NOT EXISTS data.game_events
     outs_before_play SMALLINT DEFAULT 0,
     batter_id VARCHAR(36),
     pitcher_id VARCHAR(36),
-    home_team_id VARCHAR(36),
-    away_team_id VARCHAR(36),
+    pitcher_team_id VARCHAR(36),
+    batter_team_id VARCHAR(36),
     home_score FLOAT DEFAULT 0,
     away_score FLOAT DEFAULT 0,
     home_strike_count INT DEFAULT 3,
     away_strike_count INT DEFAULT 3,
     batter_count INT DEFAULT 0,
     pitches TEXT,
+    bases_occupied TEXT,
     total_strikes SMALLINT DEFAULT 0,
     total_balls SMALLINT DEFAULT 0,
     total_fouls SMALLINT DEFAULT 0,

@@ -18,8 +18,8 @@ async function sendGameStart (game_id, params){
         event_type,
         event_index,
         pitcher_id,
-        home_team_id,
-        away_team_id,
+        pitcher_team_id,
+        batter_team_id,
         event_text
     )
     VALUES (

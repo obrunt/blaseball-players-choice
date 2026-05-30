@@ -33,7 +33,7 @@ async function setGameStadium(game_id, team_id){
   const stadiumQuery = `
     SELECT t.stadium_id FROM data.teams AS t
     LEFT_JOIN data.games AS g
-    ON g.home_team_id = t.team_id
+    ON g.home_team = t.team_id
     WHERE g.game_id = ?
     AND t.team_id  = ?
     AND t.valid_until IS NULL;

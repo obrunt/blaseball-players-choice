@@ -2,6 +2,45 @@ const { pool } = require("../../../../config/db");
 const { roll } = require("../../../middleware/randomRoll");
 
 
+
+async function fetchGameDay(game_id){
+  
+  const query = `
+    SELECT day FROM data.games
+    WHERE game_id = ?
+    LIMIT 1;
+  `;
+
+  try {
+    const result = await pool.query(query, [game_id]);
+
+    //The day the game takes place
+    return result[0];
+
+  } catch (err){
+    console.log(err);
+  }
+}
+
+async function fetchGameSeason (game_id){
+  
+  const query = `
+    SELECT season FROM data.games
+    WHERE game_id = ?
+    LIMIT 1;
+  `;
+
+  try {
+    const result = await pool.query(query, [game_id]);
+
+    //The season the game takes place
+    return result[0];
+
+  } catch (err){
+    console.log(err);
+  }
+}
+
 //Getting all of the teams within the layers of the subleague
 async function getSeasonDayGames(day, season){
 
@@ -28,5 +67,7 @@ function fetch_game_order(season, day){
 
 
 module.exports = {
-  fetch_game_order
+  fetch_game_order,
+  fetchGameDay,
+  fetchSeasonDay
 };
