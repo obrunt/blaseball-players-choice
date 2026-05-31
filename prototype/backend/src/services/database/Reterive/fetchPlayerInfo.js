@@ -153,6 +153,5 @@ module.exports = {
   getPlayerStat,
   getPlayerTeam,
   getPlayerPosition,
-
   isFlinching
 };

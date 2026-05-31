@@ -96,6 +96,46 @@ async function getPitchingTeam(game_id){
   }
 }
 
+async function getPitcher(game_id) {
+  //Want to get the most recent event that happened for who's on base
+  const query = `
+    SELECT pitcher_id FROM data.game_events
+    WHERE game_id = ?
+    ORDER BY event_index DESC
+    LIMIT 1;
+  `;
+
+  try {
+    const result = await pool.query(query, [game_id]);
+
+    return result[0];
+
+  } catch (err){
+    console.log(err);
+  }
+}
+
+async function getBatter(game_id) {
+    //Want to get the most recent event that happened for who's on base
+  const query = `
+    SELECT batter_id FROM data.game_events
+    WHERE game_id = ?
+    ORDER BY event_index DESC
+    LIMIT 1;
+  `;
+
+  try {
+    const result = await pool.query(query, [game_id]);
+
+    return result[0];
+
+  } catch (err){
+    console.log(err);
+  }
+}
+
+
+
 async function getGameOccupiedBases(game_id){
  
     //Want to get the most recent event that happened for who's on base
@@ -139,10 +179,9 @@ async function getBatterAppearanceCount(game_id, player_id){
   }
 }
 
-async function isMaximumBaseball(game_id){
+async function getGameCounts(game_id){
     //Need to get all of the outs, balls and fouls for the team that is currently up to bat
-    //After getting them, compare the current to the maximum count - 1
-        //Minus one because otherwise would roll over to be non maximum
+    //Also get the counts for each team so that comparison can be done for when rool overs happen
 
     const query =  `
     SELECT bases_occupied, strikes, outs, balls
@@ -160,25 +199,32 @@ async function isMaximumBaseball(game_id){
   try {
     const result = await pool.query(query, [game_id]);
 
-    let info = JSON.parse(result[0]);
-
-    //Checking that all of the info is the most it can be
-
-    if(info.bases_occupied.length() == info.base_count){
-        if(info.strikes == (info.strike_count - 1)){
-            if(info.balls == (info.ball_count - 1)){
-                if(info.out == (info.ball_out - 1)){
-                    return true;
-                }
-            }
-        }
-    }
-
     return false;
 
   } catch (err){
     console.log(err);
   }
+}
+
+async function isMaximumBaseball(game_id){
+  //Need to get all of the outs, balls and fouls for the team that is currently up to bat
+  //After getting them, compare the current to the maximum count - 1
+      //Minus one because otherwise would roll over to be non maximum
+
+  let info = await getGameCounts(game_id);
+
+  //Checking that all of the info is the most it can be
+
+  if(info.bases_occupied.length() == info.base_count){
+      if(info.strikes == (info.strike_count - 1)){
+          if(info.balls == (info.ball_count - 1)){
+              if(info.out == (info.ball_out - 1)){
+                  return true;
+              }
+          }
+      }
+  }
+  return false;
 }
 
 
@@ -187,9 +233,14 @@ module.exports = {
     getGameWeather,
     getGameStadium,
     getGameInning,
+    getGameCounts,
     getGameOccupiedBases,
+
     getBattingTeam,
     getPitchingTeam,
+    getBatter,
+    getPitcher,
+
     isMaximumBaseball,
     getBatterAppearanceCount
 };

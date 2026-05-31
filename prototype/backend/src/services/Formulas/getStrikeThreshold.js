@@ -306,25 +306,3 @@ function get_strike_threshold(batter_id, pitcher_id, batter_team, pitcher_team, 
     threshold = min(threshold, factors.roll_cap);
     return threshold;
 }
-
-/**
- * 
-    if meta.season >= 18:
-        if meta.season == 18:
-            ruth_cold_hypediff = (10 * ruth + 1 * cold) / 11 + 0.2 * hypediff
-        else:
-            ruth_cold_hypediff = (20 * ruth + 3 * cold + 3 * hypediff) / 23
-        threshold = (
-            (constant if fwd < 0.5 else constant + 0.05)
-            + ruth_factor * ruth_cold_hypediff * (1 + 0.2 * vibes)
-            + (fwd_factor * fwd if fwd < 0.5 else (fwd_factor - 0.1) * fwd)
-            + musc_factor * musc
-            + mox_factor * mox
-            + abs_factor * abs(musc - mox)
-        )
-    else:
-        threshold = constant + ruth_factor * (ruth * (1 + 0.2 * vibes)) + fwd_factor * fwd + musc_factor * musc
-    threshold = min(threshold, roll_cap)
-    return threshold
- */
-

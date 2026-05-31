@@ -113,7 +113,7 @@ function decide_game_play_order(season){
       //Home or away is a coin flip
 
       //Getting a random number
-      let num = roll(0,32);
+      let num = intRoll(0,32);
 
       //This means that the team is playing outside their subleague
       if (num == 0) {
@@ -137,7 +137,7 @@ function decide_game_play_order(season){
 
 
       //Getting a decide if the first team is playing home or away
-      num = roll(0,1);
+      num = intRoll(0,2);
       
       switch (num){
 

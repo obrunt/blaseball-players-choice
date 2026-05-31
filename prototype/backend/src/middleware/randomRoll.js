@@ -1,7 +1,11 @@
 
 
-function roll(min, max){
+function intRoll(min, max){
     return Math.floor(Math.random() * max) + min;
 }
 
-module.export = { roll };
+function floatRoll(min, max){
+    return Math.random() * max + min;
+}
+
+module.export = { intRoll, floatRoll };

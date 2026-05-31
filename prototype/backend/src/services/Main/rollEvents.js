@@ -1,5 +1,15 @@
 
 
+const { floatRoll, intRoll } = require("../../middleware/randomRoll");
+
+const { get_strike_threshold } = require("../Formulas/getStrikeThreshold");
+const { get_swing_strike_threshold, get_swing_ball_threshold } = require("../Formulas/getSwingThreshold");
+
+const { getGameStadium, getBattingTeam, getPitchingTeam, getBatter, getPitcher } = require("../database/Reterive/fetchGameInfo");
+const { pitcherAcidicBlood } = require("../database/Reterive/fetchGameMisc");
+const { getGameStadium, getBattingTeam, getPitchingTeam } = require("../database/Reterive/fetchGameInfo");
+
+
 /**
  * roll for return-from-elsewhere (end event if it procs) and name unscattering (thresholds TODO?)
 roll for weather, end event if it procs (thresholds TODO)
@@ -42,88 +52,80 @@ if batter is magmatic:
 
 */
 
+function createEvent(game_id){
+  const pitchThreshold = throwPitch(game_id);
+  const throwRoll = floatRoll(0,1);
 
-function throwPitch(){
-    /**
-     * def throw_pitch(self, known_result=None):
-        meta = self.get_stat_meta()
-        threshold = get_strike_threshold(
-            self.batter, self.batting_team, self.pitcher, self.pitching_team, self.stadium, meta, self.is_flinching()
-        )
-        if self.batter.undefined():
-            # musc and mox
-            self.roll("undefined (strike formula)")
-            self.roll("undefined (strike formula)")
-            self.print(f"--- threshold is {threshold}")
 
-        passed_check = None
-        if known_result == "ball":
-            passed_check = False
-        elif known_result == "strike":
-            passed_check = True
+  //TODO
+  /*if(pitcherAcidicBlood(game_id)){
 
-        roll = self.roll("strike", threshold=threshold, passed=passed_check)
-        if self.pitching_team.has_mod(Mod.ACIDIC):
-            acidic_roll = self.roll("acidic")
-            success = "Acidic pitch" in self.desc
-            self.log_roll(Csv.MODPROC, "Acidic Pitch" if success else "Not Acidic Pitch", acidic_roll, success)
+  }*/
 
-        self.is_strike = roll < threshold
-        self.strike_roll = roll
-        self.strike_threshold = threshold
 
-        if known_result == "strike" and roll > threshold:
-            self.print(f"!!! warn: too high strike roll (threshold {threshold})")
-            self.is_strike = True
-        elif known_result == "ball" and roll < threshold:
-            self.print(f"!!! warn: too low strike roll (threshold {threshold})")
-            self.is_strike = False
 
-        known_result_overrides = {
-            "2021-06-21T20:17:23.768Z": True,
-            "2021-06-24T03:00:24.613Z": True,
-            "2021-06-24T04:12:06.096Z": True,
-            "2021-06-21T23:09:15.837Z": True,
-            "2021-06-26T03:06:40.110Z": True,
-            "2021-06-24T05:15:00.980Z": True,
-            "2021-06-24T08:12:41.052Z": True,
-            "2021-06-24T09:20:42.736Z": True,
-            "2021-06-24T11:10:24.784Z": True,
-        }
-        if self.event["created"] in known_result_overrides:
-            self.is_strike = known_result_overrides[self.event["created"]]
+  //Differing formulas for each situation
+  //Becuase of that, need to have two different option once a ball is thrown
+    //Would be nice to just combine into one check
+    //But want to keep the math as accurate as possible
+  
+  let swungAtBall;
 
-        if self.pitching_team.has_mod("FIERY") and self.strikes < self.max_strikes - 1:
-            # event where our formula registers a ball but we know it's a strike by roll count
-            # ideally we'd get rid of these and our formula would just guess right but alas
-            double_strike_overrides = {
-                #"2021-05-21T05:32:00.224Z": True, now unnecessary due to strike formula improvements
-                #"2021-06-16T01:14:32.242Z": True, Last Double strike override goodbye!
-                # "2021-07-22T10:07:27.012Z": False, # removed as realigns later with a party roll
-                # "2021-06-22T17:19:20.764Z": True,
-            }
+  //This is a strike thrown
+  if(throwRoll < pitchThreshold){
+    swungAtBall = swingBat(game_id, 'strike');
+  }
+  //This is a ball
+  else{
+    swungAtBall = swingBat(game_id, 'ball');
+  }
 
-            if self.event["created"] in double_strike_overrides:
-                override_is_strike = double_strike_overrides[self.event["created"]]
-                if override_is_strike != self.is_strike:
-                    self.is_strike = override_is_strike
-                    self.print("!!! overriding double strike to {}".format(override_is_strike))
-                else:
-                    self.print("!!! unnecessary double strike override")
 
-            if self.is_strike:
-                double_strike_roll = self.roll("double strike")
-                success = "fires a Double Strike" in self.desc
-                self.log_roll(Csv.MODPROC, "Double Strike" if success else "Single Strike", double_strike_roll, success)
-            else:
-                self.print("!!! double strike eligible! (threshold is {})".format(threshold))
-
-        return roll
-
-     */
+  return;
 }
 
 
+function throwPitch(game_id){  
+  const batting_team = getBattingTeam(game_id);
+  const pitching_team = getPitchingTeam(game_id);
+
+  const batter = getBatter(game_id);
+  const pitcher = getPitcher(game_id);
+
+  //Getting the limits for the roll
+  const threshold = get_strike_threshold(batter, batting_team, pitcher,  pitching_team, game_id);
+  
+  return threshold;
+}
+
+function swingBat(game_id, throwType){
+  const batting_team = getBattingTeam(game_id);
+  const pitching_team = getPitchingTeam(game_id);
+
+  const batter = getBatter(game_id);
+  const pitcher = getPitcher(game_id);
+
+
+  const batFlinch = await batterFlinch(game_id);
+  const gameCount = await getGameCounts(game_id);
+
+  //This is an automatic no-swing
+  if(batFlinch && gameCount.strikes == 0){
+    return false;
+  }
+
+
+  if(throwType = 'strike'){
+
+  }
+  //Technically this isn't needed
+    //Keep for readability
+  else if(throwType = 'ball'){
+
+  }
+
+
+}
 
 
 

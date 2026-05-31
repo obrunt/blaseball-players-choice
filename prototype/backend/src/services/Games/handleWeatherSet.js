@@ -1,5 +1,5 @@
 const { pool } = require("../../../../config/db");
-const { roll } = require("../../../middleware/randomRoll");
+const { intRoll} = require("../../../middleware/randomRoll");
 
 
 async function getGameWeather(game_id){
@@ -57,7 +57,7 @@ function set_weather(game_id){
         //26 & 27 are unknown
         //Definently weighted odds for each chance
             //Currently just keeping odds equal
-    let weatherIndex = roll (0, 29);
+    let weatherIndex = intRoll (0, 30);
 
     switch(weatherIndex){
         //This will probably need to change to checking for the ranges
