@@ -579,6 +579,7 @@ CREATE TABLE IF NOT EXISTS data.game_events
     top_of_inning BOOL DEFAULT false,
     outs_before_play SMALLINT DEFAULT 0,
     batter_id VARCHAR(36),
+    batter_position INT,
     pitcher_id VARCHAR(36),
     pitcher_team_id VARCHAR(36),
     batter_team_id VARCHAR(36),

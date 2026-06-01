@@ -21,8 +21,8 @@ async function getTeamMods(team){
   }
 }
 
-async function getTeamActivePlayers(team){
-    //Want to get all players ctive on the team that aren't in the shadows
+async function getTeamActivePlayers(team_id){
+    //Want to get all players active on the team that aren't in the shadows
 
   const query = `
     SELECT player_id FROM data.player_modifications
@@ -33,7 +33,7 @@ async function getTeamActivePlayers(team){
   `;
 
   try {
-    const result = await pool.query(query, [team]);
+    const result = await pool.query(query, [team_id]);
 
     //Returns an array of player ids
     return result[0];
@@ -43,7 +43,50 @@ async function getTeamActivePlayers(team){
   }
 }
 
+async function getPositionRosterLength(team_id, position_type){
+    //Getting the maximum index position from the team roster
+ const query = `
+    SELECT position_id FROM data.team_roster
+    WHERE team_id = ?
+    AND position_type_id = ?
+    AND valid_until IS NULL
+    ORDER BY position_id DESC
+    LIMIT 1;
+  `;
+
+  try {
+    const result = await pool.query(query, [team_id, position_type]);
+
+    return result[0];
+
+  } catch (err){
+    console.log(err);
+  }
+}
+
+async function getPlayerFromIndex(team_id, position_type, position_index){
+   const query = `
+    SELECT player_id FROM data.team_roster
+    WHERE team_id = ?
+    AND position_type_id = ?
+    AND position_id = ?
+    AND valid_until IS NULL
+    LIMIT 1;
+  `;
+
+  try {
+    const result = await pool.query(query, [team_id, position_type, position_index]);
+
+    return result[0];
+
+  } catch (err){
+    console.log(err);
+  }
+}
+
 module.exports = {
     getTeamMods,
-    getTeamActivePlayers
+    getTeamActivePlayers,
+    getPositionRosterLength,
+    getPlayerFromIndex
 }

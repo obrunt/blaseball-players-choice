@@ -18,15 +18,29 @@ async function sendGameStart (game_id, params){
         event_type,
         event_index,
         pitcher_id,
+        batter_id,
+        batter_position,
         pitcher_team_id,
         batter_team_id,
         event_text
     )
     VALUES (
-        ?,
+        ?,  --Game ID
         'GAME_START',
-        0,
-        ?,
+        0, --Starting event
+        ?,  --Pitcher
+        (SELECT player_id FROM data.team_roster     --Selecting the batter who's last in the roster
+        WHERE position_type_id = 0                  --The BATTER UP event increases the index by one
+        AND valid_until IS NULL                     --So for INNING START batter selection will start the a beginning again
+        AND team_id = ?
+        ORDER BY position_id DESC
+        LIMIT 1),
+        (SELECT position_id FROM data.team_roster     --Setting the index to be last in the index
+        WHERE position_type_id = 0                  --The BATTER UP event increases the index by one
+        AND valid_until IS NULL
+        AND team_id = ?
+        ORDER BY position_id DESC
+        LIMIT 1),
         ?,
         ?,
         'Play ball!'
@@ -34,9 +48,10 @@ async function sendGameStart (game_id, params){
   `;
 
   try {
-    const result = await pool.query(query, [game_id, params.home_team_pitcher_id, params.home_team, params.away_team]);
+    const result = await pool.query(query, [game_id, params.home_team_pitcher_id, params.away_team, params.away_team, params.home_team, params.away_team]);
 
-    //Returns index of weather and name of weather
+    //Returns the text
+      //Will probably not be used by anything
     return 'Play ball!';
 
   } catch (err){

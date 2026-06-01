@@ -98,6 +98,8 @@ function run(games){
       
       send_game_event(game.game_id, "GAME_START", game);
       send_game_event(game.game_id, "INNING_START", game);
+      //Will still have to set up this up
+      send_game_event(game.game_id, "BATTER_UP", game);
       resolve();
     });
   })

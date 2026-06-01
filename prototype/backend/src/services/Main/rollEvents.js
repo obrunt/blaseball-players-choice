@@ -69,15 +69,42 @@ function createEvent(game_id){
     //Would be nice to just combine into one check
     //But want to keep the math as accurate as possible
   
-  let swungAtBall;
+  let pitchType;
+  let swingThreshold;
 
   //This is a strike thrown
   if(throwRoll < pitchThreshold){
-    swungAtBall = swingBat(game_id, 'strike');
+    pitchType = 'strike';
+    swingThreshold = swingBat(game_id, pitchType);
   }
   //This is a ball
   else{
-    swungAtBall = swingBat(game_id, 'ball');
+    pitchType = 'ball';
+    swingThreshold = swingBat(game_id, pitchType);
+  }
+
+  //Checking to see if the batter swung
+  const swingRoll = floatRoll(0,1);
+
+  //If the batter didn't swing at the ball
+  if(swingRoll > swingThreshold){
+    //If the ball thrown was a ball
+    if(pitchType == 'ball'){
+      //Increase ball count
+
+      //Get ball count
+      //If the ball count is equal to the team ball count, then WALK event
+    }
+    else{
+
+    }
+
+
+
+
+  }
+  else{
+
   }
 
 
@@ -93,7 +120,7 @@ function throwPitch(game_id){
   const pitcher = getPitcher(game_id);
 
   //Getting the limits for the roll
-  const threshold = get_strike_threshold(batter, batting_team, pitcher,  pitching_team, game_id);
+  const threshold = get_strike_threshold(batter, batting_team, pitcher, pitching_team, game_id);
   
   return threshold;
 }
@@ -114,17 +141,18 @@ function swingBat(game_id, throwType){
     return false;
   }
 
+  let swingThreshold;
 
   if(throwType = 'strike'){
-
+    swingThreshold = get_swing_strike_threshold(batter, batting_team, pitcher, pitching_team, game_id);
   }
   //Technically this isn't needed
     //Keep for readability
   else if(throwType = 'ball'){
-
+    swingThreshold = get_swing_ball_threshold(batter, batting_team, pitcher, pitching_team, game_id);
   }
 
-
+  return swingThreshold;
 }
 
 
