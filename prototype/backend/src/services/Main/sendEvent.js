@@ -25,8 +25,11 @@ function send_game_event (game_id, event_type, params){
         case 'GAME_START':
             await sendGameStart(game_id, params);
             break;
-        case 'INNING_START':
-            await sendNewInning(game_id, params);
+        case 'INNING_TOP':
+            await sendInningStart(game_id);
+            break;
+        case 'INNING_BOTTOM':
+            await sendInningFlip(game_id);
             break;
         case 'BATTER_UP':
             await sendBatterUp(game_id);
@@ -40,9 +43,10 @@ function send_game_event (game_id, event_type, params){
             await sendBall(game_id);
             break;
         case 'HOME_RUN':
-            await sendHomeRun(game_id, player_id);
+            await sendHomeRun(game_id, params);
             break;
-        case 'GAME_START':
+        case 'STRIKEOUT':
+            await sendStrikeout(game_id, params);
             break;
         case 'GAME_START':
             break;

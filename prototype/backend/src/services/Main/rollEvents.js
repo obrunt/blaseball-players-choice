@@ -5,9 +5,10 @@ const { floatRoll, intRoll } = require("../../middleware/randomRoll");
 const { get_strike_threshold } = require("../formulas/getStrikeThreshold");
 const { get_swing_strike_threshold, get_swing_ball_threshold } = require("../formulas/getSwingThreshold");
 
-const { getGameStadium, getBattingTeam, getPitchingTeam, getBatter, getPitcher } = require("../database/Reterive/fetchGameInfo");
+const { getGameStadium, getBattingTeam, getPitchingTeam, getBatter, getPitcher } = require("../database/fetchGameInfo");
 const { pitcherAcidicBlood } = require("../database/fetchGameMisc");
 const { getGameStadium, getBattingTeam, getPitchingTeam } = require("../database/fetchGameInfo");
+const { increaseResult } = require("./Events/countManagement");
 
 
 /**
@@ -57,7 +58,11 @@ function createEvent(game_id){
   const throwRoll = floatRoll(0,1);
 
 
-  //TODO
+  //TODO: include acidic pitchs
+    //To be honest, don't like much of the things that can cause runs to be taken away
+    //Or non interger runs
+    //Just makes it look weird
+    //Put it as low priority
   /*if(pitcherAcidicBlood(game_id)){
 
   }*/
@@ -65,23 +70,19 @@ function createEvent(game_id){
 
 
   //Differing formulas for each situation
-  //Becuase of that, need to have two different option once a ball is thrown
-    //Would be nice to just combine into one check
-    //But want to keep the math as accurate as possible
+  //Because of that, need to have two different option once a ball is thrown
   
   let pitchType;
-  let swingThreshold;
-
   //This is a strike thrown
   if(throwRoll < pitchThreshold){
     pitchType = 'strike';
-    swingThreshold = swingBat(game_id, pitchType);
   }
   //This is a ball
   else{
     pitchType = 'ball';
-    swingThreshold = swingBat(game_id, pitchType);
   }
+
+  const swingThreshold = swingBat(game_id, pitchType);
 
   //Checking to see if the batter swung
   const swingRoll = floatRoll(0,1);
@@ -90,28 +91,81 @@ function createEvent(game_id){
   if(swingRoll > swingThreshold){
     //If the ball thrown was a ball
     if(pitchType == 'ball'){
-      let ballResult = increaseBallResult(game_id);
+      let ballResult = await increaseResult(game_id, 'ball');
 
       //If the ball caused a walk
       if(ballResult){
-        send_game_event(game_id, 'WALK');
-        send_game_event(game_id, 'BATTER_UP');
         /**
          * 
           if batter has base instincts:
             roll for base instincts (thresholds TODO)
          */
+
+        //Sending the walk event
+          //This also includes the scenario where the bases are loaded and someone scores
+        send_game_event(game_id, 'WALK');
+        //Sending a call for a new batter to replace the new one
+        send_game_event(game_id, 'BATTER_UP');
+        return;
+        
       }
       //If it was just a ball
       else{
         send_game_event(game_id, 'BALL');
+        return;
       }
       //Going back to the main loop
       return;
     }
-    else{
+    else if(pitchType = 'strike'){
+      let strikeResult = await increaseResult(game_id, 'strike');
 
+      //If it was a strikeout
+      if(strikeResult){
+        //Checking to see if it would cause an inning change
+        let outResult = await increaseResult(game_id, 'out');
+
+        //If the inning will change
+        if(outResult.change){
+          //Sending a strikeout event
+          send_game_event(game_id, 'STRIKEOUT', false);
+
+          //If it is currently the top of the inning
+            //Switch it to the bottom of the inning
+
+          //TODO: add check to see if this is needed
+            //Case where the inning number is 9 or above
+            //And the team that would be batting in the bottom is already winning
+          if(outResult.top){
+            send_game_event(game_id, 'INNING_BOTTOM');
+          }
+          else{
+            send_game_event(game_id, 'INNING_TOP');
+          }
+
+        }
+        //The inning doesn't change
+        else{
+
+        }
+      }
+      //If it was just a strike
+      else {
+
+      }
+
+      /**
+       * else:
+          strike count += 1
+          if strike count == # of strikes in a strikeout:
+            result is strikeout looking
+          else:
+            result is strike looking/flinching
+       */
     }
+    //Both have a return inside
+    //But if there's an error still want a way to get back to the main loop
+    return;
 
 
 

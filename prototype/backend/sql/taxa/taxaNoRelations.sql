@@ -4,6 +4,10 @@ CREATE SCHEMA taxa;
 
 
 
+
+--TODO: see if this table is needed, the switch statement covers the event types
+--It does mean that they're hardcoded into the program, but it makes the code a lot more readable when sending the events in the rollEvents file
+
 CREATE TABLE taxa.event_types (
     event_type_id integer NOT NULL,
     event_type text,
@@ -68,8 +72,8 @@ INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_ba
     INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (33, 'TUNNELS_STOLEN_RUN', 0, 0, 0, 0, 0);
 
     INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (34, 'GAME_START', 0, 0, 0, 0, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (35, 'INNING_START', 0, 0, 0, 0, 0);
-    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (36, 'HALF_INNING', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (35, 'INNING_TOP', 0, 0, 0, 0, 0);
+    INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (36, 'INNING_BOTTOM', 0, 0, 0, 0, 0);
     INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (37, 'INNING_END', 0, 0, 0, 0, 0);
     INSERT INTO taxa.event_types (event_type_id, event_type, plate_appearance, at_bat, hit, total_bases, "out") VALUES (38, 'BATTER_UP', 0, 0, 0, 0, 0);
 

@@ -231,7 +231,6 @@ function calc_next_game_odds(game_id){
 
 }
 
-
 module.export = {
     start_game_day
 };

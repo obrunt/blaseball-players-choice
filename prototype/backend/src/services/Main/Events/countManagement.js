@@ -333,9 +333,7 @@ async function sendWalk(game_id) {
 
 }
 
-
-/*
-async function sendHomeRun(game_id, player_id) {
+async function sendStrikeout(game_id, didSwing) {
   const previousRowQuery =  `
     SELECT *
     WHERE game_id = ?
@@ -348,19 +346,13 @@ async function sendHomeRun(game_id, player_id) {
   } catch (err){
     console.log(err);
   }
-  
-  result.event_index += 1;
 
-  //Getting the correct team, so that we can increase the correct team score
-  const playerTeam = await getPlayerTeam(player_id);
-  if(playerTeam == result.home_team){
-    result.home_score += 1;
+  if(didSwing){
+    result.event_text += ' swinging.'
   }
-  else if(playerTeam == result.away_team){
-    result.away_score += 1;
+  else{
+    result.event_text += ' looking.'
   }
-  const playerName = await getPlayerStat('full_name', player_id);
-
 
   const newRowQuery = `
   INSERT INTO data.game_events (
@@ -437,7 +429,7 @@ async function sendHomeRun(game_id, player_id) {
   try {
     result = await pool.query(newRowQuery, [
         result.game_id,
-        'BALL',
+        'WALK',
         result.event_index,
         result.inning,
         result.top_of_inning,
@@ -457,7 +449,7 @@ async function sendHomeRun(game_id, player_id) {
         result.outs,
         result.balls,
         result.is_last_game_event,
-        `Ball. ${result.balls}-${result.strikes}`,
+        result.event_text,
         result.season,
         result.day,
         result.home_ball_count,
@@ -487,40 +479,28 @@ async function sendHomeRun(game_id, player_id) {
 
 
 }
-  */
 
-async function increaseBallResult(game_id){
-    //Getting
-    const gameCounts = await getGameCounts(game_id);
 
-    const increaseBalls = gameCounts.balls + 1;
 
-    if(increaseBalls == gameCounts.ball_count){
-        return true;
-    }
+async function increaseResult(game_id, countVar){
+  //Getting the counts for the current inning
+  const gameCounts = await getGameCounts(game_id);
 
-    return false;
+  const increaseBalls = gameCounts[countVar + 's'] + 1;
+
+  if(increaseBalls == gameCounts[countVar + '_count']){
+    return true;
+  }
+
+  return false;
 }
 
-async function increaseStrikeResult(){
-
-}
-
-async function increaseOutResult() {
-    
-}
-
-async function increaseFoulResult() {
-    
-}
 
 module.exports = {
   sendBall,
   sendWalk,
   sendHomeRun,
+  sendStrikeout,
 
-  increaseBallResult,
-  increaseFoulResult,
-  increaseOutResult,
-  increaseStrikeResult
+  increaseResult
 }

@@ -1,7 +1,7 @@
 const { pool } = require("../../../../config/db");
 const { roll } = require("../../../middleware/randomRoll");
 
-const { getTeamCounts } = require("../../database/Reterive/fetchTeamInfo");
+const { getTeamCounts } = require("../../database/fetchTeamInfo");
 
 
 async function sendGameStart (game_id, params){
@@ -102,6 +102,26 @@ async function sendGameStart (game_id, params){
   }
 }
 
+async function getCheckGameOver(game_id){
+
+    const previousRowQuery =  `
+    SELECT is_last_game_event
+    WHERE game_id = ?
+    ORDER BY event_index DESC
+    LIMIT 1;
+  `;
+  try {
+    let result = await pool.query(previousRowQuery, [game_id]);
+
+    return result;
+
+  } catch (err){
+    console.log(err);
+  }
+}
+
+
 module.export = {
-  sendGameStart
+  sendGameStart,
+  getCheckGameOver
 }

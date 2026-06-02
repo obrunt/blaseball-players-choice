@@ -97,7 +97,7 @@ function run(games){
     games.forEach(game => {
       
       send_game_event(game.game_id, "GAME_START", game);
-      send_game_event(game.game_id, "INNING_START", game);
+      send_game_event(game.game_id, "INNING_TOP", game);
       //Will still have to set up this up
       send_game_event(game.game_id, "BATTER_UP", game);
       resolve();
@@ -109,29 +109,29 @@ function run(games){
 
 
 
+  /*
   games.forEach(game => {
       
     send_game_event(game.game_id, "GAME_START", {});
-    send_game_event(game.game_id, "INNING_START", {});
+    send_game_event(game.game_id, "INNING_TOP", {});
 
   });
+  */
 
   var gamesComplete = new Promise((resolve, reject) => {
     games.forEach(game => {
-      let gameActive = true;
+      let gameOver = false;
         
-      while(gameActive){
+      while(!gameOver){
 
         createEvent(game);
-        if(isGameActive(game)){
 
-        }
+        gameOver = await getCheckGameOver(game.game_id);
       } 
         
       resolve();
     });
   });
-
   gamesComplete.then(() => {
     console.log('All done!');
   });
