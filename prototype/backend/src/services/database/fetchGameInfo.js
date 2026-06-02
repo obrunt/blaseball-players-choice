@@ -96,6 +96,23 @@ async function getPitchingTeam(game_id){
   }
 }
 
+async function getSetPitchers(game_id){
+  //Want to get the most recent event that happened for who's on base
+  const query = `
+    SELECT home_team_pitcher_id, away_team_pitcher_id FROM data.games
+    WHERE game_id = ?;
+  `;
+
+  try {
+    const result = await pool.query(query, [game_id]);
+
+    return result;
+
+  } catch (err){
+    console.log(err);
+  }
+}
+
 async function getPitcher(game_id) {
   //Want to get the most recent event that happened for who's on base
   const query = `
@@ -240,6 +257,7 @@ module.exports = {
     getPitchingTeam,
     getBatter,
     getPitcher,
+    getSetPitchers,
 
     isMaximumBaseball,
     getBatterAppearanceCount

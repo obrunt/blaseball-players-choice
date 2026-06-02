@@ -30,7 +30,7 @@ async function getPreviousBatter(game_id, team_id){
 
 
 async function sendBatterUp(game_id){
-    const previousRowQuery =  `
+  const previousRowQuery =  `
     SELECT *
     WHERE game_id = ?
     ORDER BY event_index DESC
