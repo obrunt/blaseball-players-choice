@@ -14,9 +14,8 @@ async function sendBall(game_id) {
     ORDER BY event_index DESC
     LIMIT 1;
   `;
-    let result;
   try {
-    result = await pool.query(previousRowQuery, [game_id]);
+    let result = await pool.query(previousRowQuery, [game_id]);
 
   } catch (err){
     console.log(err);
@@ -146,9 +145,8 @@ async function sendWalk(game_id) {
     ORDER BY event_index DESC
     LIMIT 1;
   `;
-    let result;
   try {
-    result = await pool.query(previousRowQuery, [game_id]);
+    let result = await pool.query(previousRowQuery, [game_id]);
 
   } catch (err){
     console.log(err);
@@ -344,9 +342,8 @@ async function sendHomeRun(game_id, player_id) {
     ORDER BY event_index DESC
     LIMIT 1;
   `;
-    let result;
   try {
-    result = await pool.query(previousRowQuery, [game_id]);
+    let result = await pool.query(previousRowQuery, [game_id]);
 
   } catch (err){
     console.log(err);

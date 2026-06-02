@@ -43,6 +43,29 @@ async function getTeamActivePlayers(team_id){
   }
 }
 
+async function getTeamStat(stat, team_id){
+    //This is a basic generic function that just selects one stat from the player
+    //Insead of haivng a large number of different calls just have the one
+
+  const query = `
+    SELECT ? FROM data.teams
+    WHERE team_id = ?
+    AND valid_until IS NULL
+    LIMIT 1;
+  `;
+
+  try {
+    const result = await pool.query(query, [stat, team_id]);
+
+    //Returns the requested stat
+    return result[0];
+
+  } catch (err){
+    console.log(err);
+  }
+
+}
+
 async function getPositionRosterLength(team_id, position_type){
     //Getting the maximum index position from the team roster
  const query = `
@@ -128,6 +151,7 @@ async function getTeamCounts(team_id){
 module.exports = {
     getTeamMods,
     getTeamCounts,
+    getTeamStat,
     
     getTeamActivePlayers,
     getPositionRosterLength,
