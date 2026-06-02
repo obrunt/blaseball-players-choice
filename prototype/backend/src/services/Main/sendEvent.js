@@ -33,14 +33,14 @@ function send_game_event (game_id, event_type, params){
             break;
         case 'WALK':
             //Sending a walk, then choosing a new batter
-            await sendBatterWalk(game_id);
+            await sendWalk(game_id);
             await sendBatterUp(game_id);
             break;
         case 'BALL':
             await sendBall(game_id);
             break;
-        case 'WALK':
-            await sendWalk(game_id);
+        case 'HOME_RUN':
+            await sendHomeRun(game_id, player_id);
             break;
         case 'GAME_START':
             break;
