@@ -78,7 +78,7 @@ async function getPlayerStat(stat, player){
     const result = await pool.query(query, [stat, player]);
 
     //Returns the requested stat
-    return result[0];
+    return result;
 
   } catch (err){
     console.log(err);

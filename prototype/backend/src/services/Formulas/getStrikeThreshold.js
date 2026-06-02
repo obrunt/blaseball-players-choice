@@ -236,7 +236,7 @@ function get_strike_threshold(batter_id, pitcher_id, batter_team, pitcher_team, 
     const inning = await getGameInning(game_id);
     
 
-    const pitcher_vibes = await getVibes(pitcher_id, game_id);
+    const pitcher_vibes = await getVibes(pitcher_id, day);
 
     //Getting all of the multiplied stats for the pitcher
     let multiplier = getMultiplier(pitcher_id, pitcher_team, stadium_id, game_id, season, day, 'ruthlessness');

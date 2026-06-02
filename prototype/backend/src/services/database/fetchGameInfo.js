@@ -1,5 +1,29 @@
 const { pool } = require("../../../../config/db");
 
+
+async function getGameStat(stat, game_id){
+  //This is a basic generic function that just selects one stat from the game events
+    //Insead of haivng a large number of different calls just have the one
+
+  const query = `
+    SELECT ? FROM data.game_events
+    WHERE game_id = ?
+    ORDER BY event_index DESC
+    LIMIT 1;
+  `;
+
+  try {
+    const result = await pool.query(query, [stat, game_id]);
+
+    //Returns the requested stat
+    return result;
+
+  } catch (err){
+    console.log(err);
+  }
+
+}
+
 async function getGameWeather(game_id){
     
   const query = `
@@ -247,18 +271,19 @@ async function isMaximumBaseball(game_id){
 
 
 module.exports = {
-    getGameWeather,
-    getGameStadium,
-    getGameInning,
-    getGameCounts,
-    getGameOccupiedBases,
+  getGameStat,
+  getGameWeather,
+  getGameStadium,
+  getGameInning,
+  getGameCounts,
+  getGameOccupiedBases,
 
-    getBattingTeam,
-    getPitchingTeam,
-    getBatter,
-    getPitcher,
-    getSetPitchers,
+  getBattingTeam,
+  getPitchingTeam,
+  getBatter,
+  getPitcher,
+  getSetPitchers,
 
-    isMaximumBaseball,
-    getBatterAppearanceCount
+  isMaximumBaseball,
+  getBatterAppearanceCount
 };

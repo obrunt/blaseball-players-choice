@@ -42,11 +42,21 @@ function send_game_event (game_id, event_type, params){
         case 'BALL':
             await sendBall(game_id);
             break;
-        case 'HOME_RUN':
-            await sendHomeRun(game_id, params);
-            break;
         case 'STRIKEOUT':
             await sendStrikeout(game_id, params);
+            break;
+        case 'STRIKE':
+            await sendStrike(game_id, params);
+            break;
+        case 'GAME_START':
+            break;
+        case 'GAME_START':
+            break;
+        case 'GAME_START':
+            break;
+        case 'GAME_START':
+            break;
+        case 'GAME_START':
             break;
         case 'GAME_START':
             break;

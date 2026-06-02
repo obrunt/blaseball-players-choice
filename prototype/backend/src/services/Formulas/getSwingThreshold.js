@@ -13,8 +13,8 @@ function get_swing_strike_threshold(batter_id, pitcher_id, batter_team, pitcher_
     const stadium_id = await getGameStadium(game_id);
     const inning = await getGameInning(game_id);
     
-    const pitcher_vibes = await getVibes(pitcher_id, game_id);
-    const batter_vibes = await getVibes(batter_id, game_id);
+    const pitcher_vibes = await getVibes(pitcher_id, day);
+    const batter_vibes = await getVibes(batter_id, day);
 
     
     let stadium_hype = await getStadiumStat('hype', stadium_id);
@@ -66,8 +66,8 @@ function get_swing_ball_threshold(batter_id, pitcher_id, batter_team, pitcher_te
     const stadium_id = await getGameStadium(game_id);
     const inning = await getGameInning(game_id);
     
-    const pitcher_vibes = await getVibes(pitcher_id, game_id);
-    const batter_vibes = await getVibes(batter_id, game_id);
+    const pitcher_vibes = await getVibes(pitcher_id, day);
+    const batter_vibes = await getVibes(batter_id, day);
 
     let multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'moxie');
     const batter_moxie = (await getPlayerStat('moxie', batter_id)) * multiplier * (1 + 0.2 * batter_vibes);

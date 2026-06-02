@@ -4,6 +4,7 @@ const { floatRoll, intRoll } = require("../../middleware/randomRoll");
 
 const { get_strike_threshold } = require("../formulas/getStrikeThreshold");
 const { get_swing_strike_threshold, get_swing_ball_threshold } = require("../formulas/getSwingThreshold");
+const { get_contact_ball_threshold, get_contact_strike_threshold } = require("../formulas/getContactThreshold");
 
 const { getGameStadium, getBattingTeam, getPitchingTeam, getBatter, getPitcher } = require("../database/fetchGameInfo");
 const { pitcherAcidicBlood } = require("../database/fetchGameMisc");
@@ -118,61 +119,111 @@ function createEvent(game_id){
       return;
     }
     else if(pitchType = 'strike'){
-      let strikeResult = await increaseResult(game_id, 'strike');
+      const strikeResult = await increaseResult(game_id, 'strike');
 
       //If it was a strikeout
       if(strikeResult){
         //Checking to see if it would cause an inning change
-        let outResult = await increaseResult(game_id, 'out');
+        const outResult = await increaseResult(game_id, 'out');
+
 
         //If the inning will change
-        if(outResult.change){
+        if(outResult){
           //Sending a strikeout event
           send_game_event(game_id, 'STRIKEOUT', false);
-
           //If it is currently the top of the inning
-            //Switch it to the bottom of the inning
+          //Switch it to the bottom of the inning
+          //Otherwise increase the inning
+            //Evalutaions for ending the game are within the inning increase event
+          const increaseInning = await getGameInning(game_id);
 
-          //TODO: add check to see if this is needed
-            //Case where the inning number is 9 or above
-            //And the team that would be batting in the bottom is already winning
-          if(outResult.top){
+          if(increaseInning.top_of_inning){
             send_game_event(game_id, 'INNING_BOTTOM');
           }
           else{
             send_game_event(game_id, 'INNING_TOP');
           }
-
+          return;
         }
         //The inning doesn't change
         else{
+          //Sending a strikeout event
+          send_game_event(game_id, 'STRIKEOUT', false);
 
+          //Because we know there are outs left in the inning (per previous check)
+          //We need to get a new batter for the team
+          send_game_event(game_id, 'BATTER_UP');
         }
+        return;
       }
       //If it was just a strike
       else {
-
+        send_game_event(game_id, 'STRIKE', false);
+        return;
       }
-
-      /**
-       * else:
-          strike count += 1
-          if strike count == # of strikes in a strikeout:
-            result is strikeout looking
-          else:
-            result is strike looking/flinching
-       */
+      return;
     }
     //Both have a return inside
     //But if there's an error still want a way to get back to the main loop
     return;
-
-
-
-
   }
+  //If the batter swung at the ball
   else{
+    const contactThreshold = hitBall(game_is, pitchType);
 
+    const contactRoll = floatRoll(0,1);
+    //If there was no contact
+      //Then it's a strike swinging
+    if(contactRoll > contactThreshold){
+      //Checking to see if increasing the strikes would cause a strikeout
+      const strikeResult = await increaseResult(game_id, 'strike');
+
+      //If it was a strikeout
+      if(strikeResult){
+        //Checking to see if it would cause an inning change
+        const outResult = await increaseResult(game_id, 'out');
+
+
+        //If the inning will change
+        if(outResult){
+          //Sending a strikeout event
+          send_game_event(game_id, 'STRIKEOUT', true);
+          //If it is currently the top of the inning
+          //Switch it to the bottom of the inning
+          //Otherwise increase the inning
+            //Evalutaions for ending the game are within the inning increase event
+          const increaseInning = await getGameInning(game_id);
+
+          if(increaseInning.top_of_inning){
+            send_game_event(game_id, 'INNING_BOTTOM');
+          }
+          else{
+            send_game_event(game_id, 'INNING_TOP');
+          }
+          return;
+        }
+        //The inning doesn't change
+        else{
+          //Sending a strikeout event
+          send_game_event(game_id, 'STRIKEOUT', true);
+
+          //Because we know there are outs left in the inning (per previous check)
+          //We need to get a new batter for the team
+          send_game_event(game_id, 'BATTER_UP');
+        }
+        return;
+      }
+      //If it was just a strike
+      else {
+        send_game_event(game_id, 'STRIKE', true);
+        return;
+      }
+      return;
+    }
+    //If there was contact
+    else{
+      
+    }
   }
 
 
@@ -223,32 +274,30 @@ function swingBat(game_id, throwType){
   return swingThreshold;
 }
 
+function hitBall(game_id, throwType){
+  const batting_team = getBattingTeam(game_id);
+  const pitching_team = getPitchingTeam(game_id);
+
+  const batter = getBatter(game_id);
+  const pitcher = getPitcher(game_id);
+
+  let contactThreshold;
+
+  if(throwType = 'strike'){
+    contactThreshold = get_contact_strike_threshold(batter, batting_team, pitcher, pitching_team, game_id);
+  }
+  //Technically this isn't needed
+    //Keep for readability
+  else if(throwType = 'ball'){
+    contactThreshold = get_contact_ball_threshold(batter, batting_team, pitcher, pitching_team, game_id);
+  }
+
+  return contactThreshold;
+}
 
 
 /**
 *
-roll for strike zone (threshold known)
-if pitcher has acidic blood mod:
-  roll for acidic blood (threshold TODO)
-if batter has flinch and strike count is 0:
-  automatic no-swing
-else:
-  roll for swing (threshold differs based on strike zone roll; both thresholds known)
-if batter didn't swing:
-  if ball out of zone:
-    ball count += 1
-    if ball count == # of balls in a walk:
-      result is walk
-      if batter has base instincts:
-        roll for base instincts (thresholds TODO)
-    else:
-      result is a ball
-  else:
-    strike count += 1
-    if strike count == # of strikes in a strikeout:
-      result is strikeout looking
-    else:
-      result is strike looking/flinching
 else:  # batter did swing
   roll for contact (threshold differs based on strike zone roll; both thresholds known)
   if no contact:
