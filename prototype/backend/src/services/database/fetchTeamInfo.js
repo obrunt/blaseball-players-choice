@@ -84,8 +84,51 @@ async function getPlayerFromIndex(team_id, position_type, position_index){
   }
 }
 
+async function getTeamCounts(team_id){
+   const query = `
+    SELECT modification FROM data.team_roster
+    WHERE team_id = ?
+    AND valid_until IS NULL
+    LIMIT 1;
+  `;
+
+  try {
+    const result = await pool.query(query, [team_id]);
+
+    let params = {
+      balls: 4,
+      strikes: 3,
+      outs: 3,
+      bases: 4
+    };
+
+    if(result.includes("EXTRA_STRIKE")){
+      params.strikes += 1;
+    }
+
+    if(result.includes("EXTRA_BASE")){
+      params.bases += 1;
+    }
+
+    if(result.includes("EXTRA_OUT")){
+      params.outs += 1;
+    }
+
+    if(result.includes("WALK_IN_THE_PARK")){
+      params.balls -= 1;
+    }
+    
+    return params;
+
+  } catch (err){
+    console.log(err);
+  }
+}
+
 module.exports = {
     getTeamMods,
+    getTeamCounts,
+    
     getTeamActivePlayers,
     getPositionRosterLength,
     getPlayerFromIndex

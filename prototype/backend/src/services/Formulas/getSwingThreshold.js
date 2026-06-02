@@ -1,9 +1,9 @@
 const { getMultiplier } = require("getMultiplier");
 
-const { getVibes, getPlayerStat } = require("../database/Reterive/fetchPlayerInfo");
-const { fetchGameSeason, fetchGameDay } = require("../database/Reterive/fetchSeasonDayGames");
-const { getGameStadium, getGameInning } = require("../database/Reterive/fetchGameInfo");
-const { getStadiumStat } = require("../database/Reterive/fetchStadiumInfo");
+const { getVibes, getPlayerStat } = require("../database/fetchPlayerInfo");
+const { fetchGameSeason, fetchGameDay } = require("../database/fetchSeasonDayGames");
+const { getGameStadium, getGameInning } = require("../database/fetchGameInfo");
+const { getStadiumStat } = require("../database/fetchStadiumInfo");
 
 
 

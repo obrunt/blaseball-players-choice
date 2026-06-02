@@ -1,7 +1,7 @@
 const { pool } = require("../../../../config/db");
 const { roll } = require("../../../middleware/randomRoll");
 
-const { getPositionRosterLength, getPlayerFromIndex } = require("../../database/Reterive/fetchTeamInfo"); 
+const { getPositionRosterLength, getPlayerFromIndex } = require("../../database/fetchTeamInfo"); 
 const { getPreviousBatter } = require("batterManagement");
 
 
@@ -30,7 +30,7 @@ async function sendInningStart (game_id, params){
         batter_team_id,
         pitcher_team_id,
         pitcher_id,
-        event_text
+        event_text,
     )
     VALUES (
         ?,  --Game id  

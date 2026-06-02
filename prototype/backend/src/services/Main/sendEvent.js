@@ -2,10 +2,12 @@ const { pool } = require("../../../config/db");
 const { roll } = require("../../middleware/randomRoll");
 
 
-const { sendGameStart } = require("Events/gameStart");
-const { sendNewInning } = require("Events/inningManagement");
+const { sendGameStart } = require("events/gameStart");
+const { sendNewInning } = require("events/inningManagement");
 
-const { sendBatterUp } = require("Events/batterManagement");
+const { sendBatterUp } = require("events/batterManagement");
+
+const { sendBall, sendWalk } = require("events/countManagement");
 
 //Need to get in all the imports
 //Probably group into files
@@ -27,19 +29,26 @@ function send_game_event (game_id, event_type, params){
             await sendNewInning(game_id, params);
             break;
         case 'BATTER_UP':
-            await sendBatterUp(game_id, params);
+            await sendBatterUp(game_id);
             break;
-        case 'GAME_START':
+        case 'WALK':
+            //Sending a walk, then choosing a new batter
+            await sendBatterWalk(game_id);
+            await sendBatterUp(game_id);
             break;
-        case 'GAME_START':
+        case 'BALL':
+            await sendBall(game_id);
             break;
-        case 'GAME_START':
+        case 'WALK':
+            await sendWalk(game_id);
             break;
         case 'GAME_START':
             break;
         case 'GAME_START':
             break;
     }
+
+    return;
 }
 
 

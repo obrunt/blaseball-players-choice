@@ -1,3 +1,6 @@
+const { pool } = require("../../../../config/db");
+const { roll } = require("../../../middleware/randomRoll");
+
 
 
 async function getPreviousBatter(game_id, team_id){
@@ -37,7 +40,7 @@ async function sendBatterUp(game_id){
   const prevBatter = await getPreviousBatter(game_id, batting_team_id);
 
   //Increasing the index position, then modding to include wrap around scenarios
-  const newBatterPosition = (prevBatter.batter_position + 1) % batterLength;
+  const batter_position = (prevBatter.batter_position + 1) % batterLength;
 
   const batter_id = await getPlayerFromIndex(batting_team_id, 0, newBatterPosition);
 
@@ -79,16 +82,18 @@ async function sendBatterUp(game_id){
   `;
 
   try {
-    const result = await pool.query(query, [game_id, game_id, game_id, params.away_team, params.home_team, params.home_team_pitcher_id, params.away_team]);
+    const result = await pool.query(query, [game_id, game_id, batter_id, batter_position, batter_id, batting_team_id]);
 
     //Find way to get the number of the inning 
-    return `Top of _, ${params.away_team} batting.`;
+    return `player_name batting for the nickname.`;
 
   } catch (err){
     console.log(err);
   }
 }
 
+
 module.exports = {
-    getPreviousBatter
+  getPreviousBatter,
+  sendBatterUp
 }

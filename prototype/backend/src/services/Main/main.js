@@ -1,10 +1,10 @@
 
 const { send_game_event } = require("sendEvent");
 
-const { fetch_previous_date } = require("../Reterive/fetchPreviousDay");
-const { fetch_game_order } = require("../Reterive/fetchSeasonDayGames");
+const { fetch_previous_date } = require("../database/fetchPreviousDay");
+const { fetch_game_order } = require("../database/fetchSeasonDayGames");
 
-const { start_game_day } = require("../Games/handleStartGame");
+const { start_game_day } = require("../games/handleStartGame");
 
 
 function main (){

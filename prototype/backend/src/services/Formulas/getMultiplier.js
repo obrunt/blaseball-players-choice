@@ -1,6 +1,6 @@
-const { getBattingTeam, isMaximumBaseball, getBatterAppearanceCount, getGameWeather } = require("../database/Reterive/fetchGameInfo");
-const { getPlayerMods, getPlayerTeam, getPlayerPosition } = require("../database/Reterive/fetchPlayerInfo");
-const { getTeamMods, getTeamActivePlayers } = require("../database/Reterive/fetchTeamInfo");
+const { getBattingTeam, isMaximumBaseball, getBatterAppearanceCount, getGameWeather } = require("../database/fetchGameInfo");
+const { getPlayerMods, getPlayerTeam, getPlayerPosition } = require("../database/fetchPlayerInfo");
+const { getTeamMods, getTeamActivePlayers } = require("../database/fetchTeamInfo");
 
 
 

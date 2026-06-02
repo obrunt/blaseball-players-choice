@@ -1,13 +1,19 @@
 const { pool } = require("../../../../config/db");
 const { roll } = require("../../../middleware/randomRoll");
 
+const { getTeamCounts } = require("../../database/Reterive/fetchTeamInfo");
+
 
 async function sendGameStart (game_id, params){
   //This is creating the first event in the chain for the game id
   //Setting the initials
     //Event Type
     //The home and away teams
+    //Counts for each team
     //And the pitcher that was set previously
+
+  const homeCount = await getTeamCounts(params.home_team);
+  const awayCount = await getTeamCounts(params.away_team);
   
   //Have to look over how the event_index is set in the sql
   //Or if thats something that I have to do
@@ -22,7 +28,17 @@ async function sendGameStart (game_id, params){
         batter_position,
         pitcher_team_id,
         batter_team_id,
-        event_text
+        event_text,
+
+        home_ball_count,
+        home_base_count,
+        home_out_count,
+        home_strike_count,
+        
+        away_ball_count,
+        away_base_count,
+        away_out_count,
+        away_strike_count
     )
     VALUES (
         ?,  --Game ID
@@ -43,12 +59,39 @@ async function sendGameStart (game_id, params){
         LIMIT 1),
         ?,
         ?,
-        'Play ball!'
+        'Play ball!',
+
+        ?,      --Counts for the home team
+        ?,
+        ?,
+        ?,
+        
+        ?,      --Counts for the away team
+        ?,
+        ?,
+        ?
     );
   `;
 
   try {
-    const result = await pool.query(query, [game_id, params.home_team_pitcher_id, params.away_team, params.away_team, params.home_team, params.away_team]);
+    const result = await pool.query(query, [
+      game_id,
+      params.home_team_pitcher_id, 
+      params.away_team, 
+      params.away_team, 
+      params.home_team, 
+      params.away_team,
+
+      homeCount.balls,
+      homeCount.bases,
+      homeCount.outs,
+      homeCount.strikes,
+
+      awayCount.balls,
+      awayCount.bases,
+      awayCount.outs,
+      awayCount.strikes
+    ]);
 
     //Returns the text
       //Will probably not be used by anything

@@ -2,12 +2,12 @@
 
 const { floatRoll, intRoll } = require("../../middleware/randomRoll");
 
-const { get_strike_threshold } = require("../Formulas/getStrikeThreshold");
-const { get_swing_strike_threshold, get_swing_ball_threshold } = require("../Formulas/getSwingThreshold");
+const { get_strike_threshold } = require("../formulas/getStrikeThreshold");
+const { get_swing_strike_threshold, get_swing_ball_threshold } = require("../formulas/getSwingThreshold");
 
 const { getGameStadium, getBattingTeam, getPitchingTeam, getBatter, getPitcher } = require("../database/Reterive/fetchGameInfo");
-const { pitcherAcidicBlood } = require("../database/Reterive/fetchGameMisc");
-const { getGameStadium, getBattingTeam, getPitchingTeam } = require("../database/Reterive/fetchGameInfo");
+const { pitcherAcidicBlood } = require("../database/fetchGameMisc");
+const { getGameStadium, getBattingTeam, getPitchingTeam } = require("../database/fetchGameInfo");
 
 
 /**
@@ -90,10 +90,24 @@ function createEvent(game_id){
   if(swingRoll > swingThreshold){
     //If the ball thrown was a ball
     if(pitchType == 'ball'){
-      //Increase ball count
+      let ballResult = increaseBallResult(game_id);
 
-      //Get ball count
-      //If the ball count is equal to the team ball count, then WALK event
+      //If the ball caused a walk
+      if(ballResult){
+        send_game_event(game_id, 'WALK');
+        send_game_event(game_id, 'BATTER_UP');
+        /**
+         * 
+          if batter has base instincts:
+            roll for base instincts (thresholds TODO)
+         */
+      }
+      //If it was just a ball
+      else{
+        send_game_event(game_id, 'BALL');
+      }
+      //Going back to the main loop
+      return;
     }
     else{
 

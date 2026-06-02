@@ -1,9 +1,9 @@
 const { getMultiplier } = require("getMultiplier");
 
-const { getVibes, getPlayerStat, isFlinching } = require("../database/Reterive/fetchPlayerInfo");
-const { fetchGameSeason, fetchGameDay } = require("../database/Reterive/fetchSeasonDayGames");
-const { getGameStadium, getGameInning } = require("../database/Reterive/fetchGameInfo");
-const { getStadiumStat } = require("../database/Reterive/fetchStadiumInfo");
+const { getVibes, getPlayerStat, isFlinching } = require("../database/fetchPlayerInfo");
+const { fetchGameSeason, fetchGameDay } = require("../database/fetchSeasonDayGames");
+const { getGameStadium, getGameInning } = require("../database/fetchGameInfo");
+const { getStadiumStat } = require("../database/fetchStadiumInfo");
 
 
 //Assume that the unknown season were just the most/lest recent

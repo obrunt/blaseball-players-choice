@@ -577,7 +577,7 @@ CREATE TABLE IF NOT EXISTS data.game_events
     event_index INT,
     inning SMALLINT DEFAULT -1,
     top_of_inning BOOL DEFAULT false,
-    outs_before_play SMALLINT DEFAULT 0,
+
     batter_id VARCHAR(36),
     batter_position INT,
     pitcher_id VARCHAR(36),
@@ -585,22 +585,21 @@ CREATE TABLE IF NOT EXISTS data.game_events
     batter_team_id VARCHAR(36),
     home_team_id VARCHAR(36),
     away_team_id VARCHAR(36),
+
     home_score FLOAT DEFAULT 0,
     away_score FLOAT DEFAULT 0,
     home_strike_count INT DEFAULT 3,
     away_strike_count INT DEFAULT 3,
-    batter_count INT DEFAULT 0,
-    pitches TEXT,
     bases_occupied TEXT,
     strikes SMALLINT DEFAULT 0,
     outs SMALLINT DEFAULT 0,
     balls SMALLINT DEFAULT 0,
-    lineup_position SMALLINT DEFAULT 0,
-    errors_on_play SMALLINT DEFAULT 0,
+
     is_last_game_event BOOL DEFAULT false,
     event_text TEXT,
     season INT DEFAULT -1,
     day INT DEFAULT -1,
+
     home_ball_count INT DEFAULT 4,
     away_ball_count INT DEFAULT 4,
     home_base_count INT DEFAULT 4,
@@ -609,6 +608,7 @@ CREATE TABLE IF NOT EXISTS data.game_events
     away_out_count INT DEFAULT 3,
     home_strike_count INT DEFAULT 3,
     away_strike_count INT DEFAULT 3,
+    
     tournament INT DEFAULT -1,
     CONSTRAINT game_events_pkey PRIMARY KEY (id),
     CONSTRAINT no_dupes UNIQUE (game_id, event_index),
