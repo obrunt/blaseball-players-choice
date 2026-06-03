@@ -119,11 +119,53 @@ function get_fly_ground_threshold(batter_id, pitcher_id, batter_team, pitcher_te
 
 
 
-function get_advance_base_out(runner_id, batter_team, game_id){
+function get_advance_base_out(runner_id, batter_team, base_index, game_id){
     const season = await fetchGameSeason(game_id);
     const day = await fetchGameDay(game_id);
     const stadium_id = await getGameStadium(game_id);
     const inning = await getGameInning(game_id);
+
+    
+    const runner_vibes = await getVibes(runner_id, day);
+
+    
+    let multiplier = getMultiplier(runner_id, batter_team, stadium_id, game_id, season, day, 'indulgence');
+    const runner_indulgence = (await getPlayerStat('indulgence', runner_id)) * multiplier * (1 + 0.2 * runner_vibes);
+
+    
+    const stadium_elongation = await getStadiumStat('elongation', stadium_id) - 0.5;
+    const stadium_inconvenience = await getStadiumStat('inconvenience', stadium_id) - 0.5;
+
+
+    let threshold;
+    //If runner is on first base, they'll be advancing to second
+    if(base_index == 0){
+        threshold = -0.085
+            + 0.36 * runner_indulgence
+            - 0.38 * runner_indulgence**2
+            + 0.24 * runner_indulgence**4
+            - 0.10 * stadium_elongation
+            - 0.10 * stadium_inconvenience;
+    }
+    //If runner is on second base, they'll be advancing to third
+    else if (base_index == 1){
+        threshold = 0.045
+            + 0.065 * runner_indulgence
+            + 0.30 * runner_indulgence**2
+            - 0.10 * stadium_elongation
+            - 0.10 * stadium_inconvenience;
+    }
+    //If they're on the third or fourth base
+        //In the case where one of the teams has a mod that increases the total number of bases
+        //They might not actally have the same formula, but it's easy enough to have a catch all
+    else{
+        threshold = 0.45
+            + 0.35 * runner_indulgence
+            - 0.10 * stadium_elongation
+            - 0.10 * stadium_inconvenience;
+    }
+
+    return threshold;
 }
 
 

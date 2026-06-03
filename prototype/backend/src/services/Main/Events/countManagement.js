@@ -606,7 +606,6 @@ async function sendStrike(game_id, didSwing){
 }
 
 async function sendFoul(game_id, increaseStrikeCount){
-  async function sendStrike(game_id, didSwing){
   const previousRowQuery =  `
     SELECT *
     WHERE game_id = ?
@@ -738,6 +737,172 @@ async function sendFoul(game_id, increaseStrikeCount){
     console.log(err);
   }
 }
+
+async function sendFlyout(game_id, params) {
+  const { runs, bases_occupied, fielder_id } = params;
+
+  const previousRowQuery =  `
+    SELECT *
+    WHERE game_id = ?
+    ORDER BY event_index DESC
+    LIMIT 1;
+  `;
+  try {
+    let result = await pool.query(previousRowQuery, [game_id]);
+
+  } catch (err){
+    console.log(err);
+  }
+
+  //Updating universial cases
+  result.event_index += 1;
+  result.outs += 1;
+  result.balls = 0;
+  result.strikes = 0;
+
+  //Getting the batter and fielder name
+  const batterName = await getPlayerStat('full_name', result.batter_id);
+  const fielderName = await getPlayerStat('full_name', fielder_id);
+
+  result.event_text = `${batterName} hit a flyout to ${fielderName}.`;
+
+  //If the sent bases have changed
+    //If they didn't either the inning changes such as it was not a sacrafice
+    //Or the person on the furthest base failed to advance, so there were no changes
+  if(result.bases_occupied != bases_occupied && bases_occupied != ''){
+    result.bases_occupied = bases_occupied;
+  }
+
+  //Someone advanced to home
+  //Then we need to increase the score, and add it to the event text
+  if(runs != ''){
+    //Getting the correct team, so that we can increase the correct team score
+    const playerTeam = await getPlayerTeam(runs);
+    if(playerTeam == result.home_team){
+      result.home_score += 1;
+    }
+    else if(playerTeam == result.away_team){
+      result.away_score += 1;
+    }
+    const scoringPlayerName = await getPlayerStat('full_name', runs);
+
+    result.event_text += `\n${scoringPlayerName} advances on the sacrafice. \n1 Run scored!`;
+  }
+
+
+
+  const newRowQuery = `
+  INSERT INTO data.game_events (
+        game_id,
+        event_type,
+        event_index,
+        inning,
+        top_of_inning,
+        batter_id,
+        batter_position,
+        pitcher_id,
+        pitcher_team_id,
+        batter_team_id,
+        home_team_id,
+        away_team_id,
+        home_score,
+        away_score,
+        home_strike_count,
+        away_strike_count,
+        bases_occupied,
+        strikes,
+        outs,
+        balls,
+        is_last_game_event,
+        event_text,
+        season,
+        day,
+        home_ball_count,
+        away_ball_count,
+        home_base_count,
+        away_base_count,
+        home_out_count,
+        away_out_count,
+        home_strike_count,
+        away_strike_count,
+        tournament  
+  ) VALUES (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+  );`;
+
+
+  try {
+    result = await pool.query(newRowQuery, [
+        result.game_id,
+        'FLYOUT',
+        result.event_index,
+        result.inning,
+        result.top_of_inning,
+        result.batter_id,
+        result.batter_position,
+        result.pitcher_id,
+        result.pitcher_team_id,
+        result.batter_team_id,
+        result.home_team_id,
+        result.away_team_id,
+        result.home_score,
+        result.away_score,
+        result.home_strike_count,
+        result.away_strike_count,
+        result.bases_occupied,
+        result.strikes,
+        result.outs,
+        result.balls,
+        result.is_last_game_event,
+        result.event_text,
+        result.season,
+        result.day,
+        result.home_ball_count,
+        result.away_ball_count,
+        result.home_base_count,
+        result.away_base_count,
+        result.home_out_count,
+        result.away_out_count,
+        result.home_strike_count,
+        result.away_strike_count,
+        result.tournament 
+    ]);
+
+  } catch (err){
+    console.log(err);
+  }
 }
 
 async function increaseResult(game_id, countVar){

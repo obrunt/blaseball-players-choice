@@ -182,7 +182,6 @@ function createEvent(game_id){
       if(strikeResult){
         //Checking to see if it would cause an inning change
         const outResult = await increaseResult(game_id, 'out');
-
         
         //Sending a strikeout event
         send_game_event(game_id, 'STRIKEOUT', true);
@@ -259,7 +258,38 @@ function createEvent(game_id){
             if(!outResult){
               const current_bases = await getGameOccupiedBases(game_id);
 
-              advanceBases(game_id, current_bases.base_arr, current_bases.base_count);
+              let params = advanceBases(game_id, current_bases.base_arr, current_bases.base_count);
+              params.fielder_id = chosenFielder;
+
+              send_game_event(game_id, 'FLYOUT', params);
+              return;
+            }
+            //If there are not outs left in the inning
+            //Then send a flyout and an inning switch
+            else{
+
+              let params = {
+                runs: '',
+                bases_occupied: '',
+                fielder_id: chosenFielder
+              };
+              //Sending the flyout, then the inning change
+              send_game_event(game_id, 'FLYOUT', params);
+
+              //If it is currently the top of the inning
+              //Switch it to the bottom of the inning
+              //Otherwise increase the inning
+                //Evalutaions for ending the game are within the inning increase event
+              const increaseInning = await getGameInning(game_id);
+
+              if(increaseInning.top_of_inning){
+                send_game_event(game_id, 'INNING_BOTTOM');
+              }
+              else{
+                send_game_event(game_id, 'INNING_TOP');
+              }
+              return;
+  
             }
             //Sending the FLYOUT result after the runners have advanced
             //This sets the order of (possible) events as
@@ -419,7 +449,7 @@ function advanceBasesOut(game_id, base_arr, base_count){
     //If there is someone on the current base
     if(base_arr[i] != ''){
       //Checking to see if the 
-      const advanceThreshold = get_advance_base_out(base_arr[i], batting_team);
+      const advanceThreshold = get_advance_base_out(base_arr[i], batting_team, i, game_id);
 
       const advanceRoll = floatRoll(0, 1);
 
@@ -444,59 +474,9 @@ function advanceBasesOut(game_id, base_arr, base_count){
     runs: runScored,
     bases_occupied: base_arr
   }
+
+  return params;
   /**
-   *def handle_out_advances(self, fielder):
-
-        def did_advance(base, runner_id):
-            new_runner_idx = self.next_update["baseRunners"].index(runner_id)
-            new_runner_base = self.next_update["basesOccupied"][new_runner_idx]
-            return new_runner_base != base
-
-        self.print(
-            "OUT {} {} -> {}".format(
-                self.ty.value,
-                self.update["basesOccupied"],
-                self.next_update["basesOccupied"],
-            )
-        )
-
-        if self.ty == EventType.FLY_OUT:
-            self.try_roll_batter_debt(fielder)
-            base_before_home = Base.FOURTH if self.stadium.has_mod(Mod.EXTRA_BASE) else Base.THIRD
-
-            # this might be bugged for fifth base? see: 2021-06-24T10:13:01.604Z
-            is_third_free = 2 not in self.update["basesOccupied"]
-            for base, runner_id in zip(self.update["basesOccupied"], self.update["baseRunners"]):
-                runner = self.data.get_player(runner_id)
-
-                # yes, *not* checking self.next_update
-                # this is my explanation for why [1, 0] -> [2, 1] never happens
-                # (it still thinks second is occupied even when they move)
-                is_next_free = (base + 1) not in self.update["basesOccupied"]
-                if base == Base.SECOND and is_third_free:
-                    is_next_free = True
-
-                roll_outcome = did_advance(base, runner_id)
-
-                if is_next_free:
-                    adv_roll = self.roll(f"adv? {base}/{runner.name} ({roll_outcome})")
-                    self.log_roll(
-                        Csv.FLYOUT, f"advance_{base}", adv_roll, roll_outcome, fielder=fielder, relevant_runner=runner
-                    )
-
-                    if runner.undefined():
-                        self.roll("undefined (runner advance)")
-
-                    if roll_outcome:
-                        self.damage(runner, "batter")
-
-                        # the logic does properly "remove" the runner when scoring from third, though
-                        if base == base_before_home:
-                            is_third_free = True
-                            self.damage(runner, "batter")
-                    else:
-                        break
-
         elif self.ty == EventType.GROUND_OUT:
             if len(self.update["basesOccupied"]) > 0:
                 # roll needs batter tragicness, fielder tenaciousness, pitcher shakespearianism
