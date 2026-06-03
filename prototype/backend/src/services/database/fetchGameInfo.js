@@ -181,7 +181,13 @@ async function getGameOccupiedBases(game_id){
  
     //Want to get the most recent event that happened for who's on base
   const query = `
-    SELECT bases_occupied FROM data.game_events
+    SELECT bases_occupied 
+    CASE
+      WHEN batter_team_id = home_team_id
+      THEN home_base_count AS 'base_count'
+      WHEN batter_team_id = away_team_id
+      THEN away_base_count AS 'base_count'
+    FROM data.game_events
     WHERE game_id = ?
     ORDER BY event_index DESC
     LIMIT 1;
@@ -191,7 +197,13 @@ async function getGameOccupiedBases(game_id){
     const result = await pool.query(query, [game_id]);
 
     //Returns the text array of what bases are ocupied
-    return result[0];
+    const baseArr = JASON.parse(result.bases_occupied);
+
+    const bases = {
+      base_arr: baseArr,
+      base_count: result.base_count
+    }
+    return bases;
 
   } catch (err){
     console.log(err);

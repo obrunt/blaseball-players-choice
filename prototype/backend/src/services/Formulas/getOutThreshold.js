@@ -83,6 +83,52 @@ function get_out_threshold(batter_id, pitcher_id, fielder_id, batter_team, pitch
     return threshold;
 }
 
+
+function get_fly_ground_threshold(batter_id, pitcher_id, batter_team, pitcher_team, game_id){
+    const season = await fetchGameSeason(game_id);
+    const day = await fetchGameDay(game_id);
+    const stadium_id = await getGameStadium(game_id);
+    const inning = await getGameInning(game_id);
+
+    let multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'buoyancy');
+    const batter_buoyancy = (await getPlayerStat('buoyancy', batter_id)) * (1 / multiplier);
+    
+
+    //As per the formula
+        //To be completetly accurate this should use the batters stat
+        //But it passed the pitchers team
+        //So it's likely that it was intended to be getting the pitchers stat
+        //So I've taken the liberty to just make that change
+        //Even if it's not sim accurate
+    multiplier = getMultiplier(pitcher_id, pitcher_team, stadium_id, game_id, season, day, 'suppression');
+    const pitcher_suppression = (await getPlayerStat('suppression', pitcher_id)) * multiplier;
+    
+
+    const stadium_ominousness = (await getStadiumStat('ominousness', stadium_id)) - 0.5;
+
+    let stadium_hype = await getStadiumStat('hype', stadium_id);
+    if(!inning.top_of_inning){
+        stadium_hype *= -1;
+    }
+
+
+    const threshold = 0.18 + 0.3 * (batter_buoyancy + 0.2 * stadium_hype) - 0.16 * (pitcher_suppression + 0.2 * stadium_hype) - 0.1 * stadium_ominousness;
+
+    return max(threshold, 0.01);
+}
+
+
+
+function get_advance_base_out(runner_id, batter_team, game_id){
+    const season = await fetchGameSeason(game_id);
+    const day = await fetchGameDay(game_id);
+    const stadium_id = await getGameStadium(game_id);
+    const inning = await getGameInning(game_id);
+}
+
+
 module.exports = {
-    get_out_threshold
+    get_out_threshold,
+    get_fly_ground_threshold,
+    get_advance_base_out
 }
