@@ -605,6 +605,140 @@ async function sendStrike(game_id, didSwing){
   }
 }
 
+async function sendFoul(game_id, increaseStrikeCount){
+  async function sendStrike(game_id, didSwing){
+  const previousRowQuery =  `
+    SELECT *
+    WHERE game_id = ?
+    ORDER BY event_index DESC
+    LIMIT 1;
+  `;
+  try {
+    let result = await pool.query(previousRowQuery, [game_id]);
+
+  } catch (err){
+    console.log(err);
+  }
+
+  if(increaseStrikeCount){
+    result.strikes += 1;    
+  }
+  result.event_index += 1;
+
+  const newRowQuery = `
+  INSERT INTO data.game_events (
+        game_id,
+        event_type,
+        event_index,
+        inning,
+        top_of_inning,
+        batter_id,
+        batter_position,
+        pitcher_id,
+        pitcher_team_id,
+        batter_team_id,
+        home_team_id,
+        away_team_id,
+        home_score,
+        away_score,
+        home_strike_count,
+        away_strike_count,
+        bases_occupied,
+        strikes,
+        outs,
+        balls,
+        is_last_game_event,
+        event_text,
+        season,
+        day,
+        home_ball_count,
+        away_ball_count,
+        home_base_count,
+        away_base_count,
+        home_out_count,
+        away_out_count,
+        home_strike_count,
+        away_strike_count,
+        tournament  
+  ) VALUES (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+        ?,
+  );`;
+  try {
+    result = await pool.query(newRowQuery, [
+        result.game_id,
+        'FOUL',
+        result.event_index,
+        result.inning,
+        result.top_of_inning,
+        result.batter_id,
+        result.batter_position,
+        result.pitcher_id,
+        result.pitcher_team_id,
+        result.batter_team_id,
+        result.home_team_id,
+        result.away_team_id,
+        result.home_score,
+        result.away_score,
+        result.home_strike_count,
+        result.away_strike_count,
+        result.bases_occupied,
+        result.strikes,
+        result.outs,
+        result.balls,
+        result.is_last_game_event,
+        `Foul. ${result.balls}-${result.strikes}`,
+        result.season,
+        result.day,
+        result.home_ball_count,
+        result.away_ball_count,
+        result.home_base_count,
+        result.away_base_count,
+        result.home_out_count,
+        result.away_out_count,
+        result.home_strike_count,
+        result.away_strike_count,
+        result.tournament 
+    ]);
+
+    return result;
+
+  } catch (err){
+    console.log(err);
+  }
+}
+}
 
 async function increaseResult(game_id, countVar){
   //Getting the counts for the current inning
@@ -623,8 +757,7 @@ async function increaseResult(game_id, countVar){
 module.exports = {
   sendBall,
   sendWalk,
-  sendHomeRun,
-
+  sendFoul,
   sendStrikeout,
   sendStrike,
 

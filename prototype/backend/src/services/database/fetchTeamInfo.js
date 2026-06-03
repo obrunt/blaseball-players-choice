@@ -1,17 +1,17 @@
 const { pool } = require("../../../../config/db");
 
-async function getTeamMods(team){
-    //We want to get all the mods that the player has
-    //This just calls the player mod table and returns the current mods
+async function getTeamMods(team_id){
+    //We want to get all the mods that the team has
+    //This just calls the team mod table and returns the current mods
 
   const query = `
-    SELECT modification FROM data.player_modifications
+    SELECT modification FROM data.team_modifications
     WHERE player_id = ?
     AND valid_until IS NULL;
   `;
 
   try {
-    const result = await pool.query(query, [team]);
+    const result = await pool.query(query, [team_id]);
 
     //Returns an array of modifications
     return result[0];
@@ -25,7 +25,7 @@ async function getTeamActivePlayers(team_id){
     //Want to get all players active on the team that aren't in the shadows
 
   const query = `
-    SELECT player_id FROM data.player_modifications
+    SELECT player_id FROM data.team_roster
     WHERE (position_type_id = 0
     OR position_type_id = 1)
     AND team_id = ?
@@ -41,6 +41,58 @@ async function getTeamActivePlayers(team_id){
   } catch (err){
     console.log(err);
   }
+}
+
+
+//TODO: incoporate this into the BATTER_UP and Pitcher Select 
+//to prevent players who cannot be there from being hosing
+
+async function getTeamPresentPlayers(team_id, player_position){
+  const queryPlayers = `
+    SELECT player_id FROM data.player_modifications
+    WHERE position_type_id = ?
+    AND team_id = ?
+    AND valid_until IS NULL;
+  `;
+
+  try {
+    const activePlayers = await pool.query(queryPlayers, [player_position, team_id]);
+
+    //Returns an array of player ids
+    return result[0];
+
+  } catch (err){
+    console.log(err);
+  }
+
+  const elsewhereQuery = `SELECT t.player_id FROM data.team_roster AS t
+    LEFT JOIN data.player_modifications AS p
+    ON t.player_id = p.player_id
+    WHERE t.valid_until IS NULL
+    AND p.valid_until IS NULL
+    AND p.player_id IS NOT NULL
+    AND p.modification = 'ELSEWHERE'
+    AND t.team_id = ?;
+  `;
+
+  try {
+    const elsewherePlayers = await pool.query(queryPlayers, [team_id]);
+
+    //Returns an array of player ids
+    return result[0];
+
+  } catch (err){
+    console.log(err);
+  }
+
+  //Filtering out players who have the elsewhere mod
+    //Because they cannot be present to catch an out
+    //Or do other things
+  let presentPlayers = activePlayers.filter((player) => {
+    return elsewherePlayers.indexOf(player) === -1;
+  });
+
+  return presentPlayers
 }
 
 async function getTeamStat(stat, team_id){

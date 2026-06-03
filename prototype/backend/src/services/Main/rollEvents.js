@@ -222,7 +222,40 @@ function createEvent(game_id){
     }
     //If there was contact
     else{
-      
+      const foulThreshold = validHit(game_id);
+      const foulRoll = floatRoll(0,1);
+
+      //It was a foul
+      if(foulRoll > foulThreshold){
+        //Checking to see if increasing the strikes would cause a strikeout
+          //Because it's a foul we want to see if we increase the strike count or not
+        const strikeResult = await increaseResult(game_id, 'strike');
+
+        //Inverting the result because it tells us if increasing would cause an out
+        //So we don't want to increase if it's true
+        send_game_event(game_id, 'FOUL', !strikeResult);
+        return;
+        
+      }
+      //The ball was a valid, normal swing
+      else{
+        //Getting the person who will catch the ball
+        const chosenFielder = selectFielder(game_id);
+
+        const outThreshold = catchBall(game_id, chosenFielder);
+
+        const outRoll = floatRoll(0, 1);
+
+        //If the ball is an out
+        if(outRoll > outThreshold){
+
+        }
+        //The ball was not caught
+          //Advance as normal
+        else{
+
+        }
+      }
     }
   }
 
@@ -295,61 +328,85 @@ function hitBall(game_id, throwType){
   return contactThreshold;
 }
 
+function validHit(game_id){
+  const batting_team = getBattingTeam(game_id);
 
+  const batter = getBatter(game_id);
+
+  let threshold = get_foul_threshold(batter, batting_team, game_id);
+
+  return threshold;
+}
+
+function selectFielder(game_id){
+  const pitching_team = await getPitchingTeam(game_id);
+
+  //Getting the batters who are present
+    //Because the pitching team is, well, pitching
+    //The batters are in charge of getting the outs
+  const fielder_ids = await getTeamPresentPlayers(pitching_team, 0);
+
+  //The int roll is non inclusive for the right value
+  //So we can just use the length of the list
+  const fielderRoll = intRoll(0, feilder_ids.length());
+
+  //REturning the player id of the chosen fielder
+  return fielder_ids[fielderRoll];
+}
+
+function catchBall(game_id, fielder){
+  const batting_team = getBattingTeam(game_id);
+  const pitching_team = getPitchingTeam(game_id);
+
+  const batter = getBatter(game_id);
+  const pitcher = getPitcher(game_id);
+
+  const threshold = await get_out_threshold(batter, pitcher, fielder, batting_team, pitching_team, game_id);
+
+  return threshold;
+}
 /**
 *
-else:  # batter did swing
-  roll for contact (threshold differs based on strike zone roll; both thresholds known)
-  if no contact:
-    strike count += 1
-    if strike count == # of strikes in a strikeout:
-      result is strikeout swinging
-    else:
-      result is strike swinging
-  else:  # yes contact
-    roll for foul (threshold known)
-    if foul:
-      result is foul
-    else:
-      roll to choose a fielder (known)
-      roll for out (threshold in progress)
-      if out:
-        num outs += 1
-        roll to choose a flyout assigned fielder (known)
-        roll for fly (threshold known)
-        if fly:
-          if num outs < # of outs in a half-inning:
-            for each runner in reverse order:
-              if the next base is open:
-                roll for runner advancement (threshold in progress)
-          result is flyout with flyout assigned fielder responsible
-        else:
-          roll to choose a ground out assigned fielder (known)
-          if num outs < # of outs in a half-inning:
-            refer to https://github.com/xSke/resim/blob/83cb0d6165da8e099bc41e634272fcce8efe55d8/resim.py#L871 for double play, fielders choice, and runner advancement logic (all thresholds known)
-          else:
-            result is groundout with ground out assigned fielder responsible
-        if batter has debt, result is a simple ground out or flyout, and assigned fielder is not already observed:
-          roll for debt (threshold TODO)
-      else:  # not an out
-        roll for home run (threshold known)
-        if home run:
-          result is home run
-          roll buckets (threshold unknown)
-        else:  # base hit
-          roll for fielder (known)
-          roll for double (threshold known)
-          roll for triple (threshold known)
-          if triples roll passed:
-            result is triple
-          else if doubles roll passed:
-            result is double
-          else:
-            result is single
-          apply automatic advancement based on the hit type
+else:  # yes contact
+  else:
+    roll for out (threshold in progress)
+    if out:
+      num outs += 1
+      roll to choose a flyout assigned fielder (known)
+      roll for fly (threshold known)
+      if fly:
+        if num outs < # of outs in a half-inning:
           for each runner in reverse order:
             if the next base is open:
-              roll for extra runner advancement (threshold TODO)
+              roll for runner advancement (threshold in progress)
+        result is flyout with flyout assigned fielder responsible
+      else:
+        roll to choose a ground out assigned fielder (known)
+        if num outs < # of outs in a half-inning:
+          refer to https://github.com/xSke/resim/blob/83cb0d6165da8e099bc41e634272fcce8efe55d8/resim.py#L871 for double play, fielders choice, and runner advancement logic (all thresholds known)
+        else:
+          result is groundout with ground out assigned fielder responsible
+      if batter has debt, result is a simple ground out or flyout, and assigned fielder is not already observed:
+        roll for debt (threshold TODO)
+    else:  # not an out
+      roll for home run (threshold known)
+      if home run:
+        result is home run
+        roll buckets (threshold unknown)
+      else:  # base hit
+        roll for fielder (known)
+        roll for double (threshold known)
+        roll for triple (threshold known)
+        if triples roll passed:
+          result is triple
+        else if doubles roll passed:
+          result is double
+        else:
+          result is single
+        apply automatic advancement based on the hit type
+        for each runner in reverse order:
+          if the next base is open:
+            roll for extra runner advancement (threshold TODO)
 if batter is reverberating and this event ends the PA and it wasn't a hit or HR:
   roll for reverberating (threshold TODO)
 if the attractor async thing happened:  # idk ask astrid

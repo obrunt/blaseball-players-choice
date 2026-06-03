@@ -3,7 +3,7 @@ const { roll } = require("../../middleware/randomRoll");
 
 
 const { sendGameStart } = require("events/gameStart");
-const { sendNewInning } = require("events/inningManagement");
+const { sendInningStart, sendInningFlip } = require("events/inningManagement");
 
 const { sendBatterUp } = require("events/batterManagement");
 
@@ -19,7 +19,7 @@ const { sendBall, sendWalk } = require("events/countManagement");
     //Other
 
 
-function send_game_event (game_id, event_type, params){
+function send_game_event(game_id, event_type, params){
     
     switch(event_type){
         case 'GAME_START':
@@ -48,7 +48,8 @@ function send_game_event (game_id, event_type, params){
         case 'STRIKE':
             await sendStrike(game_id, params);
             break;
-        case 'GAME_START':
+        case 'FOUL':
+            await sendFoul(game_id, params);
             break;
         case 'GAME_START':
             break;

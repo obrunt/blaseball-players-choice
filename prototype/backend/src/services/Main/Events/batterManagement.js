@@ -45,6 +45,9 @@ async function sendBatterUp(game_id){
 
   result.event_index += 1;
 
+  //TODO: add check to see if the batter is elsewhere
+  //In that case, increase the position index, after 
+
   //Getting how many batters the team has, so that we can loop the array
   const batterLength = await getPositionRosterLength(result.batting_team_id, 0);
 
@@ -60,8 +63,6 @@ async function sendBatterUp(game_id){
 
   result.event_text = `${playerName} is batting for the ${teamNickname}`;
 
-
-  //TODO: Copy over the previous info such as outs, different team info set from game start
 
   const newRowQuery = `
   INSERT INTO data.game_events (

@@ -257,7 +257,7 @@ const ball_threshold_look_up_table = [
 ];
 
 
-function get_contact_strike_threshold(batter_id, pitcher_id, batter_tea, pitcher_team, game_id){
+function get_contact_strike_threshold(batter_id, pitcher_id, batter_team, pitcher_team, game_id){
     const season = await fetchGameSeason(game_id);
     const day = await fetchGameDay(game_id);
     const stadium_id = await getGameStadium(game_id);    
@@ -296,7 +296,7 @@ function get_contact_strike_threshold(batter_id, pitcher_id, batter_tea, pitcher
 }
 
 
-function get_contact_ball_threshold(batter_id, pitcher_id, batter_tea, pitcher_team, game_id){
+function get_contact_ball_threshold(batter_id, pitcher_id, batter_team, pitcher_team, game_id){
     const season = await fetchGameSeason(game_id);
     const day = await fetchGameDay(game_id);
     const stadium_id = await getGameStadium(game_id);    
