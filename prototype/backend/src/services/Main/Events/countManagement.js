@@ -7,7 +7,7 @@ const { getGameCounts } = require("../../database/fetchGameInfo");
 const { getPlayerTeam, getPlayerStat } = require("../../database/fetchPlayerInfo");
 
 
-async function sendBall(game_id) {
+async function getPreviousRow(game_id) {
   const previousRowQuery =  `
     SELECT *
     WHERE game_id = ?
@@ -21,8 +21,10 @@ async function sendBall(game_id) {
     console.log(err);
   }
 
-  result.balls += 1;
-  result.event_index += 1;
+  return result;
+}
+
+async function sendNewRow(result){
 
   const newRowQuery = `
   INSERT INTO data.game_events (
@@ -95,11 +97,10 @@ async function sendBall(game_id) {
         ?,
   );`;
 
-
   try {
     result = await pool.query(newRowQuery, [
         result.game_id,
-        'BALL',
+        result.event_type,
         result.event_index,
         result.inning,
         result.top_of_inning,
@@ -119,7 +120,7 @@ async function sendBall(game_id) {
         result.outs,
         result.balls,
         result.is_last_game_event,
-        `Ball. ${result.balls}-${result.strikes}`,
+        result.event_text,
         result.season,
         result.day,
         result.home_ball_count,
@@ -133,24 +134,31 @@ async function sendBall(game_id) {
         result.tournament 
     ]);
 
+    //Sending the OK message
+    return result[0];
   } catch (err){
     console.log(err);
   }
 }
 
-async function sendWalk(game_id) {
-  const previousRowQuery =  `
-    SELECT *
-    WHERE game_id = ?
-    ORDER BY event_index DESC
-    LIMIT 1;
-  `;
-  try {
-    let result = await pool.query(previousRowQuery, [game_id]);
 
-  } catch (err){
-    console.log(err);
-  }
+
+async function sendBall(game_id) {
+  let result = await getPreviousRow(game_id);
+
+  result.balls += 1;
+  result.event_index += 1;
+
+  result.event_type = 'BALL';
+  result.event_text = `Ball. ${result.balls}-${result.strikes}`
+
+  const ok = await sendNewRow(result);
+
+  return;
+}
+
+async function sendWalk(game_id) {
+  let result = await getPreviousRow(game_id);
 
   let baseArr = JSON.parse(result.bases_occupied);
 
@@ -186,6 +194,7 @@ async function sendWalk(game_id) {
   //Getting the batter name
   const batterName = await getPlayerStat('full_name', result.batter_id);
 
+  result.event_type = 'WALK';
   result.event_text = `${batterName} draws a walk.`;
 
 
@@ -206,135 +215,13 @@ async function sendWalk(game_id) {
     result.event_text += `\n${scoringPlayerName} scores! \n1 Run scored!`;
   }
 
+  const ok = await sendNewRow(result);
 
-
-  const newRowQuery = `
-  INSERT INTO data.game_events (
-        game_id,
-        event_type,
-        event_index,
-        inning,
-        top_of_inning,
-        batter_id,
-        batter_position,
-        pitcher_id,
-        pitcher_team_id,
-        batter_team_id,
-        home_team_id,
-        away_team_id,
-        home_score,
-        away_score,
-        home_strike_count,
-        away_strike_count,
-        bases_occupied,
-        strikes,
-        outs,
-        balls,
-        is_last_game_event,
-        event_text,
-        season,
-        day,
-        home_ball_count,
-        away_ball_count,
-        home_base_count,
-        away_base_count,
-        home_out_count,
-        away_out_count,
-        home_strike_count,
-        away_strike_count,
-        tournament  
-  ) VALUES (
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-  );`;
-
-
-  try {
-    result = await pool.query(newRowQuery, [
-        result.game_id,
-        'WALK',
-        result.event_index,
-        result.inning,
-        result.top_of_inning,
-        result.batter_id,
-        result.batter_position,
-        result.pitcher_id,
-        result.pitcher_team_id,
-        result.batter_team_id,
-        result.home_team_id,
-        result.away_team_id,
-        result.home_score,
-        result.away_score,
-        result.home_strike_count,
-        result.away_strike_count,
-        result.bases_occupied,
-        result.strikes,
-        result.outs,
-        result.balls,
-        result.is_last_game_event,
-        result.event_text,
-        result.season,
-        result.day,
-        result.home_ball_count,
-        result.away_ball_count,
-        result.home_base_count,
-        result.away_base_count,
-        result.home_out_count,
-        result.away_out_count,
-        result.home_strike_count,
-        result.away_strike_count,
-        result.tournament 
-    ]);
-
-  } catch (err){
-    console.log(err);
-  }
+  return;
 }
 
 async function sendStrikeout(game_id, didSwing) {
-  const previousRowQuery =  `
-    SELECT *
-    WHERE game_id = ?
-    ORDER BY event_index DESC
-    LIMIT 1;
-  `;
-  try {
-    let result = await pool.query(previousRowQuery, [game_id]);
-
-  } catch (err){
-    console.log(err);
-  }
+  let result = await getPreviousRow(game_id);
 
   result.event_index += 1;
 
@@ -342,12 +229,13 @@ async function sendStrikeout(game_id, didSwing) {
   result.outs += 1;
   result.strikes = 0;
   result.balls = 0;
+  result.event_type = 'STRIKEOUT';
 
 
   //Getting the batters name for the event text
   const batterName = await getPlayerStat('full_name', result.batter_id);
 
-  result.event_text += `\n${batterName} strikes out`;
+  result.event_text = `\n${batterName} strikes out`;
 
   if(didSwing){
     result.event_text += ' swinging.'
@@ -356,406 +244,60 @@ async function sendStrikeout(game_id, didSwing) {
     result.event_text += ' looking.'
   }
 
-  const newRowQuery = `
-  INSERT INTO data.game_events (
-        game_id,
-        event_type,
-        event_index,
-        inning,
-        top_of_inning,
-        batter_id,
-        batter_position,
-        pitcher_id,
-        pitcher_team_id,
-        batter_team_id,
-        home_team_id,
-        away_team_id,
-        home_score,
-        away_score,
-        home_strike_count,
-        away_strike_count,
-        bases_occupied,
-        strikes,
-        outs,
-        balls,
-        is_last_game_event,
-        event_text,
-        season,
-        day,
-        home_ball_count,
-        away_ball_count,
-        home_base_count,
-        away_base_count,
-        home_out_count,
-        away_out_count,
-        home_strike_count,
-        away_strike_count,
-        tournament  
-  ) VALUES (
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-  );`;
+  const ok = await sendNewRow(result);
 
-
-  try {
-    result = await pool.query(newRowQuery, [
-        result.game_id,
-        'STRIKEOUT',
-        result.event_index,
-        result.inning,
-        result.top_of_inning,
-        result.batter_id,
-        result.batter_position,
-        result.pitcher_id,
-        result.pitcher_team_id,
-        result.batter_team_id,
-        result.home_team_id,
-        result.away_team_id,
-        result.home_score,
-        result.away_score,
-        result.home_strike_count,
-        result.away_strike_count,
-        result.bases_occupied,
-        result.strikes,
-        result.outs,
-        result.balls,
-        result.is_last_game_event,
-        result.event_text,
-        result.season,
-        result.day,
-        result.home_ball_count,
-        result.away_ball_count,
-        result.home_base_count,
-        result.away_base_count,
-        result.home_out_count,
-        result.away_out_count,
-        result.home_strike_count,
-        result.away_strike_count,
-        result.tournament 
-    ]);
-
-  } catch (err){
-    console.log(err);
-  }
+  return;
 }
 
 async function sendStrike(game_id, didSwing){
-  const previousRowQuery =  `
-    SELECT *
-    WHERE game_id = ?
-    ORDER BY event_index DESC
-    LIMIT 1;
-  `;
-  try {
-    let result = await pool.query(previousRowQuery, [game_id]);
-
-  } catch (err){
-    console.log(err);
-  }
+  let result = await getPreviousRow(game_id);
 
   result.strikes += 1;
   result.event_index += 1;
+  result.event_type = 'STRIKE';
 
-  const newRowQuery = `
-  INSERT INTO data.game_events (
-        game_id,
-        event_type,
-        event_index,
-        inning,
-        top_of_inning,
-        batter_id,
-        batter_position,
-        pitcher_id,
-        pitcher_team_id,
-        batter_team_id,
-        home_team_id,
-        away_team_id,
-        home_score,
-        away_score,
-        home_strike_count,
-        away_strike_count,
-        bases_occupied,
-        strikes,
-        outs,
-        balls,
-        is_last_game_event,
-        event_text,
-        season,
-        day,
-        home_ball_count,
-        away_ball_count,
-        home_base_count,
-        away_base_count,
-        home_out_count,
-        away_out_count,
-        home_strike_count,
-        away_strike_count,
-        tournament  
-  ) VALUES (
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-  );`;
+  result.event_text = `Strike, `;
+
+  if(didSwing){
+    result.event_text += 'swinging.';
+  }
+  else{
+    result.event_text += 'looking.';
+  }
 
   //TODO: if the batter flinched
   //Change it to 'Strike, finching'
+  result.event_text += ` ${result.balls}-${result.strikes}.`;
 
-  try {
-    result = await pool.query(newRowQuery, [
-        result.game_id,
-        'STRIKE',
-        result.event_index,
-        result.inning,
-        result.top_of_inning,
-        result.batter_id,
-        result.batter_position,
-        result.pitcher_id,
-        result.pitcher_team_id,
-        result.batter_team_id,
-        result.home_team_id,
-        result.away_team_id,
-        result.home_score,
-        result.away_score,
-        result.home_strike_count,
-        result.away_strike_count,
-        result.bases_occupied,
-        result.strikes,
-        result.outs,
-        result.balls,
-        result.is_last_game_event,
-        `Strike, looking. ${result.balls}-${result.strikes}`,
-        result.season,
-        result.day,
-        result.home_ball_count,
-        result.away_ball_count,
-        result.home_base_count,
-        result.away_base_count,
-        result.home_out_count,
-        result.away_out_count,
-        result.home_strike_count,
-        result.away_strike_count,
-        result.tournament 
-    ]);
+  const ok = await sendNewRow(result);
 
-    return result;
-
-  } catch (err){
-    console.log(err);
-  }
+  return;
 }
 
 async function sendFoul(game_id, increaseStrikeCount){
-  const previousRowQuery =  `
-    SELECT *
-    WHERE game_id = ?
-    ORDER BY event_index DESC
-    LIMIT 1;
-  `;
-  try {
-    let result = await pool.query(previousRowQuery, [game_id]);
-
-  } catch (err){
-    console.log(err);
-  }
+  let result = await getPreviousRow(game_id);
 
   if(increaseStrikeCount){
     result.strikes += 1;    
   }
+
   result.event_index += 1;
+  result.event_type = 'FOUL';
+  result.event_text = `Foul. ${result.balls}-${result.strikes}`;
 
-  const newRowQuery = `
-  INSERT INTO data.game_events (
-        game_id,
-        event_type,
-        event_index,
-        inning,
-        top_of_inning,
-        batter_id,
-        batter_position,
-        pitcher_id,
-        pitcher_team_id,
-        batter_team_id,
-        home_team_id,
-        away_team_id,
-        home_score,
-        away_score,
-        home_strike_count,
-        away_strike_count,
-        bases_occupied,
-        strikes,
-        outs,
-        balls,
-        is_last_game_event,
-        event_text,
-        season,
-        day,
-        home_ball_count,
-        away_ball_count,
-        home_base_count,
-        away_base_count,
-        home_out_count,
-        away_out_count,
-        home_strike_count,
-        away_strike_count,
-        tournament  
-  ) VALUES (
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-  );`;
-  try {
-    result = await pool.query(newRowQuery, [
-        result.game_id,
-        'FOUL',
-        result.event_index,
-        result.inning,
-        result.top_of_inning,
-        result.batter_id,
-        result.batter_position,
-        result.pitcher_id,
-        result.pitcher_team_id,
-        result.batter_team_id,
-        result.home_team_id,
-        result.away_team_id,
-        result.home_score,
-        result.away_score,
-        result.home_strike_count,
-        result.away_strike_count,
-        result.bases_occupied,
-        result.strikes,
-        result.outs,
-        result.balls,
-        result.is_last_game_event,
-        `Foul. ${result.balls}-${result.strikes}`,
-        result.season,
-        result.day,
-        result.home_ball_count,
-        result.away_ball_count,
-        result.home_base_count,
-        result.away_base_count,
-        result.home_out_count,
-        result.away_out_count,
-        result.home_strike_count,
-        result.away_strike_count,
-        result.tournament 
-    ]);
+  const ok = await sendNewRow(result);
 
-    return result;
-
-  } catch (err){
-    console.log(err);
-  }
+  return;
 }
 
 async function sendFlyout(game_id, params) {
   const { runs, bases_occupied, fielder_id } = params;
 
-  const previousRowQuery =  `
-    SELECT *
-    WHERE game_id = ?
-    ORDER BY event_index DESC
-    LIMIT 1;
-  `;
-  try {
-    let result = await pool.query(previousRowQuery, [game_id]);
-
-  } catch (err){
-    console.log(err);
-  }
+  let result = await getPreviousRow(game_id);
 
   //Updating universial cases
   result.event_index += 1;
+  result.event_type = 'FLYOUT';
   result.outs += 1;
   result.balls = 0;
   result.strikes = 0;
@@ -789,121 +331,58 @@ async function sendFlyout(game_id, params) {
     result.event_text += `\n${scoringPlayerName} advances on the sacrafice. \n1 Run scored!`;
   }
 
+  const ok = await sendNewRow(result);
 
-
-  const newRowQuery = `
-  INSERT INTO data.game_events (
-        game_id,
-        event_type,
-        event_index,
-        inning,
-        top_of_inning,
-        batter_id,
-        batter_position,
-        pitcher_id,
-        pitcher_team_id,
-        batter_team_id,
-        home_team_id,
-        away_team_id,
-        home_score,
-        away_score,
-        home_strike_count,
-        away_strike_count,
-        bases_occupied,
-        strikes,
-        outs,
-        balls,
-        is_last_game_event,
-        event_text,
-        season,
-        day,
-        home_ball_count,
-        away_ball_count,
-        home_base_count,
-        away_base_count,
-        home_out_count,
-        away_out_count,
-        home_strike_count,
-        away_strike_count,
-        tournament  
-  ) VALUES (
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-  );`;
-
-
-  try {
-    result = await pool.query(newRowQuery, [
-        result.game_id,
-        'FLYOUT',
-        result.event_index,
-        result.inning,
-        result.top_of_inning,
-        result.batter_id,
-        result.batter_position,
-        result.pitcher_id,
-        result.pitcher_team_id,
-        result.batter_team_id,
-        result.home_team_id,
-        result.away_team_id,
-        result.home_score,
-        result.away_score,
-        result.home_strike_count,
-        result.away_strike_count,
-        result.bases_occupied,
-        result.strikes,
-        result.outs,
-        result.balls,
-        result.is_last_game_event,
-        result.event_text,
-        result.season,
-        result.day,
-        result.home_ball_count,
-        result.away_ball_count,
-        result.home_base_count,
-        result.away_base_count,
-        result.home_out_count,
-        result.away_out_count,
-        result.home_strike_count,
-        result.away_strike_count,
-        result.tournament 
-    ]);
-
-  } catch (err){
-    console.log(err);
-  }
+  return;
 }
+
+async function sendDoublePlay(game_id, params){
+  const {runs, bases_occupied, fielder_id} = params;
+
+  let result = await getPreviousRow(game_id);
+
+  //Updating universial cases
+  result.event_index += 1;
+  result.outs += 2;
+  result.balls = 0;
+  result.strikes = 0;
+  result.event_type = 'DOUBLE_PLAY';
+
+  //Getting the batter and fielder name
+  const batterName = await getPlayerStat('full_name', result.batter_id);
+  const fielderName = await getPlayerStat('full_name', fielder_id);
+
+  result.event_text = `${batterName} hit into a double play!`;
+
+  //If the sent bases have changed
+    //If they didn't either the inning changes such as it was not a sacrafice
+    //Or the person on the furthest base failed to advance, so there were no changes
+  if(result.bases_occupied != bases_occupied && bases_occupied != ''){
+    result.bases_occupied = bases_occupied;
+  }
+
+  //Someone advanced to home
+  //Then we need to increase the score, and add it to the event text
+  if(runs != ''){
+    //Getting the correct team, so that we can increase the correct team score
+    const playerTeam = await getPlayerTeam(runs);
+    if(playerTeam == result.home_team){
+      result.home_score += 1;
+    }
+    else if(playerTeam == result.away_team){
+      result.away_score += 1;
+    }
+    const scoringPlayerName = await getPlayerStat('full_name', runs);
+
+    result.event_text += `\n${scoringPlayerName} advances on the sacrafice. \n1 Run scored!`;
+  }
+
+  const ok = await sendNewRow(result);
+
+  return;
+}
+
+
 
 async function increaseResult(game_id, countVar){
   //Getting the counts for the current inning

@@ -54,7 +54,8 @@ function send_game_event(game_id, event_type, params){
         case 'FLYOUT':
             await sendFlyout(game_id, params);
             break;
-        case 'GAME_START':
+        case 'DOUBLE_PLAY':
+            await sendDoublePlay(game_id, params);
             break;
         case 'GAME_START':
             break;

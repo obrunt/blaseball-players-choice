@@ -55,7 +55,8 @@ if batter is magmatic:
 */
 
 function createEvent(game_id){
-  const pitchThreshold = throwPitch(game_id);
+  const pitchThreshold = getThreshold(game_id, 'PITCH');
+
   const throwRoll = floatRoll(0,1);
 
 
@@ -83,7 +84,7 @@ function createEvent(game_id){
     pitchType = 'ball';
   }
 
-  const swingThreshold = swingBat(game_id, pitchType);
+  const swingThreshold = getThreshold(game_id, 'SWING', pitchType);
 
   //Checking to see if the batter swung
   const swingRoll = floatRoll(0,1);
@@ -160,7 +161,7 @@ function createEvent(game_id){
   }
   //If the batter swung at the ball
   else{
-    const contactThreshold = hitBall(game_is, pitchType);
+    const contactThreshold = getThreshold(game_id, 'HIT', pitchType);
 
     const contactRoll = floatRoll(0,1);
     //If there was no contact
@@ -201,7 +202,7 @@ function createEvent(game_id){
     }
     //If there was contact
     else{
-      const foulThreshold = validHit(game_id);
+      const foulThreshold = getThreshold(game_id, 'FOUL');
       const foulRoll = floatRoll(0,1);
 
       //It was a foul
@@ -221,7 +222,7 @@ function createEvent(game_id){
         //Getting the person who will catch the ball
         const chosenFielder = selectFielder(game_id);
 
-        const outThreshold = catchBall(game_id, chosenFielder);
+        const outThreshold = getThreshold(game_id, 'CATCH', chosenFielder);
 
         const outRoll = floatRoll(0, 1);
 
@@ -229,7 +230,7 @@ function createEvent(game_id){
         if(outRoll > outThreshold){
           const outResult = await increaseResult(game_id, 'out');
 
-          const flyThreshold = catchAirGround(game_id);
+          const flyThreshold = getThreshold(game_id, 'FLYGROUND');
 
           const flyRoll = floatRoll(0, 1);
 
@@ -328,7 +329,7 @@ function createEvent(game_id){
               //Checking to see if someone is on first base
                 //If true, then a double play can be made
               if(bases.bases_occupied[0] != ''){
-                const doublePlayThreshold = doublePlay(game_id, chosenFielder);
+                const doublePlayThreshold = getThreshold(game_id, 'DOUBLEPLAY', chosenFielder);
 
                 const doublePlayRoll = floatRoll(0, 1);
 
@@ -344,7 +345,13 @@ function createEvent(game_id){
                       //It will be cleared when the inning ticks over
                     const { bases_occupied } = await getGameOccupiedBases(game_id);
 
-                    send_game_event(game_id, 'DOUBLE_PLAY', bases_occupied);
+                    const params = {
+                      runs: '',
+                      bases_occupied: bases_occupied,
+                      fielder_id: chosenFielder
+                    };
+
+                    send_game_event(game_id, 'DOUBLE_PLAY', params);
 
                     increaseInning(game_id);
                   }
@@ -364,7 +371,15 @@ function createEvent(game_id){
                     bases_occupied[player_index] = '';
                     
                     //Advance all other players
-                    //let {runs, bases_occupied } = advanceBasesOut(game_id, bases_occupied, base_count);
+                    var {runs, bases_occupied } = advanceBasesOut(game_id, bases_occupied, base_count);
+
+                    const params = {
+                      runs: runs,
+                      bases_occupied: bases_occupied,
+                      fielder_id: chosenFielder
+                    };
+
+                    send_game_event(game_id, 'DOUBLE_PLAY', params);
                   }
                 }
               }
@@ -388,84 +403,68 @@ function createEvent(game_id){
     }
   }
 
-
   return;
 }
 
 
-//Could probably turn these into generics
-  //Do like how they all have easy to understand names tho
+function getThreshold(game_id, thresholdType, params){
+  //Getting the most commonly used values
+  const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
 
-function throwPitch(game_id){  
-  const batting_team = getBattingTeam(game_id);
-  const pitching_team = getPitchingTeam(game_id);
+  let threshold;
 
-  const batter = getBatter(game_id);
-  const pitcher = getPitcher(game_id);
+  switch(thresholdType){
+    case 'PITCH':
+      threshold = get_strike_threshold(batter, batting_team, pitcher, pitching_team, game_id);
+      break;
 
-  //Getting the limits for the roll
-  const threshold = get_strike_threshold(batter, batting_team, pitcher, pitching_team, game_id);
-  
-  return threshold;
-}
+    case 'SWING':
+      const batFlinch = await batterFlinch(game_id);
+      const gameCount = await getGameCounts(game_id);
 
-function swingBat(game_id, throwType){
-  const batting_team = getBattingTeam(game_id);
-  const pitching_team = getPitchingTeam(game_id);
+      //This is an automatic no-swing
+      if(batFlinch && gameCount.strikes == 0){
+        return 0.00;
+      }
 
-  const batter = getBatter(game_id);
-  const pitcher = getPitcher(game_id);
+      if(params = 'strike'){
+        threshold = get_swing_strike_threshold(batter, batting_team, pitcher, pitching_team, game_id);
+      }
+      //Technically this isn't needed
+        //Keep for readability
+      else if(params = 'ball'){
+        threshold = get_swing_ball_threshold(batter, batting_team, pitcher, pitching_team, game_id);
+      }
+      break;
 
+    case 'HIT':
+      if(params = 'strike'){
+        threshold = get_contact_strike_threshold(batter, batting_team, pitcher, pitching_team, game_id);
+      }
+      //Technically this isn't needed
+        //Keep for readability
+      else if(params = 'ball'){
+        threshold = get_contact_ball_threshold(batter, batting_team, pitcher, pitching_team, game_id);
+      }
+      break;
 
-  const batFlinch = await batterFlinch(game_id);
-  const gameCount = await getGameCounts(game_id);
+    case 'FOUL':
+      threshold = get_foul_threshold(batter, batting_team, game_id);
+      break;
 
-  //This is an automatic no-swing
-  if(batFlinch && gameCount.strikes == 0){
-    return false;
+    case 'CATCH':
+      threshold = await get_out_threshold(batter, pitcher, params, batting_team, pitching_team, game_id);
+      break;
+
+    case 'FLYGROUND':
+      threshold = get_fly_ground_threshold(batter, pitcher, batting_team, pitching_team, game_id);
+      break;
+
+    case 'DOUBLEPLAY':
+      threshold = get_double_play_threshold(batter, pitcher, params, batting_team, pitching_team, game_id);
+      break;
+
   }
-
-  let swingThreshold;
-
-  if(throwType = 'strike'){
-    swingThreshold = get_swing_strike_threshold(batter, batting_team, pitcher, pitching_team, game_id);
-  }
-  //Technically this isn't needed
-    //Keep for readability
-  else if(throwType = 'ball'){
-    swingThreshold = get_swing_ball_threshold(batter, batting_team, pitcher, pitching_team, game_id);
-  }
-
-  return swingThreshold;
-}
-
-function hitBall(game_id, throwType){
-  const batting_team = getBattingTeam(game_id);
-  const pitching_team = getPitchingTeam(game_id);
-
-  const batter = getBatter(game_id);
-  const pitcher = getPitcher(game_id);
-
-  let contactThreshold;
-
-  if(throwType = 'strike'){
-    contactThreshold = get_contact_strike_threshold(batter, batting_team, pitcher, pitching_team, game_id);
-  }
-  //Technically this isn't needed
-    //Keep for readability
-  else if(throwType = 'ball'){
-    contactThreshold = get_contact_ball_threshold(batter, batting_team, pitcher, pitching_team, game_id);
-  }
-
-  return contactThreshold;
-}
-
-function validHit(game_id){
-  const batting_team = getBattingTeam(game_id);
-
-  const batter = getBatter(game_id);
-
-  let threshold = get_foul_threshold(batter, batting_team, game_id);
 
   return threshold;
 }
@@ -484,42 +483,6 @@ function selectFielder(game_id){
 
   //Returning the player id of the chosen fielder
   return fielder_ids[fielderRoll];
-}
-
-function catchBall(game_id, fielder){
-  const batting_team = getBattingTeam(game_id);
-  const pitching_team = getPitchingTeam(game_id);
-
-  const batter = getBatter(game_id);
-  const pitcher = getPitcher(game_id);
-
-  const threshold = await get_out_threshold(batter, pitcher, fielder, batting_team, pitching_team, game_id);
-
-  return threshold;
-}
-
-function catchAirGround(game_id){
-  const batting_team = getBattingTeam(game_id);
-  const pitching_team = getPitchingTeam(game_id);
-
-  const batter = getBatter(game_id);
-  const pitcher = getPitcher(game_id);
-  
-  const threshold = get_fly_ground_threshold(batter, pitcher, batting_team, pitching_team, game_id);
-
-  return threshold;
-}
-
-function doublePlay(game_id, fielder){
-  const batting_team = getBattingTeam(game_id);
-  const pitching_team = getPitchingTeam(game_id);
-
-  const batter = getBatter(game_id);
-  const pitcher = getPitcher(game_id);
-  
-  const threshold = get_double_play_threshold(batter, pitcher, fielder, batting_team, pitching_team, game_id);
-
-  return threshold;
 }
 
 function advanceBasesOut(game_id, base_arr, base_count){

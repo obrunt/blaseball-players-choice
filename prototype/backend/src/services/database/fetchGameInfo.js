@@ -80,6 +80,30 @@ async function getGameInning(game_id){
   }
 }
 
+async function getPlayersTeams(game_id){
+  //Want to get the most recent event that happened for who's on base
+  const query = `
+    SELECT batter_id AS batter,
+      pitcher_id AS pitcher,
+      batter_team_id AS batting_team, 
+      pitcher_team_id AS pitching_team
+    FROM data.game_events
+    WHERE game_id = ?
+    ORDER BY event_index DESC
+    LIMIT 1;
+  `;
+
+  try {
+    const result = await pool.query(query, [game_id]);
+
+    return result[0];
+
+  } catch (err){
+    console.log(err);
+  }
+}
+
+
 async function getBattingTeam(game_id){
      
   //Want to get the most recent event that happened for who's on base
@@ -290,6 +314,7 @@ module.exports = {
   getGameCounts,
   getGameOccupiedBases,
 
+  getPlayersTeams,
   getBattingTeam,
   getPitchingTeam,
   getBatter,
