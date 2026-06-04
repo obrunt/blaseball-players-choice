@@ -7,9 +7,8 @@ const { get_swing_strike_threshold, get_swing_ball_threshold } = require("../for
 const { get_contact_ball_threshold, get_contact_strike_threshold } = require("../formulas/getContactThreshold");
 const { get_out_threshold, get_fly_ground_threshold} = require("../formulas/getOutThreshold");
 
-const { getGameStadium, getBattingTeam, getPitchingTeam, getBatter, getPitcher, getGameOccupiedBases } = require("../database/fetchGameInfo");
+const { getGameStadium, getBattingTeam, getPitchingTeam, getBatter, getPitcher, getGameOccupiedBases, getGameCounts } = require("../database/fetchGameInfo");
 const { pitcherAcidicBlood } = require("../database/fetchGameMisc");
-const { getGameStadium, getBattingTeam, getPitchingTeam } = require("../database/fetchGameInfo");
 const { increaseResult } = require("./Events/countManagement");
 
 
@@ -134,18 +133,10 @@ function createEvent(game_id){
 
         //If the inning will change
         if(outResult){
-          //If it is currently the top of the inning
-          //Switch it to the bottom of the inning
-          //Otherwise increase the inning
-            //Evalutaions for ending the game are within the inning increase event
-          const increaseInning = await getGameInning(game_id);
-
-          if(increaseInning.top_of_inning){
-            send_game_event(game_id, 'INNING_BOTTOM');
-          }
-          else{
-            send_game_event(game_id, 'INNING_TOP');
-          }
+          //Because the outs are equal to the total outs
+          //Change the inning
+            //Evalutates if its a top/bottom switch, or a total inning increase
+          changeInning(game_id);
           return;
         }
         //The inning doesn't change
@@ -188,18 +179,10 @@ function createEvent(game_id){
 
         //If the inning will change
         if(outResult){
-          //If it is currently the top of the inning
-          //Switch it to the bottom of the inning
-          //Otherwise increase the inning
-            //Evalutaions for ending the game are within the inning increase event
-          const increaseInning = await getGameInning(game_id);
-
-          if(increaseInning.top_of_inning){
-            send_game_event(game_id, 'INNING_BOTTOM');
-          }
-          else{
-            send_game_event(game_id, 'INNING_TOP');
-          }
+          //Because the outs are equal to the total outs
+          //Change the inning
+            //Evalutates if its a top/bottom switch, or a total inning increase
+          changeInning(game_id);
         }
         //The inning doesn't change
         else{
@@ -275,19 +258,12 @@ function createEvent(game_id){
               };
               //Sending the flyout, then the inning change
               send_game_event(game_id, 'FLYOUT', params);
+              
+              //Because the outs are equal to the total outs
+              //Change the inning
+                //Evalutates if its a top/bottom switch, or a total inning increase
+              changeInning(game_id);
 
-              //If it is currently the top of the inning
-              //Switch it to the bottom of the inning
-              //Otherwise increase the inning
-                //Evalutaions for ending the game are within the inning increase event
-              const increaseInning = await getGameInning(game_id);
-
-              if(increaseInning.top_of_inning){
-                send_game_event(game_id, 'INNING_BOTTOM');
-              }
-              else{
-                send_game_event(game_id, 'INNING_TOP');
-              }
               return;
   
             }
@@ -300,7 +276,103 @@ function createEvent(game_id){
           }
           //This is a ground out
           else {
+            /**
+             * FLOWCHART:
+            # -Always roll for DP. Always. Ignore the roll if no runner on first.
+            # -If runner on first (DP is possible):
+            #     -Roll Where.
+            #     -If DP pass:
+            #         -If this ends the inning, DONE
+            #         -If only forced runner is on first: Doesn't matter
+            #         -Elif two forced runners:
+            #             -Roll < 1/2 -> Out at third
+            #             -Roll > 1/2 -> Out at second
+            #         -Elif three forced runners:
+            #             -Roll < 1/3 -> Out at home
+            #             -Roll > 1/3, < 2/3 -> Out at third
+            #             -Roll > 2/3 -> Out at second
+            #         -Advance all other runners
+            #     -Elif DP fail:
+            #         -Roll Sacrifice
+            #         -If Sacrifice fail:
+            #             -Most advanced runner is out.
+            #             -Advance everyone else
+            #         -Elif Sacrifice pass:
+            #             -Roll Advancement for every baserunner
+            #             -For each runner:
+            #                  -If not forced:
+            #                      -Check advancement roll. Rolls apply in basesOccupied order aka most advanced first ([2,1,2,0] untested!!!)
+            #                  -Elif forced:
+            #                      -If initial baserunners were [2,0] AND 3rd base PASSED advancement (:ballclark:):
+            #                          -Check advancement roll for 1st base.
+            #                      -Elif any other baserunner configuration:
+            #                          -Advance
+            # -Elif no runner on first:
+            #      -For each runner:
+            #         -If not forced:
+            #             -Check advancement roll. Rolls apply in basesOccupied order aka most advanced first ([2,1,2,0] untested!!!)
+            #         -Elif forced:
+            #             -If initial baserunners were [2,0] AND 3rd base PASSED advancement (:ballclark:):
+            #                 -Check advancement roll for 1st base.
+            #             -Elif any other baserunner configuration:
+            #                 -Advance
+             */
 
+
+            //IF there are still outs left once this one is processed
+              //Then there are a few different options that can happen
+            if(!outResult){
+              //Getting the bases that are loaded because it's relevent for the checks
+              const bases = JSON.parse(await getGameOccupiedBases(game_id));
+
+              //Checking to see if someone is on first base
+                //If true, then a double play can be made
+              if(bases.bases_occupied[0] != ''){
+                const doublePlayThreshold = doublePlay(game_id, chosenFielder);
+
+                const doublePlayRoll = floatRoll(0, 1);
+
+                //Double play is happening
+                  //Need to check how many outs there are
+                if(doublePlayRoll > doublePlayThreshold){
+                  const { outs, out_count } = await getGameCounts(game_id);
+
+                  //If the double play were to start a new inning
+                    //Then get a 
+                  if((outs + 2) >= out_count){
+                    //Getting the current bases because the function expects a base array to replace
+                      //It will be cleared when the inning ticks over
+                    const { bases_occupied } = await getGameOccupiedBases(game_id);
+
+                    send_game_event(game_id, 'DOUBLE_PLAY', bases_occupied);
+
+                    increaseInning(game_id);
+                  }
+                  else{
+                    var { bases_occupied, base_count } = await getGameOccupiedBases(game_id);
+
+                    //Getting the bases that have people on them
+                    const player_bases = bases_occupied.filer((base) => base != '');
+                    //Rolling for the player who will be tagged out
+                    const baseRoll = intRoll(0, player_bases.length());
+
+                    //Getting the index of it within the actual base array
+                    const player_index = bases_occupied.indexOf(player_bases[baseRoll]);
+
+                    //Removing the player who was out
+                      //TODO: see if this player needs to be saved for the event message
+                    bases_occupied[player_index] = '';
+                    
+                    //Advance all other players
+                    //let {runs, bases_occupied } = advanceBasesOut(game_id, bases_occupied, base_count);
+                  }
+                }
+              }
+
+            }
+            else{
+
+            }
           }
 
           if(outResult){
@@ -408,9 +480,9 @@ function selectFielder(game_id){
 
   //The int roll is non inclusive for the right value
   //So we can just use the length of the list
-  const fielderRoll = intRoll(0, feilder_ids.length());
+  const fielderRoll = intRoll(0, fielder_ids.length());
 
-  //REturning the player id of the chosen fielder
+  //Returning the player id of the chosen fielder
   return fielder_ids[fielderRoll];
 }
 
@@ -434,6 +506,18 @@ function catchAirGround(game_id){
   const pitcher = getPitcher(game_id);
   
   const threshold = get_fly_ground_threshold(batter, pitcher, batting_team, pitching_team, game_id);
+
+  return threshold;
+}
+
+function doublePlay(game_id, fielder){
+  const batting_team = getBattingTeam(game_id);
+  const pitching_team = getPitchingTeam(game_id);
+
+  const batter = getBatter(game_id);
+  const pitcher = getPitcher(game_id);
+  
+  const threshold = get_double_play_threshold(batter, pitcher, fielder, batting_team, pitching_team, game_id);
 
   return threshold;
 }
@@ -627,6 +711,22 @@ function advanceBasesOut(game_id, base_arr, base_count){
                 pass
     */
 }
+
+function changeInning(game_id){
+  //If it is currently the top of the inning
+  //Switch it to the bottom of the inning
+  //Otherwise increase the inning
+    //Evalutaions for ending the game are within the inning increase event
+  const increaseInning = await getGameInning(game_id);
+
+  if(increaseInning.top_of_inning){
+    send_game_event(game_id, 'INNING_BOTTOM');
+  }
+  else{
+    send_game_event(game_id, 'INNING_TOP');
+  }
+  return;
+}
 /**
 *
 else:  # yes contact
@@ -634,14 +734,7 @@ else:  # yes contact
     roll for out (threshold in progress)
     if out:
       num outs += 1
-      roll to choose a flyout assigned fielder (known)
-      roll for fly (threshold known)
       if fly:
-        if num outs < # of outs in a half-inning:
-          for each runner in reverse order:
-            if the next base is open:
-              roll for runner advancement (threshold in progress)
-        result is flyout with flyout assigned fielder responsible
       else:
         roll to choose a ground out assigned fielder (known)
         if num outs < # of outs in a half-inning:

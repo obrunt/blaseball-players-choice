@@ -19,11 +19,11 @@ function get_out_threshold(batter_id, pitcher_id, fielder_id, batter_team, pitch
     let multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'thwackability');
     const batter_thwackability = (await getPlayerStat('thwackability', batter_id)) * multiplier * (1 + 0.2 * batter_vibes);
 
-    multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'unthwackability');
-    const pitcher_unthwackability = (await getPlayerStat('unthwackability', batter_id)) * multiplier * (1 + 0.2 * pitcher_vibes);
+    multiplier = getMultiplier(pitcher_id, pitcher_team, stadium_id, game_id, season, day, 'unthwackability');
+    const pitcher_unthwackability = (await getPlayerStat('unthwackability', pitcher_id)) * multiplier * (1 + 0.2 * pitcher_vibes);
 
-    multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'omniscience');
-    const fielder_omniscience = (await getPlayerStat('omniscience', batter_id)) * multiplier * (1 + 0.2 * fielder_vibes);
+    multiplier = getMultiplier(fielder_id, pitcher_team, stadium_id, game_id, season, day, 'omniscience');
+    const fielder_omniscience = (await getPlayerStat('omniscience', fielder_id)) * multiplier * (1 + 0.2 * fielder_vibes);
 
 
     const stadium_grandiosity = await getStadiumStat('grandiosity', stadium_id) - 0.5;
