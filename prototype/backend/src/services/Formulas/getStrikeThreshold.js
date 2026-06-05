@@ -255,11 +255,13 @@ function get_strike_threshold(batter_id, pitcher_id, batter_team, pitcher_team, 
 
     //Checking who is on the home team
     //And assigning the stadium hype to them
+    let hype;
+
     if(inning.top_of_inning){
-        const hype = await getStadiumStat('hype', stadium_id);
+        hype = await getStadiumStat('hype', stadium_id);
     }
     else {
-        const hype = -1 * await getStadiumStat('hype', stadium_id);
+        hype = -1 * await getStadiumStat('hype', stadium_id);
     }
 
     let factors = strike_threshold_look_up_table[season];

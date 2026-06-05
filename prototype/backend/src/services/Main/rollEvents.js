@@ -206,7 +206,7 @@ function createEvent(game_id){
       const foulRoll = floatRoll(0,1);
 
       //It was a foul
-      if(foulRoll > foulThreshold){
+      if(foulRoll < foulThreshold){
         //Checking to see if increasing the strikes would cause a strikeout
           //Because it's a foul we want to see if we increase the strike count or not
         const strikeResult = await increaseResult(game_id, 'strike');
@@ -235,7 +235,7 @@ function createEvent(game_id){
           const flyRoll = floatRoll(0, 1);
 
           //This is a fly ball
-          if(flyRoll > flyThreshold){
+          if(flyRoll < flyThreshold){
             //If there are outs left in the inning
               //Runners on base can advance
               //This makes the scoring/advancement distince from the innging change events
@@ -335,7 +335,7 @@ function createEvent(game_id){
 
                 //Double play is happening
                   //Need to check how many outs there are
-                if(doublePlayRoll > doublePlayThreshold){
+                if(doublePlayRoll < doublePlayThreshold){
                   const { outs, out_count } = await getGameCounts(game_id);
 
                   //If the double play were to start a new inning
@@ -380,6 +380,38 @@ function createEvent(game_id){
                     };
 
                     send_game_event(game_id, 'DOUBLE_PLAY', params);
+                  }
+                }
+                //There is no double play
+                  //Now need to check a lot of other options
+                else{
+                  //Sacrifice rolling
+                  const sacrificeThreshold = getThreshold(game_id, 'SACRIFICE');
+
+                  const sacrificeRoll = floatRoll(0, 1);
+
+                  //Checking to see if the sacrifice goes throught
+                    //First see if the sacrifice failed
+                  if(sacrificeRoll > sacrificeThreshold){
+                    //Because the sacrifice didn't work, we need to remove the furthest
+                      //logic is that the batter attempted to get themselves out first to avoid the more important player
+                      //And if the scenario failed the fielder would tag them out as well
+                    var { bases_occupied, base_count } = await getGameOccupiedBases(game_id);
+
+                    //Getting the bases that have people on them
+                    const last_player_base = bases_occupied.filer(base => base).pop();
+
+                    //Getting the index of it within the actual base array
+                    const player_index = bases_occupied.indexOf(last_player_base);
+
+                    //Setting the last base to be null
+                    bases_occupied[player_index] = '';
+
+                  }
+                  //Sacrifice doesn't go through
+                    //Forwardmost baseruner 
+                  else{
+
                   }
                 }
               }
@@ -463,7 +495,10 @@ function getThreshold(game_id, thresholdType, params){
     case 'DOUBLEPLAY':
       threshold = get_double_play_threshold(batter, pitcher, params, batting_team, pitching_team, game_id);
       break;
-
+    
+    case 'SACRIFICE':
+      threshold = get_sacrifice(batter, batter_team, game_id);
+      break;
   }
 
   return threshold;
@@ -500,7 +535,7 @@ function advanceBasesOut(game_id, base_arr, base_count){
 
       const advanceRoll = floatRoll(0, 1);
 
-      if(advanceRoll > advanceThreshold){
+      if(advanceRoll < advanceThreshold){
         //If advancing bases means they're going home
         if(i+1 == base_count){
           //Run scored

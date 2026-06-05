@@ -42,6 +42,44 @@ function get_double_play_threshold(batter_id, pitcher_id, fielder_id, batter_tea
     return max(threshold, 0.001);
 }
 
+function get_sacrifice(batter_id, batter_team, game_id){
+    const season = await fetchGameSeason(game_id);
+    const day = await fetchGameDay(game_id);
+    const stadium_id = await getGameStadium(game_id);
+    const inning = await getGameInning(game_id);
+
+    
+    let multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'martyrdom');
+    const batter_martyrdom = (await getPlayerStat('martyrdom"', batter_id)) * (1 / multiplier);
+
+    //Checking who is on the home team
+    //And assigning the stadium hype to them
+    let hype;
+
+    if(inning.top_of_inning){
+        hype = await getStadiumStat('hype', stadium_id);
+    }
+    else {
+        hype = -1 * await getStadiumStat('hype', stadium_id);
+    }
+
+    let threshold;
+
+    //For any season before 19
+    if(season < 18){
+        threshold = 0.05 + 0.25 * batter_martyrdom;
+    }
+    else if (season == 19){
+        threshold = 0.05 + 0.25 * batter_martyrdom - 0.05 * hype;
+    }
+    else{
+        threshold = 0.05 + 0.25 * batter_martyrdom - 0.035 * hype;
+    }
+    
+    return threshold;
+}
+
 module.exports = {
-    get_double_play_threshold
+    get_double_play_threshold,
+    get_sacrifice
 }

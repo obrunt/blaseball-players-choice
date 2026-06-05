@@ -374,7 +374,7 @@ async function sendDoublePlay(game_id, params){
     }
     const scoringPlayerName = await getPlayerStat('full_name', runs);
 
-    result.event_text += `\n${scoringPlayerName} advances on the sacrafice. \n1 Run scored!`;
+    result.event_text += `\n${scoringPlayerName} scores! \n1 Run scored!`;
   }
 
   const ok = await sendNewRow(result);
