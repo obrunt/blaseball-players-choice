@@ -100,7 +100,7 @@ function decide_game_play_order(season){
 
   for (let k = 0; k < 33; k++) {
     //Choosing the match up
-    for(let i = 0; i < divisionTeams.length(); i++){
+    for(let i = 0; i < divisionTeams.length; i++){
 
       //If the team has already been assigned a game, continue to next team
       if(teams.includes(divisionTeams[i].team_id)){
@@ -131,7 +131,7 @@ function decide_game_play_order(season){
 
       //Roll a number for the index of the avalible teams
       //All area equally weighted within the chosen section
-      num = roll(0, avalibleTeams.length() - 1);
+      num = roll(0, avalibleTeams.length - 1);
       //Select a team
       let chosenTeam = avalibleTeams[num];
 
@@ -162,7 +162,7 @@ function decide_game_play_order(season){
     for (let j = 0; j < 3; j++){
 
       //Looping through the pairs of teams, and inseting them into the database
-      for(let i = 0; i < teams.length(); i += 2){
+      for(let i = 0; i < teams.length; i += 2){
         setSeasonGameMatches(k*3 + j, season, teams[i], teams[i+1]);
       }
     }

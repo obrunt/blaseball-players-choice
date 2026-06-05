@@ -315,6 +315,8 @@ async function sendFlyout(game_id, params) {
     result.bases_occupied = bases_occupied;
   }
 
+  //TODO: check if someone can score when a flyout happens
+    //Looking at the database, don't think they can
   //Someone advanced to home
   //Then we need to increase the score, and add it to the event text
   if(runs != ''){
@@ -382,6 +384,76 @@ async function sendDoublePlay(game_id, params){
   return;
 }
 
+async function sendFieldersChoice(game_id, params){
+  const { runner_id, runner_base, bases_occupied } = params;
+
+  let result = await getPreviousRow(game_id);
+
+  //Updating universial cases
+  result.event_index += 1;
+  result.outs += 1;
+  result.balls = 0;
+  result.strikes = 0;
+  result.event_type = 'FIELDERS_CHOICE';
+
+  //Getting the batter and fielder name
+  const batterName = await getPlayerStat('full_name', result.batter_id);
+  const runnerName = await getPlayerStat('full_name', runner_id);
+
+  result.event_text = `${runnerName} out at ${runner_base}. ${batterName} reaches on fielder's choice.`;
+
+  //If the sent bases have changed
+    //If they didn't either the inning changes such as it was not a sacrafice
+    //Or the person on the furthest base failed to advance, so there were no changes
+  if(result.bases_occupied != bases_occupied && bases_occupied != ''){
+    result.bases_occupied = bases_occupied;
+  }
+
+  const ok = await sendNewRow(result);
+
+  return;
+}
+
+
+async function sendSacrifice(game_id, params){
+  const { runs, base_arr } = params;
+
+  let result = await getPreviousRow(game_id);
+
+  //Updating universial cases
+  result.event_index += 1;
+  result.outs += 1;
+  result.balls = 0;
+  result.strikes = 0;
+  result.event_type = 'SACRIFICE';
+
+  //Getting the batter and fielder name
+  const batterName = await getPlayerStat('full_name', result.batter_id);
+  const runnerName = await getPlayerStat('full_name', runner_id);
+
+  result.event_text = `${runnerName} out at ${runner_base}. ${batterName} reaches on fielder's choice.`;
+
+  //If the sent bases have changed
+    //If they didn't either the inning changes such as it was not a sacrafice
+    //Or the person on the furthest base failed to advance, so there were no changes
+  if(result.bases_occupied != bases_occupied && bases_occupied != ''){
+    result.bases_occupied = bases_occupied;
+  }
+
+  for(let i = 0; i < runs.length; i++){
+    const playerTeam = await getPlayerTeam(runs[i]);
+    if(playerTeam == result.home_team){
+      result.home_score += 1;
+    }
+    else if(playerTeam == result.away_team){
+      result.away_score += 1;
+    }
+  }
+
+  const ok = await sendNewRow(result);
+
+  return;
+}
 
 
 async function increaseResult(game_id, countVar){

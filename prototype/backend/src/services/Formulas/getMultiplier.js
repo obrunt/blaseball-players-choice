@@ -46,7 +46,7 @@ function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, att
                     //Need to check that this doesn't apply to pitchers
                         //It's for your own team being on base, 
                         //so pitcher cnanot have their own team while they're playing
-                if (weather == 18 && runnersOnBase.length() != '[]' && position != 1) {
+                if (weather == 18 && runnersOnBase.length != '[]' && position != 1) {
                     multiplier += 0.25;
                 }
                 break;
@@ -74,7 +74,7 @@ function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, att
                 break;
             case 'SINKING_SHIP':
                 //Getting the length of the active roster
-                const rosterSize = (await getTeamActivePlayers()).length();
+                const rosterSize = (await getTeamActivePlayers()).length;
 
                 //Does go negative, but that's the point
                     //No need to add limiter
@@ -208,7 +208,7 @@ function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, att
 
                 break;
             case 'GAUDY':
-                const stadiumMods = (await getStadiumMods(stadium_id)).length();
+                const stadiumMods = (await getStadiumMods(stadium_id)).length;
 
                 multiplier += 0.2 * stadiumMods;
                 break;

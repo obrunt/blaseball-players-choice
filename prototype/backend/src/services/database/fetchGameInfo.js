@@ -292,7 +292,7 @@ async function isMaximumBaseball(game_id){
 
   //Checking that all of the info is the most it can be
 
-  if(info.bases_occupied.length() == info.base_count){
+  if(info.bases_occupied.length == info.base_count){
       if(info.strikes == (info.strike_count - 1)){
           if(info.balls == (info.ball_count - 1)){
               if(info.out == (info.ball_out - 1)){

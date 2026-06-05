@@ -53,6 +53,11 @@ if batter is magmatic:
 
 
 */
+//TODO:
+  //We love monolithic functions
+  //Want to change this to something smaller
+
+
 
 function createEvent(game_id){
   const pitchThreshold = getThreshold(game_id, 'PITCH');
@@ -61,15 +66,9 @@ function createEvent(game_id){
 
 
   //TODO: include acidic pitchs
-    //To be honest, don't like much of the things that can cause runs to be taken away
-    //Or non interger runs
-    //Just makes it look weird
-    //Put it as low priority
   /*if(pitcherAcidicBlood(game_id)){
 
   }*/
-
-
 
   //Differing formulas for each situation
   //Because of that, need to have two different option once a ball is thrown
@@ -160,280 +159,264 @@ function createEvent(game_id){
     return;
   }
   //If the batter swung at the ball
-  else{
-    const contactThreshold = getThreshold(game_id, 'HIT', pitchType);
 
-    const contactRoll = floatRoll(0,1);
-    //If there was no contact
-      //Then it's a strike swinging
-    if(contactRoll > contactThreshold){
-      //Checking to see if increasing the strikes would cause a strikeout
-      const strikeResult = await increaseResult(game_id, 'strike');
+  const contactThreshold = getThreshold(game_id, 'HIT', pitchType);
 
-      //If it was a strikeout
-      if(strikeResult){
-        //Checking to see if it would cause an inning change
-        const outResult = await increaseResult(game_id, 'out');
-        
-        //Sending a strikeout event
-        send_game_event(game_id, 'STRIKEOUT', true);
+  const contactRoll = floatRoll(0,1);
+  //If there was no contact
+    //Then it's a strike swinging
+  if(contactRoll > contactThreshold){
+    //Checking to see if increasing the strikes would cause a strikeout
+    const strikeResult = await increaseResult(game_id, 'strike');
 
-        //If the inning will change
-        if(outResult){
-          //Because the outs are equal to the total outs
-          //Change the inning
-            //Evalutates if its a top/bottom switch, or a total inning increase
-          changeInning(game_id);
-        }
-        //The inning doesn't change
-        else{
-          //Because we know there are outs left in the inning (per previous check)
-          //We need to get a new batter for the team
-          send_game_event(game_id, 'BATTER_UP');
-        }
-        return;
+    //If it was a strikeout
+    if(strikeResult){
+      //Checking to see if it would cause an inning change
+      const outResult = await increaseResult(game_id, 'out');
+      
+      //Sending a strikeout event
+      send_game_event(game_id, 'STRIKEOUT', true);
+
+      //If the inning will change
+      if(outResult){
+        //Because the outs are equal to the total outs
+        //Change the inning
+          //Evalutates if its a top/bottom switch, or a total inning increase
+        changeInning(game_id);
       }
-      //If it was just a strike
-      else {
-        send_game_event(game_id, 'STRIKE', true);
-        return;
+      //The inning doesn't change
+      else{
+        //Because we know there are outs left in the inning (per previous check)
+        //We need to get a new batter for the team
+        send_game_event(game_id, 'BATTER_UP');
       }
       return;
     }
-    //If there was contact
-    else{
-      const foulThreshold = getThreshold(game_id, 'FOUL');
-      const foulRoll = floatRoll(0,1);
+    //If it was just a strike
+    send_game_event(game_id, 'STRIKE', true);
+    return;
+  }
+  //If there was contact
 
-      //It was a foul
-      if(foulRoll < foulThreshold){
-        //Checking to see if increasing the strikes would cause a strikeout
-          //Because it's a foul we want to see if we increase the strike count or not
-        const strikeResult = await increaseResult(game_id, 'strike');
+  const foulThreshold = getThreshold(game_id, 'FOUL');
+  const foulRoll = floatRoll(0,1);
 
-        //Inverting the result because it tells us if increasing would cause an out
-        //So we don't want to increase if it's true
-        send_game_event(game_id, 'FOUL', !strikeResult);
+  //It was a foul
+  if(foulRoll < foulThreshold){
+    //Checking to see if increasing the strikes would cause a strikeout
+      //Because it's a foul we want to see if we increase the strike count or not
+    const strikeResult = await increaseResult(game_id, 'strike');
+
+    //Inverting the result because it tells us if increasing would cause an out
+    //So we don't want to increase if it's true
+    send_game_event(game_id, 'FOUL', !strikeResult);
+    return;
+  }
+
+
+  //The ball was a valid, normal swing
+    //Getting the person who will catch the ball
+  const chosenFielder = selectFielder(game_id);
+
+  const outThreshold = getThreshold(game_id, 'CATCH', chosenFielder);
+
+  const outRoll = floatRoll(0, 1);
+
+  //If the ball is an out
+  if(outRoll > outThreshold){
+    const outResult = await increaseResult(game_id, 'out');
+
+    const flyThreshold = getThreshold(game_id, 'FLYGROUND');
+
+    const flyRoll = floatRoll(0, 1);
+
+    //This is a fly ball
+    if(flyRoll < flyThreshold){
+      //If there are outs left in the inning
+        //Runners on base can advance
+        //This makes the scoring/advancement distince from the innging change events
+      if(!outResult){
+        const { base_count, bases_occupied} = await getGameOccupiedBases(game_id);
+
+        let params = advanceBasesOut(game_id, bases_occupied, base_count);
+        params.fielder_id = chosenFielder;
+
+        send_game_event(game_id, 'FLYOUT', params);
         return;
-        
       }
-      //The ball was a valid, normal swing
-      else{
-        //Getting the person who will catch the ball
-        const chosenFielder = selectFielder(game_id);
-
-        const outThreshold = getThreshold(game_id, 'CATCH', chosenFielder);
-
-        const outRoll = floatRoll(0, 1);
-
-        //If the ball is an out
-        if(outRoll > outThreshold){
-          const outResult = await increaseResult(game_id, 'out');
-
-          const flyThreshold = getThreshold(game_id, 'FLYGROUND');
-
-          const flyRoll = floatRoll(0, 1);
-
-          //This is a fly ball
-          if(flyRoll < flyThreshold){
-            //If there are outs left in the inning
-              //Runners on base can advance
-              //This makes the scoring/advancement distince from the innging change events
-            if(!outResult){
-              const current_bases = await getGameOccupiedBases(game_id);
-
-              let params = advanceBases(game_id, current_bases.base_arr, current_bases.base_count);
-              params.fielder_id = chosenFielder;
-
-              send_game_event(game_id, 'FLYOUT', params);
-              return;
-            }
-            //If there are not outs left in the inning
-            //Then send a flyout and an inning switch
-            else{
-
-              let params = {
-                runs: '',
-                bases_occupied: '',
-                fielder_id: chosenFielder
-              };
-              //Sending the flyout, then the inning change
-              send_game_event(game_id, 'FLYOUT', params);
-              
-              //Because the outs are equal to the total outs
-              //Change the inning
-                //Evalutates if its a top/bottom switch, or a total inning increase
-              changeInning(game_id);
-
-              return;
-  
-            }
-            //Sending the FLYOUT result after the runners have advanced
-            //This sets the order of (possible) events as
-              //Score - if runner on closes base scores
-              //Advance - if no score, or for each remaning runner
-              //Flyout - set
-              //Inning change - if the outs would cause a change
-          }
-          //This is a ground out
-          else {
-            /**
-             * FLOWCHART:
-            # -Always roll for DP. Always. Ignore the roll if no runner on first.
-            # -If runner on first (DP is possible):
-            #     -Roll Where.
-            #     -If DP pass:
-            #         -If this ends the inning, DONE
-            #         -If only forced runner is on first: Doesn't matter
-            #         -Elif two forced runners:
-            #             -Roll < 1/2 -> Out at third
-            #             -Roll > 1/2 -> Out at second
-            #         -Elif three forced runners:
-            #             -Roll < 1/3 -> Out at home
-            #             -Roll > 1/3, < 2/3 -> Out at third
-            #             -Roll > 2/3 -> Out at second
-            #         -Advance all other runners
-            #     -Elif DP fail:
-            #         -Roll Sacrifice
-            #         -If Sacrifice fail:
-            #             -Most advanced runner is out.
-            #             -Advance everyone else
-            #         -Elif Sacrifice pass:
-            #             -Roll Advancement for every baserunner
-            #             -For each runner:
-            #                  -If not forced:
-            #                      -Check advancement roll. Rolls apply in basesOccupied order aka most advanced first ([2,1,2,0] untested!!!)
-            #                  -Elif forced:
-            #                      -If initial baserunners were [2,0] AND 3rd base PASSED advancement (:ballclark:):
-            #                          -Check advancement roll for 1st base.
-            #                      -Elif any other baserunner configuration:
-            #                          -Advance
-            # -Elif no runner on first:
-            #      -For each runner:
-            #         -If not forced:
-            #             -Check advancement roll. Rolls apply in basesOccupied order aka most advanced first ([2,1,2,0] untested!!!)
-            #         -Elif forced:
-            #             -If initial baserunners were [2,0] AND 3rd base PASSED advancement (:ballclark:):
-            #                 -Check advancement roll for 1st base.
-            #             -Elif any other baserunner configuration:
-            #                 -Advance
-             */
 
 
-            //IF there are still outs left once this one is processed
-              //Then there are a few different options that can happen
-            if(!outResult){
-              //Getting the bases that are loaded because it's relevent for the checks
-              const bases = JSON.parse(await getGameOccupiedBases(game_id));
+    //If there are not outs left in the inning
+    //Then send a flyout and an inning switch
+      let params = {
+        runs: '',
+        bases_occupied: '',
+        fielder_id: chosenFielder
+      };
+      //Sending the flyout, then the inning change
+      send_game_event(game_id, 'FLYOUT', params);
+      
+      //Because the outs are equal to the total outs
+      //Change the inning
+        //Evalutates if its a top/bottom switch, or a total inning increase
+      changeInning(game_id);
 
-              //Checking to see if someone is on first base
-                //If true, then a double play can be made
-              if(bases.bases_occupied[0] != ''){
-                const doublePlayThreshold = getThreshold(game_id, 'DOUBLEPLAY', chosenFielder);
+      return;
 
-                const doublePlayRoll = floatRoll(0, 1);
+      //Sending the FLYOUT result after the runners have advanced
+      //This sets the order of (possible) events as
+        //Score - if runner on closes base scores
+        //Advance - if no score, or for each remaning runner
+        //Flyout - set
+        //Inning change - if the outs would cause a change
+    }
+  }
 
-                //Double play is happening
-                  //Need to check how many outs there are
-                if(doublePlayRoll < doublePlayThreshold){
-                  const { outs, out_count } = await getGameCounts(game_id);
 
-                  //If the double play were to start a new inning
-                    //Then get a 
-                  if((outs + 2) >= out_count){
-                    //Getting the current bases because the function expects a base array to replace
-                      //It will be cleared when the inning ticks over
-                    const { bases_occupied } = await getGameOccupiedBases(game_id);
 
-                    const params = {
-                      runs: '',
-                      bases_occupied: bases_occupied,
-                      fielder_id: chosenFielder
-                    };
+    //This is a ground out
+    /**
+     * FLOWCHART:
+    # -Always roll for DP. Always. Ignore the roll if no runner on first.
+    # -If runner on first (DP is possible):
+    #     -Roll Where.
+    #     -If DP pass:
+    #         -If this ends the inning, DONE
+    #         -If only forced runner is on first: Doesn't matter
+    #         -Elif two forced runners:
+    #             -Roll < 1/2 -> Out at third
+    #             -Roll > 1/2 -> Out at second
+    #         -Elif three forced runners:
+    #             -Roll < 1/3 -> Out at home
+    #             -Roll > 1/3, < 2/3 -> Out at third
+    #             -Roll > 2/3 -> Out at second
+    #         -Advance all other runners
+    #     -Elif DP fail:
+    #         -Roll Sacrifice
+    #         -If Sacrifice fail:
+    #             -Most advanced runner is out.
+    #             -Advance everyone else
+    #         -Elif Sacrifice pass:
+    #             -Roll Advancement for every baserunner
+    #             -For each runner:
+    #                  -If not forced:
+    #                      -Check advancement roll. Rolls apply in basesOccupied order aka most advanced first ([2,1,2,0] untested!!!)
+    #                  -Elif forced:
+    #                      -If initial baserunners were [2,0] AND 3rd base PASSED advancement (:ballclark:):
+    #                          -Check advancement roll for 1st base.
+    #                      -Elif any other baserunner configuration:
+    #                          -Advance
+    # -Elif no runner on first:
+    #      -For each runner:
+    #         -If not forced:
+    #             -Check advancement roll. Rolls apply in basesOccupied order aka most advanced first ([2,1,2,0] untested!!!)
+    #         -Elif forced:
+    #             -If initial baserunners were [2,0] AND 3rd base PASSED advancement (:ballclark:):
+    #                 -Check advancement roll for 1st base.
+    #             -Elif any other baserunner configuration:
+    #                 -Advance
+      */
 
-                    send_game_event(game_id, 'DOUBLE_PLAY', params);
 
-                    increaseInning(game_id);
-                  }
-                  else{
-                    var { bases_occupied, base_count } = await getGameOccupiedBases(game_id);
+  //If there are still outs left once this one is processed
+    //Then there are a few different options that can happen
+  if(!outResult){
+    //Getting the bases that are loaded because it's relevent for the checks
+    const bases = JSON.parse(await getGameOccupiedBases(game_id));
 
-                    //Getting the bases that have people on them
-                    const player_bases = bases_occupied.filer((base) => base != '');
-                    //Rolling for the player who will be tagged out
-                    const baseRoll = intRoll(0, player_bases.length());
+    //Checking to see if someone is on first base
+      //If true, then a double play can be made
+    if(bases.bases_occupied[0] != ''){
+      const doublePlayThreshold = getThreshold(game_id, 'DOUBLEPLAY', chosenFielder);
 
-                    //Getting the index of it within the actual base array
-                    const player_index = bases_occupied.indexOf(player_bases[baseRoll]);
+      const doublePlayRoll = floatRoll(0, 1);
 
-                    //Removing the player who was out
-                      //TODO: see if this player needs to be saved for the event message
-                    bases_occupied[player_index] = '';
-                    
-                    //Advance all other players
-                    var {runs, bases_occupied } = advanceBasesOut(game_id, bases_occupied, base_count);
+      //Double play is happening
+        //Need to check how many outs there are
+      if(doublePlayRoll < doublePlayThreshold){
+        const { outs, out_count } = await getGameCounts(game_id);
 
-                    const params = {
-                      runs: runs,
-                      bases_occupied: bases_occupied,
-                      fielder_id: chosenFielder
-                    };
+        //If the double play were to start a new inning
+          //Then get a 
+        if((outs + 2) >= out_count){
+          //Getting the current bases because the function expects a base array to replace
+            //It will be cleared when the inning ticks over
+          const { bases_occupied } = await getGameOccupiedBases(game_id);
 
-                    send_game_event(game_id, 'DOUBLE_PLAY', params);
-                  }
-                }
-                //There is no double play
-                  //Now need to check a lot of other options
-                else{
-                  //Sacrifice rolling
-                  const sacrificeThreshold = getThreshold(game_id, 'SACRIFICE');
+          const params = {
+            runs: '',
+            bases_occupied: bases_occupied,
+            fielder_id: chosenFielder
+          };
 
-                  const sacrificeRoll = floatRoll(0, 1);
+          send_game_event(game_id, 'DOUBLE_PLAY', params);
 
-                  //Checking to see if the sacrifice goes throught
-                    //First see if the sacrifice failed
-                  if(sacrificeRoll > sacrificeThreshold){
-                    //Because the sacrifice didn't work, we need to remove the furthest
-                      //logic is that the batter attempted to get themselves out first to avoid the more important player
-                      //And if the scenario failed the fielder would tag them out as well
-                    var { bases_occupied, base_count } = await getGameOccupiedBases(game_id);
+          increaseInning(game_id);
 
-                    //Getting the bases that have people on them
-                    const last_player_base = bases_occupied.filer(base => base).pop();
-
-                    //Getting the index of it within the actual base array
-                    const player_index = bases_occupied.indexOf(last_player_base);
-
-                    //Setting the last base to be null
-                    bases_occupied[player_index] = '';
-
-                  }
-                  //Sacrifice doesn't go through
-                    //Forwardmost baseruner 
-                  else{
-
-                  }
-                }
-              }
-
-            }
-            else{
-
-            }
-          }
-
-          if(outResult){
-
-          }
-        }
-        //The ball was not caught
-          //Advance as normal
-        else{
-
+          return;
         }
       }
     }
+    //These are calls that don't depend on a runner being on first
+    
+    //There is no double play, now need to check a lot of other options
+      //Sacrifice
+      //Fielders choice
+      //Normal ground out
+
+    //Sacrifice rolling
+    const sacrificeThreshold = getThreshold(game_id, 'SACRIFICE');
+
+    const sacrificeRoll = floatRoll(0, 1);
+
+    //Checking to see if the sacrifice goes throught
+      //First see if the sacrifice failed
+    if(sacrificeRoll > sacrificeThreshold){
+      //Because the sacrifice didn't work, we need to remove the furthest
+        //logic is that the batter attempted to get themselves out first to avoid the more important player
+        //And if the scenario failed the fielder would tag them out as well
+      var { bases_occupied, base_count } = await getGameOccupiedBases(game_id);
+
+      //Getting the bases that have people on them
+      const last_player_base = bases_occupied.filer(base => base).pop();
+
+      //Getting the index of it within the actual base array
+      const player_index = bases_occupied.indexOf(last_player_base);
+
+
+      //Saving the id of the player who was out
+      //Setting the last base to be null
+      let params = {
+        runner_id: bases_occupied[player_index],
+        runner_base: player_index
+      };
+      bases_occupied[player_index] = '';
+
+      //Advance all other players
+        //Sending fielder id to mark a ground out
+      let { base_arr } = advanceBasesOut(game_id, bases_occupied, base_count, chosenFielder, true);
+
+      //We know intuitivly that
+      params.bases_occupied = base_arr;
+      
+      send_game_event(game_id, 'FIELDERS_CHOICE', params);
+      
+      return;
+    }
+
+    //This is the case where the sacrifice went through
+    //Advance all other players
+      //Sending fielder id to mark a ground out
+    const params = advanceBasesOut(game_id, bases_occupied, base_count, chosenFielder, false);
+
+
+    send_game_event(game_id, 'SACRIFICE', params);
+
+    return;
   }
+
+    //The ball was not caught
+      //Advance as normal
 
   return;
 }
@@ -514,24 +497,95 @@ function selectFielder(game_id){
 
   //The int roll is non inclusive for the right value
   //So we can just use the length of the list
-  const fielderRoll = intRoll(0, fielder_ids.length());
+  const fielderRoll = intRoll(0, fielder_ids.length);
 
   //Returning the player id of the chosen fielder
   return fielder_ids[fielderRoll];
 }
 
-function advanceBasesOut(game_id, base_arr, base_count){
+/*
+function advanceBases(game_id, base_arr, base_forward, base_count, advance_type, fielder_id){
+  const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
+
   //Getting the id of a player if they scored
   let runScored = '';
 
   const batting_team = getBattingTeam(game_id);
 
   //Looping through the base array backwards to prevent "clogging" up the advancements
-  for(let i = base_arr.length() - 1; i >= 0; i--){
+    //Basecount minus one because the final one is the home plate
+  for(let i = base_count - 1; i >= 0; i--){
     //If there is someone on the current base
     if(base_arr[i] != ''){
-      //Checking to see if the 
-      const advanceThreshold = get_advance_base_out(base_arr[i], batting_team, i, game_id);
+      //Checking to see if they can advance
+        //Switching between the different secnarios 
+      let advanceThreshold;
+
+      switch(advance_type){
+        case 'GROUNDOUT':
+          advanceThreshold = get_advance_base_out_ground(base_arr[i], fielder_id, batting_team, pitching_team, game_id);
+          break;
+        case 'FLYOUT':
+          advanceThreshold = get_advance_base_out_fly(base_arr[i], batting_team, i, game_id);
+          break;
+        case 'SINGLE':
+          break;
+        case 'DOUBLE':
+          break;
+        case 'HOMERUN':
+          break;
+        
+      }
+
+      //const advanceThreshold = get_advance_base_out(base_arr[i], batting_team, i, game_id);
+
+      const advanceRoll = floatRoll(0, 1);
+
+      if(advanceRoll < advanceThreshold){
+        //If advancing bases means they're going home or beyond
+        if((i + base_forward) >= base_count){
+          //Run scored
+          runScored.push(base_arr[i]);
+          base_arr[i] = '';
+        }
+        //Checking that the base they're moving to is empty
+        else if(base[i + base_forward] == ''){
+          //Moving the player up one base
+          base_arr[i + base_forward] = base_arr[i];
+          base_arr[i] = '';
+        }
+      }
+    }
+  }
+
+  const params = {
+    runs: runScored,
+    base_arr: base_arr
+  }
+
+  return params;
+}
+  */
+
+function advanceBasesOut(game_id, base_arr, base_count, fielder_id, batter_advance){
+  const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
+  //Getting the id of a player if they scored
+  let runScored = '';
+
+  const batting_team = getBattingTeam(game_id);
+
+  //Looping through the base array backwards to prevent "clogging" up the advancements
+  for(let i = base_arr.length - 1; i >= 0; i--){
+    //If there is someone on the current base
+    if(base_arr[i] != ''){
+      //Checking to see what advancement threshold we use 
+      let advanceThreshold;
+      if(fielder_id != '') {
+        advanceThreshold = get_advance_base_out_ground(base_arr[i], fielder_id, batting_team, pitching_team, game_id);
+      }
+      else {
+        advanceThreshold = get_advance_base_out_fly(base_arr[i], batting_team, i, game_id);
+      }
 
       const advanceRoll = floatRoll(0, 1);
 
@@ -539,7 +593,7 @@ function advanceBasesOut(game_id, base_arr, base_count){
         //If advancing bases means they're going home
         if(i+1 == base_count){
           //Run scored
-          runScored = base_arr[i];
+          runScored.push(base_arr[i]);
           base_arr[i] = '';
         }
         //Checking that the base they're moving to is empty
@@ -552,163 +606,69 @@ function advanceBasesOut(game_id, base_arr, base_count){
     }
   }
 
+  if(batter_advance){
+    if(base_arr[0] == ''){
+      base_arr[0] = batter; 
+    }
+    else{
+      //Getting the first un ocupied base
+      const i = base_arr.indexOf('');
+      if(i != -1){
+        //Removing the unocupied base
+        //And adding the batter to the front
+          //This shifts everyone up
+        base_arr.splice(i, 1);
+        base_arr.unshift(batter);
+      }
+      else{
+        //This means that all the bases are occupied
+        //So we add the final base runner to the runs array
+        //Then shift everyone up one
+        runScored.push(base_arr[base_arr.length - 1]);
+        base_arr.pop();
+        base_arr.unshift(batter);
+      }
+    }
+  }
+
+
+  //TODO: changing the runs to an array will probably cause some issues later
+    //Have to change any instances of runs to loop throught the array and increase the runs
+    //Also have to deal with the event message
   const params = {
     runs: runScored,
-    bases_occupied: base_arr
+    base_arr: base_arr
   }
 
   return params;
-  /**
-        elif self.ty == EventType.GROUND_OUT:
-            if len(self.update["basesOccupied"]) > 0:
-                # roll needs batter tragicness, fielder tenaciousness, pitcher shakespearianism
-                dp_roll = self.roll("dp?")
-                if self.batter.undefined():
-                    # tragicness?
-                    # the control flow is really weird here
-                    # if there's no player on first, why would it roll for batter but not for fielder...?
-                    # unless it's something else, i guess
-                    self.roll("undefined (dp batter)")
-
-                if Base.FIRST in self.update["basesOccupied"]:
-                    if fielder.undefined():
-                        self.roll("undefined (dp fielder)")
-                        pass
-
-                    is_dp = "into a double play!" in self.desc
-                    is_fc = "on fielder's choice" in self.desc
-                    self.log_roll(Csv.GROUNDOUT_FORMULAS, "DP", dp_roll, is_dp, fielder=fielder)
-
-                    if is_dp:
-                        # ...wait, is this just the martyr? roll?
-                        self.roll("dp where")  # (index into basesOccupied)
-
-                        # todo:this interacts weirdly with undefined
-                        self.damage(self.pitcher, "pitcher")
-
-                        if self.outs < self.max_outs - 2:
-                            for base, runner_id in zip(self.next_update["basesOccupied"], self.next_update["baseRunners"]):
-                                runner = self.data.get_player(runner_id)
-                                self.damage(runner, "runner")
-
-                        if "scores!" in self.desc:
-                            # assuming this is always first?
-                            scoring_runner = self.data.get_player(self.update["baseRunners"][0])
-
-                            # "surviving" player takes damage (including scoring) but they get swept from bases
-                            # so we just roll twice here
-                            self.damage(scoring_runner, "runner")
-                            self.damage(scoring_runner, "runner")
-
-                        self.damage(self.pitcher, "pitcher")
-
-                        return
-
-                    if self.batter.undefined():
-                        self.roll("undefined (martyr?)")
-
-                    # needs batter martyrdom, runner indulgence
-                    fc_roll = self.roll("martyr?")  # high = fc
-                    self.log_roll(Csv.GROUNDOUT_FORMULAS, "Sac", fc_roll, not is_fc, fielder=fielder)
-
-                    if is_fc:
-                        # so this is a rough outline, we could probably clean up this logic
-                        damage_runners = []
-
-                        if self.update["basesOccupied"] == [2, 1, 0]:
-                            damage_runners = [1, 0]  # does not include a 2 atvl
-                        elif self.update["basesOccupied"] == [1, 0]:
-                            damage_runners = [0]  # unsure
-                        elif self.update["basesOccupied"] == [2, 0]:
-                            damage_runners = [2, 2]  # this one is correct... or maybe not?
-                            if self.stadium.has_mod(Mod.EXTRA_BASE):
-                                damage_runners = [2]
-                        elif self.update["basesOccupied"] == [0]:
-                            damage_runners = []
-                        elif self.update["basesOccupied"] == [3, 0]:
-                            damage_runners = [3, 3]  # unsure
-                        elif self.update["basesOccupied"] == [3, 1, 0]:
-                            damage_runners = [3, 3, 1]  # unsure but there's 3
-                        elif self.update["basesOccupied"] == [3, 2, 0]:
-                            damage_runners = [3, 3, 2] # also unsure but there's 3
-
-                        self.damage(self.pitcher, "pitcher")
-
-                        for rbase in damage_runners:
-                            idx = self.update["basesOccupied"].index(rbase)
-                            runner_id = self.update["baseRunners"][idx]
-                            runner = self.data.get_player(runner_id)
-                            self.damage(runner, "runner")
-
-                        return
-
-            # as of s24, this is before item rolls for sure
-            # see: 2021-07-28T10:08:43.892Z
-            self.try_roll_batter_debt(fielder)
-
-            self.damage(self.pitcher, "pitcher")
-            # there's some weird stuff with damage rolls in the first fragment of s16
-            # this seems to work for groundouts but something similar might be up for flyouts
-            if (self.season, self.day) >= (15, 3):
-                self.damage(self.batter, "fielder")
-                self.damage(fielder, "fielder")
-
-            forced_bases = 0
-            while forced_bases in self.update["basesOccupied"]:
-                forced_bases += 1
-
-            base_before_home = Base.FOURTH if self.stadium.has_mod(Mod.EXTRA_BASE) else Base.THIRD
-            for base, runner_id in zip(self.update["basesOccupied"], self.update["baseRunners"]):
-                runner = self.data.get_player(runner_id)
-
-                was_forced = base < forced_bases
-                if self.event["created"] in ["2021-05-12T13:20:27.312Z", "2021-05-17T19:19:27.034Z"]:
-                    # did_advance gets confused because the same runner is on two bases.
-                    roll_outcome = True
-                else:
-                    roll_outcome = did_advance(base, runner_id) if not was_forced else None
-
-                # needs... fielder tenaciousness and runner indulgence?
-                adv_roll = self.roll(f"adv? {base}/{runner.name} ({roll_outcome})")
-                if self.batter.undefined() and base == base_before_home: # sac?
-                    # self.roll("undefined (advance batter)")
-                    pass
-                if runner.undefined():
-                    self.roll("undefined (advance runner)")
-                if fielder.undefined():
-                    self.roll("undefined (runner adv fielder)")
-
-                if roll_outcome and base == base_before_home and not was_forced:
-                    # when a runner scores from third, it "ignores" forcing logic
-                    # ie. [2, 0] -> [0] is possible! (first *isn't* forced to second. even if they probably should)
-                    forced_bases = 0
-
-                if roll_outcome is not None:
-                    self.log_roll(
-                        Csv.GROUNDOUT_FORMULAS,
-                        "advance",
-                        adv_roll,
-                        roll_outcome,
-                        fielder=fielder,
-                        relevant_runner=runner,
-                    )
-
-                if roll_outcome or was_forced:
-                    self.damage(runner, "batter")
-
-                    if base == base_before_home:
-                        if (self.season, self.day) >= (15, 3):
-                            self.damage(runner, "batter")
-
-                        else:
-                            self.damage(self.batter, "batter")
-
-            if (self.season, self.day) < (15, 3):
-                self.damage(self.batter, "fielder")
-                self.damage(fielder, "fielder")
-                pass
-    */
 }
+
+function advanceBasesHit(game_id, base_arr, bases_forward, base_count){
+  let runs;
+
+  //Moving all players forward by the know amount
+  for(let i = 0; i < bases_forward; i++){
+    base_arr.shift('');
+  }
+
+  //Getting all the values that are over the "active" bases
+  for(let j = base_arr.length; j < base_count; j--){
+    //If an 
+    if(base_arr[j] != ''){
+      runs.push(base_arr[j]);
+    }
+    base_arr.pop();
+  }
+
+  const result = {
+    runs: runs,
+    base_arr: base_arr
+  }
+
+  return result;
+}
+
+
 
 function changeInning(game_id){
   //If it is currently the top of the inning

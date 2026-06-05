@@ -81,7 +81,7 @@ function fetch_pitcher(team_id, season, day){
 
         //This is done if a pitcher has been removed from the team to stop overreach
             //This method also assumes that new pitchers are added to the end of the roster
-        const postition = (i + 1) % team.length();
+        const postition = (i + 1) % team.length;
 
         //Exiting the loop
         hasPitcher = true;

@@ -57,9 +57,11 @@ function send_game_event(game_id, event_type, params){
         case 'DOUBLE_PLAY':
             await sendDoublePlay(game_id, params);
             break;
-        case 'GAME_START':
+        case 'SACRIFICE':
+            await sendSacrifice(game_id, params);
             break;
-        case 'GAME_START':
+        case 'FIELDERS_CHOICE':
+            await sendFieldersChoice(game_id, params);
             break;
         case 'GAME_START':
             break;

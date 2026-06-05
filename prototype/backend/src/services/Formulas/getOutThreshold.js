@@ -119,7 +119,7 @@ function get_fly_ground_threshold(batter_id, pitcher_id, batter_team, pitcher_te
 
 
 
-function get_advance_base_out(runner_id, batter_team, base_index, game_id){
+function get_advance_base_out_fly(runner_id, batter_team, base_index, game_id){
     const season = await fetchGameSeason(game_id);
     const day = await fetchGameDay(game_id);
     const stadium_id = await getGameStadium(game_id);
@@ -169,8 +169,42 @@ function get_advance_base_out(runner_id, batter_team, base_index, game_id){
 }
 
 
+function get_advance_base_out_ground(runner_id, fielder_id, batter_team, pitcher_team, game_id){
+    const season = await fetchGameSeason(game_id);
+    const day = await fetchGameDay(game_id);
+    const stadium_id = await getGameStadium(game_id);
+    const inning = await getGameInning(game_id);
+
+    
+    const runner_vibes = await getVibes(runner_id, day);
+    const fielder_vibes = await getVibes(fielder_id, day);
+
+    
+    let multiplier = getMultiplier(runner_id, batter_team, stadium_id, game_id, season, day, 'indulgence');
+    const runner_indulgence = (await getPlayerStat('indulgence', runner_id)) * multiplier * (1 + 0.2 * runner_vibes);
+
+    multiplier = getMultiplier(fielder_id, pitcher_team, stadium_id, game_id, season, day, 'tenaciousness');
+    const fielder_tenaciousness = (await getPlayerStat('tenaciousness', fielder_id)) * multiplier * (1 + 0.2 * fielder_vibes);
+
+
+    
+    const stadium_elongation = await getStadiumStat('elongation', stadium_id) - 0.5;
+    const stadium_inconvenience = await getStadiumStat('inconvenience', stadium_id) - 0.5;
+
+
+    const threshold = 0.5
+                + 0.35 * runner_indulgence
+                - 0.10 * fielder_tenaciousness
+                - 0.10 * stadium_inconvenience
+                - 0.10 * stadium_elongation;
+
+    return threshold;
+}
+
+
 module.exports = {
     get_out_threshold,
     get_fly_ground_threshold,
-    get_advance_base_out
+    get_advance_base_out_fly,
+    get_advance_base_out_ground
 }
