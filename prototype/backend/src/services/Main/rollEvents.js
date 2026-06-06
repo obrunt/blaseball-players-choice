@@ -270,7 +270,7 @@ function createEvent(game_id){
         //Flyout - set
         //Inning change - if the outs would cause a change
     }
-  }
+  
 
 
 
@@ -318,102 +318,141 @@ function createEvent(game_id){
       */
 
 
-  //If there are still outs left once this one is processed
-    //Then there are a few different options that can happen
-  if(!outResult){
-    //Getting the bases that are loaded because it's relevent for the checks
-    const bases = JSON.parse(await getGameOccupiedBases(game_id));
+    //If there are still outs left once this one is processed
+      //Then there are a few different options that can happen
+    if(!outResult){
+      //Getting the bases that are loaded because it's relevent for the checks
+      const bases = JSON.parse(await getGameOccupiedBases(game_id));
 
-    //Checking to see if someone is on first base
-      //If true, then a double play can be made
-    if(bases.bases_occupied[0] != ''){
-      const doublePlayThreshold = getThreshold(game_id, 'DOUBLEPLAY', chosenFielder);
+      //Checking to see if someone is on first base
+        //If true, then a double play can be made
+      if(bases.bases_occupied[0] != ''){
+        const doublePlayThreshold = getThreshold(game_id, 'DOUBLEPLAY', chosenFielder);
 
-      const doublePlayRoll = floatRoll(0, 1);
+        const doublePlayRoll = floatRoll(0, 1);
 
-      //Double play is happening
-        //Need to check how many outs there are
-      if(doublePlayRoll < doublePlayThreshold){
-        const { outs, out_count } = await getGameCounts(game_id);
+        //Double play is happening
+          //Need to check how many outs there are
+        if(doublePlayRoll < doublePlayThreshold){
+          const { outs, out_count } = await getGameCounts(game_id);
 
-        //If the double play were to start a new inning
-          //Then get a 
-        if((outs + 2) >= out_count){
-          //Getting the current bases because the function expects a base array to replace
-            //It will be cleared when the inning ticks over
-          const { bases_occupied } = await getGameOccupiedBases(game_id);
+          //If the double play were to start a new inning
+            //Then get a 
+          if((outs + 2) >= out_count){
+            //Getting the current bases because the function expects a base array to replace
+              //It will be cleared when the inning ticks over
+            const { bases_occupied } = await getGameOccupiedBases(game_id);
 
-          const params = {
-            runs: '',
-            bases_occupied: bases_occupied,
-            fielder_id: chosenFielder
+            const params = {
+              runs: '',
+              bases_occupied: bases_occupied,
+              fielder_id: chosenFielder
+            };
+
+            send_game_event(game_id, 'DOUBLE_PLAY', params);
+
+            increaseInning(game_id);
+
+            return;
+          }
+        }
+        //There is no double play, now need to check a lot of other options
+          //Sacrifice
+          //Fielders choice
+          //Normal ground out
+      }
+
+      //The original sim has sacrifices/fielders out only when there's someone on first base
+        //This is probably because the frist base runner is forced to go to the next base
+        //aka actual sports stuff
+      //However that's not nessacerily how actual sports stuff works
+        //You could have someone on second and want a sacrifice bun so they can get to third
+        //aka actual sports stuff
+      //So I've added another roll that has the same thresholds as the double play
+      //So that they still have the same chance of happening
+      //But it removes the arbitrary limitations of having a forced runner
+        //If there wasn't this check then groundouts would only happen when it would be the final out of the inning
+
+      const sacrificeAttemptThreshold = getThreshold(game_id, 'SACRIFICEATTEMPT', chosenFielder);
+
+      const sacrificeAttemptRoll = floatRoll(0, 1);
+
+      if(sacrificeAttemptRoll > sacrificeAttemptThreshold){
+        
+        //Sacrifice rolling
+        const sacrificeThreshold = getThreshold(game_id, 'SACRIFICE');
+
+        const sacrificeRoll = floatRoll(0, 1);
+
+        //Checking to see if the sacrifice goes throught
+          //First see if the sacrifice failed
+        if(sacrificeRoll > sacrificeThreshold){
+          //Because the sacrifice didn't work, we need to remove the furthest
+            //logic is that the batter attempted to get themselves out first to avoid the more important player
+            //And if the scenario failed the fielder would tag them out as well
+          var { bases_occupied, base_count } = await getGameOccupiedBases(game_id);
+
+          //Getting the bases that have people on them
+          const last_player_base = bases_occupied.filer(base => base).pop();
+
+          //Getting the index of it within the actual base array
+          const player_index = bases_occupied.indexOf(last_player_base);
+
+
+          //Saving the id of the player who was out
+          //Setting the last base to be null
+          let params = {
+            runner_id: bases_occupied[player_index],
+            runner_base: player_index
           };
+          bases_occupied[player_index] = '';
 
-          send_game_event(game_id, 'DOUBLE_PLAY', params);
+          //Advance all other players
+            //Sending fielder id to mark a ground out
+          let { base_arr } = advanceBasesOut(game_id, bases_occupied, base_count, chosenFielder, true);
 
-          increaseInning(game_id);
-
+          //We know intuitivly that
+          params.bases_occupied = base_arr;
+          
+          send_game_event(game_id, 'FIELDERS_CHOICE', params);
+          
           return;
         }
+
+        //This is the case where the sacrifice went through
+        //Advance all other players
+          //Sending fielder id to mark a ground out
+        let params = advanceBasesOut(game_id, bases_occupied, base_count, chosenFielder, false);
+        params.fielder_id = chosenFielder;
+
+        send_game_event(game_id, 'SACRIFICE', params);
+
+        return;
       }
+      //This is the scenario where it's a normal advancement on a ground out
+      let params = advanceBasesOut(game_id, bases_occupied, base_count, chosenFielder, false);
+      params.fielder_id = chosenFielder;
+
+      send_game_event(game_id, 'GROUNDOUT', params);
+      return
     }
-    //These are calls that don't depend on a runner being on first
+    //Because this would be the final out of the inning, it can only be a groundout
+    let params = advanceBasesOut(game_id, bases_occupied, base_count, chosenFielder, false);
+    //Because this is the final out of the inning
+    //Baserunners cannot score
+    params.runs = '';
+    params.fielder_id = chosenFielder;
+
+    send_game_event(game_id, 'GROUNDOUT', params);
     
-    //There is no double play, now need to check a lot of other options
-      //Sacrifice
-      //Fielders choice
-      //Normal ground out
-
-    //Sacrifice rolling
-    const sacrificeThreshold = getThreshold(game_id, 'SACRIFICE');
-
-    const sacrificeRoll = floatRoll(0, 1);
-
-    //Checking to see if the sacrifice goes throught
-      //First see if the sacrifice failed
-    if(sacrificeRoll > sacrificeThreshold){
-      //Because the sacrifice didn't work, we need to remove the furthest
-        //logic is that the batter attempted to get themselves out first to avoid the more important player
-        //And if the scenario failed the fielder would tag them out as well
-      var { bases_occupied, base_count } = await getGameOccupiedBases(game_id);
-
-      //Getting the bases that have people on them
-      const last_player_base = bases_occupied.filer(base => base).pop();
-
-      //Getting the index of it within the actual base array
-      const player_index = bases_occupied.indexOf(last_player_base);
-
-
-      //Saving the id of the player who was out
-      //Setting the last base to be null
-      let params = {
-        runner_id: bases_occupied[player_index],
-        runner_base: player_index
-      };
-      bases_occupied[player_index] = '';
-
-      //Advance all other players
-        //Sending fielder id to mark a ground out
-      let { base_arr } = advanceBasesOut(game_id, bases_occupied, base_count, chosenFielder, true);
-
-      //We know intuitivly that
-      params.bases_occupied = base_arr;
-      
-      send_game_event(game_id, 'FIELDERS_CHOICE', params);
-      
-      return;
-    }
-
-    //This is the case where the sacrifice went through
-    //Advance all other players
-      //Sending fielder id to mark a ground out
-    const params = advanceBasesOut(game_id, bases_occupied, base_count, chosenFielder, false);
-
-
-    send_game_event(game_id, 'SACRIFICE', params);
+    //Because the outs are equal to the total outs
+    //Change the inning
+      //Evalutates if its a top/bottom switch, or a total inning increase
+    changeInning(game_id);
 
     return;
   }
+
 
     //The ball was not caught
       //Advance as normal
@@ -481,6 +520,9 @@ function getThreshold(game_id, thresholdType, params){
     
     case 'SACRIFICE':
       threshold = get_sacrifice(batter, batter_team, game_id);
+      break;
+    case 'SACRIFICEATTEMPT':
+      threshold = get_sacrifice_attempt_threshold(batter, pitcher, params, batting_team, pitching_team, game_id);
       break;
   }
 

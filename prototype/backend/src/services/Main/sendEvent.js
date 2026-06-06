@@ -63,6 +63,17 @@ function send_game_event(game_id, event_type, params){
         case 'FIELDERS_CHOICE':
             await sendFieldersChoice(game_id, params);
             break;
+        case 'GROUNDOUT':
+            await sendGroundOut(game_id, params);
+            break;
+        case 'GAME_START':
+            break;
+        case 'GAME_START':
+            break;
+        case 'GAME_START':
+            break;
+        case 'GAME_START':
+            break;
         case 'GAME_START':
             break;
     }

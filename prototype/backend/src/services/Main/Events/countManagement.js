@@ -400,7 +400,9 @@ async function sendFieldersChoice(game_id, params){
   const batterName = await getPlayerStat('full_name', result.batter_id);
   const runnerName = await getPlayerStat('full_name', runner_id);
 
-  result.event_text = `${runnerName} out at ${runner_base}. ${batterName} reaches on fielder's choice.`;
+  let base_name;
+
+  result.event_text = `${runnerName} out at ${getBaseName(runner_base)}. ${batterName} reaches on fielder's choice.`;
 
   //If the sent bases have changed
     //If they didn't either the inning changes such as it was not a sacrafice
@@ -416,7 +418,7 @@ async function sendFieldersChoice(game_id, params){
 
 
 async function sendSacrifice(game_id, params){
-  const { runs, base_arr } = params;
+  const { runs, base_arr, fielder_id } = params;
 
   let result = await getPreviousRow(game_id);
 
@@ -429,9 +431,11 @@ async function sendSacrifice(game_id, params){
 
   //Getting the batter and fielder name
   const batterName = await getPlayerStat('full_name', result.batter_id);
+  const fielderName = await getPlayerStat('full_name', fielder_id); 
   const runnerName = await getPlayerStat('full_name', runner_id);
 
-  result.event_text = `${runnerName} out at ${runner_base}. ${batterName} reaches on fielder's choice.`;
+  //TODO: check if more than one person can score on a sacrifice
+  result.event_text = `${batterName} hit a ground out to ${fielderName}. ${runnerName} advances on the sacrifice.`;
 
   //If the sent bases have changed
     //If they didn't either the inning changes such as it was not a sacrafice
@@ -440,20 +444,78 @@ async function sendSacrifice(game_id, params){
     result.bases_occupied = bases_occupied;
   }
 
-  for(let i = 0; i < runs.length; i++){
-    const playerTeam = await getPlayerTeam(runs[i]);
-    if(playerTeam == result.home_team){
-      result.home_score += 1;
+  if(runs != ''){
+    for(let i = 0; i < runs.length; i++){
+      const playerTeam = await getPlayerTeam(runs[i]);
+      if(playerTeam == result.home_team){
+        result.home_score += 1;
+      }
+      else if(playerTeam == result.away_team){
+        result.away_score += 1;
+      }
+      const runnerName = await getPlayerStat('full_name', runs[i]);
+      result.event_text += ` ${runnerName} advances on the sacrifice.`;
     }
-    else if(playerTeam == result.away_team){
-      result.away_score += 1;
-    }
+    result.event_text += ` ${runs.length} runs scored!`;
   }
 
   const ok = await sendNewRow(result);
 
   return;
 }
+
+
+
+async function sendGroundOut(game_id, params){
+  const { runs, base_arr, fielder_id } = params;
+
+  let result = await getPreviousRow(game_id);
+
+  //Updating universial cases
+  result.event_index += 1;
+  result.outs += 1;
+  result.balls = 0;
+  result.strikes = 0;
+  result.event_type = 'GROUNDOUT';
+
+  //Getting the batter and fielder name
+  const batterName = await getPlayerStat('full_name', result.batter_id);
+  const fielderName = await getPlayerStat('full_name', fielder_id); 
+  const runnerName = await getPlayerStat('full_name', runner_id);
+
+  //TODO: check if more than one person can score on a sacrifice
+  result.event_text = `${batterName} hit a ground out to ${fielderName}. ${runnerName} advances on the sacrifice.`;
+
+  //If the sent bases have changed
+    //If they didn't either the inning changes such as it was not a sacrafice
+    //Or the person on the furthest base failed to advance, so there were no changes
+  if(result.bases_occupied != bases_occupied && bases_occupied != ''){
+    result.bases_occupied = bases_occupied;
+  }
+  
+  if(runs != ''){
+    for(let i = 0; i < runs.length; i++){
+      const playerTeam = await getPlayerTeam(runs[i]);
+      if(playerTeam == result.home_team){
+        result.home_score += 1;
+      }
+      else if(playerTeam == result.away_team){
+        result.away_score += 1;
+      }
+      const runnerName = await getPlayerStat('full_name', runs[i]);
+      result.event_text += ` ${runnerName} advances on the sacrifice.`;
+    }
+    result.event_text += ` ${runs.length} runs scored!`;
+  }
+
+  const ok = await sendNewRow(result);
+
+  return;
+}
+
+
+
+
 
 
 async function increaseResult(game_id, countVar){
@@ -467,6 +529,25 @@ async function increaseResult(game_id, countVar){
   }
 
   return false;
+}
+
+//This is so dumb
+//We love hardcoded values
+//There's /gotta/ be a smarter way to do this
+async function getBaseName(base_num){
+  switch (base_num){
+    case 0:
+      return "first";
+    case 1:
+      return "second";
+    case 2:
+      return "third";
+    case 3:
+      return "fourth";
+    case 4:
+      return "fifth";
+  }
+  return '';
 }
 
 
