@@ -236,15 +236,17 @@ function createEvent(game_id){
         //Runners on base can advance
         //This makes the scoring/advancement distince from the innging change events
       if(!outResult){
-        const { base_count, bases_occupied} = await getGameOccupiedBases(game_id);
+        const { base_count, bases_occupied } = await getGameOccupiedBases(game_id);
 
         let params = advanceBasesOut(game_id, bases_occupied, base_count);
         params.fielder_id = chosenFielder;
 
         send_game_event(game_id, 'FLYOUT', params);
+
+        //We need to get a new batter for the team
+        send_game_event(game_id, 'BATTER_UP');
         return;
       }
-
 
     //If there are not outs left in the inning
     //Then send a flyout and an inning switch
@@ -270,53 +272,6 @@ function createEvent(game_id){
         //Flyout - set
         //Inning change - if the outs would cause a change
     }
-  
-
-
-
-    //This is a ground out
-    /**
-     * FLOWCHART:
-    # -Always roll for DP. Always. Ignore the roll if no runner on first.
-    # -If runner on first (DP is possible):
-    #     -Roll Where.
-    #     -If DP pass:
-    #         -If this ends the inning, DONE
-    #         -If only forced runner is on first: Doesn't matter
-    #         -Elif two forced runners:
-    #             -Roll < 1/2 -> Out at third
-    #             -Roll > 1/2 -> Out at second
-    #         -Elif three forced runners:
-    #             -Roll < 1/3 -> Out at home
-    #             -Roll > 1/3, < 2/3 -> Out at third
-    #             -Roll > 2/3 -> Out at second
-    #         -Advance all other runners
-    #     -Elif DP fail:
-    #         -Roll Sacrifice
-    #         -If Sacrifice fail:
-    #             -Most advanced runner is out.
-    #             -Advance everyone else
-    #         -Elif Sacrifice pass:
-    #             -Roll Advancement for every baserunner
-    #             -For each runner:
-    #                  -If not forced:
-    #                      -Check advancement roll. Rolls apply in basesOccupied order aka most advanced first ([2,1,2,0] untested!!!)
-    #                  -Elif forced:
-    #                      -If initial baserunners were [2,0] AND 3rd base PASSED advancement (:ballclark:):
-    #                          -Check advancement roll for 1st base.
-    #                      -Elif any other baserunner configuration:
-    #                          -Advance
-    # -Elif no runner on first:
-    #      -For each runner:
-    #         -If not forced:
-    #             -Check advancement roll. Rolls apply in basesOccupied order aka most advanced first ([2,1,2,0] untested!!!)
-    #         -Elif forced:
-    #             -If initial baserunners were [2,0] AND 3rd base PASSED advancement (:ballclark:):
-    #                 -Check advancement roll for 1st base.
-    #             -Elif any other baserunner configuration:
-    #                 -Advance
-      */
-
 
     //If there are still outs left once this one is processed
       //Then there are a few different options that can happen
@@ -338,23 +293,32 @@ function createEvent(game_id){
 
           //If the double play were to start a new inning
             //Then get a 
+            // 
+            
+          //Getting the current bases because the function expects a base array to replace
+            //It will be cleared when the inning ticks over
+          const { bases_occupied } = await getGameOccupiedBases(game_id);
+
+          const params = {
+            runs: '',
+            bases_occupied: bases_occupied,
+            fielder_id: chosenFielder
+          };
+
           if((outs + 2) >= out_count){
-            //Getting the current bases because the function expects a base array to replace
-              //It will be cleared when the inning ticks over
-            const { bases_occupied } = await getGameOccupiedBases(game_id);
-
-            const params = {
-              runs: '',
-              bases_occupied: bases_occupied,
-              fielder_id: chosenFielder
-            };
-
             send_game_event(game_id, 'DOUBLE_PLAY', params);
 
             increaseInning(game_id);
 
             return;
           }
+            
+          send_game_event(game_id, 'DOUBLE_PLAY', params);
+          
+          //We need to get a new batter for the team
+          send_game_event(game_id, 'BATTER_UP');
+
+          return;
         }
         //There is no double play, now need to check a lot of other options
           //Sacrifice
@@ -363,13 +327,13 @@ function createEvent(game_id){
       }
 
       //The original sim has sacrifices/fielders out only when there's someone on first base
-        //This is probably because the frist base runner is forced to go to the next base
+        //This is probably because the first base runner is forced to go to the next base
         //aka actual sports stuff
       //However that's not nessacerily how actual sports stuff works
-        //You could have someone on second and want a sacrifice bun so they can get to third
+        //You could have someone on second and want a sacrifice bunt so they can get to third
         //aka actual sports stuff
       //So I've added another roll that has the same thresholds as the double play
-      //So that they still have the same chance of happening
+        //So that they still have the same chance of happening
       //But it removes the arbitrary limitations of having a forced runner
         //If there wasn't this check then groundouts would only happen when it would be the final out of the inning
 
@@ -415,6 +379,8 @@ function createEvent(game_id){
           params.bases_occupied = base_arr;
           
           send_game_event(game_id, 'FIELDERS_CHOICE', params);
+
+          send_game_event(game_id, 'BATTER_UP');
           
           return;
         }
@@ -427,14 +393,22 @@ function createEvent(game_id){
 
         send_game_event(game_id, 'SACRIFICE', params);
 
+        send_game_event(game_id, 'BATTER_UP');
+
         return;
       }
+
+      //TODO: add roll for debt after the ground out
+
       //This is the scenario where it's a normal advancement on a ground out
       let params = advanceBasesOut(game_id, bases_occupied, base_count, chosenFielder, false);
       params.fielder_id = chosenFielder;
 
       send_game_event(game_id, 'GROUNDOUT', params);
-      return
+
+      send_game_event(game_id, 'BATTER_UP');
+
+      return;
     }
     //Because this would be the final out of the inning, it can only be a groundout
     let params = advanceBasesOut(game_id, bases_occupied, base_count, chosenFielder, false);
@@ -445,6 +419,8 @@ function createEvent(game_id){
 
     send_game_event(game_id, 'GROUNDOUT', params);
     
+    //TODO: add roll for debt after ground out but before the new inning
+
     //Because the outs are equal to the total outs
     //Change the inning
       //Evalutates if its a top/bottom switch, or a total inning increase
@@ -452,10 +428,37 @@ function createEvent(game_id){
 
     return;
   }
+  //The ball was not caught
+    //Advance as normal
 
+  const homerunThreshold = getThreshold(game_id, 'HOMERUN');
 
-    //The ball was not caught
-      //Advance as normal
+  const homerunRoll = floatRoll(0, 1);
+
+  if(homerunRoll < homerunThreshold){
+
+    const batter_id = getBatter(game_id);
+    const { base_count, bases_occupied } = await getGameOccupiedBases(game_id);
+
+    const params = advanceBasesHit(game_id, base_arr, base_count, base_count, batter_id);
+
+    send_game_event(game_id, 'HOMERUN', params);
+
+    send_game_event(game_id, 'BATTER_UP');
+
+    return;
+  }
+
+  //We've already rolled for fielder
+    //If we were entirly sim accurate then it would go here as well
+
+  const tripleThreshold = getThreshold(game_id, 'TRIPLE', chosenFielder);
+
+  const tripleRoll = floatRoll(0, 1);
+
+  if(tripleRoll < tripleThreshold){
+
+  }
 
   return;
 }
@@ -523,6 +526,9 @@ function getThreshold(game_id, thresholdType, params){
       break;
     case 'SACRIFICEATTEMPT':
       threshold = get_sacrifice_attempt_threshold(batter, pitcher, params, batting_team, pitching_team, game_id);
+      break;
+    case 'TRIPLE':
+      threshold = get_triple_threshold(batter, pitcher, params, batter_team, pitching_team, game_id);
       break;
   }
 
@@ -685,11 +691,11 @@ function advanceBasesOut(game_id, base_arr, base_count, fielder_id, batter_advan
   return params;
 }
 
-function advanceBasesHit(game_id, base_arr, bases_forward, base_count){
+function advanceBasesHit(game_id, base_arr, bases_forward, base_count, batter_id){
   let runs;
 
   //Moving all players forward by the know amount
-  for(let i = 0; i < bases_forward; i++){
+  for(let i = 0; i < bases_forward - 1; i++){
     base_arr.shift('');
   }
 
@@ -711,7 +717,6 @@ function advanceBasesHit(game_id, base_arr, bases_forward, base_count){
 }
 
 
-
 function changeInning(game_id){
   //If it is currently the top of the inning
   //Switch it to the bottom of the inning
@@ -729,18 +734,6 @@ function changeInning(game_id){
 }
 /**
 *
-else:  # yes contact
-  else:
-    roll for out (threshold in progress)
-    if out:
-      num outs += 1
-      if fly:
-      else:
-        roll to choose a ground out assigned fielder (known)
-        if num outs < # of outs in a half-inning:
-          refer to https://github.com/xSke/resim/blob/83cb0d6165da8e099bc41e634272fcce8efe55d8/resim.py#L871 for double play, fielders choice, and runner advancement logic (all thresholds known)
-        else:
-          result is groundout with ground out assigned fielder responsible
       if batter has debt, result is a simple ground out or flyout, and assigned fielder is not already observed:
         roll for debt (threshold TODO)
     else:  # not an out
