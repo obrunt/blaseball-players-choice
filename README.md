@@ -1,22 +1,29 @@
-#Blaseball: Player's Choice
+# Blaseball: Player's Choice
 
 This is a project attempting to re-create the main functionality of blaseball, along with giving the user the chance to edit teams, players, and the assigned modifications. 
 
 Unlike projects like [Resim](https://github.com/xSke/resim) or [Sandbox](https://github.com/Society-for-Internet-Blaseball-Research/sandbox) this sim will _not_ be a perfect match for the flow following TGB's initial design. Rather, this is attempting to be Blaseball-enough for the purposes of allowing editability on the users end.
 
+## Set Up
 
-##References
+TODO: Once is launchable state, create a how to set up
+
+1. Install dependencies
+2. Create database
+3. Set up .env
+4. Start server
+5. Start front end
+
+## References
 
 There are other projects that have been used in part, or heavily references while working on creating this project.
 
-https://github.com/Society-for-Internet-Blaseball-Research/docs/blob/master/docs/z-datablase-guest-access.md
-
-https://api.blaseball-reference.com/docs
-
-https://github.com/xSke/resim/blob/main/formulas.py
+- [Datablase](https://github.com/Society-for-Internet-Blaseball-Research/docs/blob/master/docs/z-datablase-guest-access.md)
+- [Blaseball API Reference](https://api.blaseball-reference.com/docs)
+- [Resim](https://github.com/xSke/resim/blob/main/formulas.py)
 
 
-##Progress Tracking
+## Progress Tracking
 
 Planned workflow:
 
