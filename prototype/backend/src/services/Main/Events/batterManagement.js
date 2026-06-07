@@ -47,6 +47,9 @@ async function sendBatterUp(game_id){
 
   //TODO: add check to see if the batter is elsewhere
   //In that case, increase the position index, after 
+  
+  //TODO: roll to see if the reverberating thing happens
+  //if it does, then the same batter is a batter up
 
   //Getting how many batters the team has, so that we can loop the array
   const batterLength = await getPositionRosterLength(result.batting_team_id, 0);

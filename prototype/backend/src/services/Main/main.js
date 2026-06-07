@@ -108,16 +108,6 @@ function run(games){
   });
 
 
-
-  /*
-  games.forEach(game => {
-      
-    send_game_event(game.game_id, "GAME_START", {});
-    send_game_event(game.game_id, "INNING_TOP", {});
-
-  });
-  */
-
   var gamesComplete = new Promise((resolve, reject) => {
     games.forEach(game => {
       let gameOver = false;

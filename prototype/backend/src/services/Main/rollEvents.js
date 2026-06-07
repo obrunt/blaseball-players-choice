@@ -8,10 +8,18 @@ const { get_contact_ball_threshold, get_contact_strike_threshold } = require("..
 const { get_out_threshold, get_fly_ground_threshold} = require("../formulas/getOutThreshold");
 
 const { getGameStadium, getBattingTeam, getPitchingTeam, getBatter, getPitcher, getGameOccupiedBases, getGameCounts } = require("../database/fetchGameInfo");
-const { pitcherAcidicBlood } = require("../database/fetchGameMisc");
+const { pitcherAcidicBlood, get_big_buckets_threshold } = require("../database/fetchGameMisc");
 const { increaseResult } = require("./Events/countManagement");
+const { get_homerun_threshold, get_triple_threshold, get_double_threshold } = require("../formulas/getAdvanceThreshold");
 
 
+//These are values that would be easier to be globally access
+  //TODO: Check to see if this is a smart thing to do 
+var game_id;
+var base_count;
+var bases_occupied;
+
+var fielder_id;
 /**
  * roll for return-from-elsewhere (end event if it procs) and name unscattering (thresholds TODO?)
 roll for weather, end event if it procs (thresholds TODO)
@@ -58,11 +66,14 @@ if batter is magmatic:
   //Want to change this to something smaller
 
 
-
+//TODO:
+  //Find every instance of check inning change or batter up and combine those into one function
 function createEvent(game_id){
-  const pitchThreshold = getThreshold(game_id, 'PITCH');
+  game_id = game_id;
 
-  const throwRoll = floatRoll(0,1);
+  let base_consts = await getGameOccupiedBases(game_id);
+  base_count = base_consts.base_count;
+  bases_occupied = base_consts.bases_occupied;
 
 
   //TODO: include acidic pitchs
@@ -70,12 +81,18 @@ function createEvent(game_id){
 
   }*/
 
+  //Now that all the non game checks are done we can set a fielder
+    //They will be used in a lot of the rolls during active play
+  fielder_id = selectFielder();
+
+
+
   //Differing formulas for each situation
   //Because of that, need to have two different option once a ball is thrown
   
   let pitchType;
   //This is a strike thrown
-  if(throwRoll < pitchThreshold){
+  if(getThreshold('PITCH')){
     pitchType = 'strike';
   }
   //This is a ball
@@ -83,16 +100,12 @@ function createEvent(game_id){
     pitchType = 'ball';
   }
 
-  const swingThreshold = getThreshold(game_id, 'SWING', pitchType);
-
-  //Checking to see if the batter swung
-  const swingRoll = floatRoll(0,1);
 
   //If the batter didn't swing at the ball
-  if(swingRoll > swingThreshold){
+  if(getThreshold('SWING', pitchType)){
     //If the ball thrown was a ball
     if(pitchType == 'ball'){
-      let ballResult = await increaseResult(game_id, 'ball');
+      let ballResult = increaseResult(game_id, 'ball');
 
       //If the ball caused a walk
       if(ballResult){
@@ -120,13 +133,12 @@ function createEvent(game_id){
       return;
     }
     else if(pitchType = 'strike'){
-      const strikeResult = await increaseResult(game_id, 'strike');
 
       //If it was a strikeout
-      if(strikeResult){
+      if(increaseResult(game_id, 'strike')){
         //Checking to see if it would cause an inning change
           //This has to be before the strikeout event because that increases the outs
-        const outResult = await increaseResult(game_id, 'out');
+        const outResult = increaseResult(game_id, 'out');
 
         //Sending a strikeout event
         send_game_event(game_id, 'STRIKEOUT', false);
@@ -136,7 +148,7 @@ function createEvent(game_id){
           //Because the outs are equal to the total outs
           //Change the inning
             //Evalutates if its a top/bottom switch, or a total inning increase
-          changeInning(game_id);
+          changeInning();
           return;
         }
         //The inning doesn't change
@@ -158,31 +170,30 @@ function createEvent(game_id){
     //But if there's an error still want a way to get back to the main loop
     return;
   }
+
+
   //If the batter swung at the ball
-
-  const contactThreshold = getThreshold(game_id, 'HIT', pitchType);
-
-  const contactRoll = floatRoll(0,1);
   //If there was no contact
     //Then it's a strike swinging
-  if(contactRoll > contactThreshold){
+  if(getThreshold('HIT', pitchType)){
     //Checking to see if increasing the strikes would cause a strikeout
-    const strikeResult = await increaseResult(game_id, 'strike');
 
     //If it was a strikeout
-    if(strikeResult){
-      //Checking to see if it would cause an inning change
-      const outResult = await increaseResult(game_id, 'out');
+    if(increaseResult(game_id, 'strike')){
+      //Has to be before strikeout because strikeout increases the results
+      const outResult = increaseResult(game_id, 'out');
       
       //Sending a strikeout event
       send_game_event(game_id, 'STRIKEOUT', true);
 
+      
+      //Checking to see if it would cause an inning change
       //If the inning will change
       if(outResult){
         //Because the outs are equal to the total outs
         //Change the inning
           //Evalutates if its a top/bottom switch, or a total inning increase
-        changeInning(game_id);
+        changeInning();
       }
       //The inning doesn't change
       else{
@@ -198,48 +209,36 @@ function createEvent(game_id){
   }
   //If there was contact
 
-  const foulThreshold = getThreshold(game_id, 'FOUL');
-  const foulRoll = floatRoll(0,1);
-
   //It was a foul
-  if(foulRoll < foulThreshold){
+  if(getThreshold('FOUL')){
     //Checking to see if increasing the strikes would cause a strikeout
       //Because it's a foul we want to see if we increase the strike count or not
-    const strikeResult = await increaseResult(game_id, 'strike');
-
     //Inverting the result because it tells us if increasing would cause an out
     //So we don't want to increase if it's true
-    send_game_event(game_id, 'FOUL', !strikeResult);
+    send_game_event(game_id, 'FOUL', !increaseResult(game_id, 'strike'));
     return;
   }
 
 
   //The ball was a valid, normal swing
     //Getting the person who will catch the ball
-  const chosenFielder = selectFielder(game_id);
-
-  const outThreshold = getThreshold(game_id, 'CATCH', chosenFielder);
-
-  const outRoll = floatRoll(0, 1);
 
   //If the ball is an out
-  if(outRoll > outThreshold){
-    const outResult = await increaseResult(game_id, 'out');
-
-    const flyThreshold = getThreshold(game_id, 'FLYGROUND');
-
-    const flyRoll = floatRoll(0, 1);
-
+  if(getThreshold('CATCH')){
     //This is a fly ball
-    if(flyRoll < flyThreshold){
+    if(getThreshold('FLYGROUND')){
       //If there are outs left in the inning
         //Runners on base can advance
         //This makes the scoring/advancement distince from the innging change events
-      if(!outResult){
-        const { base_count, bases_occupied } = await getGameOccupiedBases(game_id);
+      if(!increaseResult(game_id, 'out')){
 
-        let params = advanceBasesOut(game_id, bases_occupied, base_count);
-        params.fielder_id = chosenFielder;
+        let params = {
+          bases_occupied: bases_occupied,
+          runs: '',
+          fielder_id: chosenFielder
+        }
+        params.runs = advanceBasesOut(false, false);
+
 
         send_game_event(game_id, 'FLYOUT', params);
 
@@ -252,7 +251,7 @@ function createEvent(game_id){
     //Then send a flyout and an inning switch
       let params = {
         runs: '',
-        bases_occupied: '',
+        bases_occupied: bases_occupied,
         fielder_id: chosenFielder
       };
       //Sending the flyout, then the inning change
@@ -261,7 +260,7 @@ function createEvent(game_id){
       //Because the outs are equal to the total outs
       //Change the inning
         //Evalutates if its a top/bottom switch, or a total inning increase
-      changeInning(game_id);
+      changeInning();
 
       return;
 
@@ -275,43 +274,35 @@ function createEvent(game_id){
 
     //If there are still outs left once this one is processed
       //Then there are a few different options that can happen
-    if(!outResult){
-      //Getting the bases that are loaded because it's relevent for the checks
-      const bases = JSON.parse(await getGameOccupiedBases(game_id));
+    if(!increaseResult(game_id, 'out')){
 
       //Checking to see if someone is on first base
         //If true, then a double play can be made
-      if(bases.bases_occupied[0] != ''){
-        const doublePlayThreshold = getThreshold(game_id, 'DOUBLEPLAY', chosenFielder);
-
-        const doublePlayRoll = floatRoll(0, 1);
+      if(bases_occupied[0] != ''){
 
         //Double play is happening
           //Need to check how many outs there are
-        if(doublePlayRoll < doublePlayThreshold){
+        if(getThreshold('DOUBLEPLAY')){
           const { outs, out_count } = await getGameCounts(game_id);
 
-          //If the double play were to start a new inning
-            //Then get a 
-            // 
-            
           //Getting the current bases because the function expects a base array to replace
             //It will be cleared when the inning ticks over
-          const { bases_occupied } = await getGameOccupiedBases(game_id);
 
-          const params = {
-            runs: '',
+          let params = {
             bases_occupied: bases_occupied,
+            runs: '',
             fielder_id: chosenFielder
-          };
-
+          }
+    
           if((outs + 2) >= out_count){
             send_game_event(game_id, 'DOUBLE_PLAY', params);
 
-            increaseInning(game_id);
+            increaseInning();
 
             return;
           }
+
+          params.runs = advanceBasesOut(false, true);
             
           send_game_event(game_id, 'DOUBLE_PLAY', params);
           
@@ -337,24 +328,14 @@ function createEvent(game_id){
       //But it removes the arbitrary limitations of having a forced runner
         //If there wasn't this check then groundouts would only happen when it would be the final out of the inning
 
-      const sacrificeAttemptThreshold = getThreshold(game_id, 'SACRIFICEATTEMPT', chosenFielder);
-
-      const sacrificeAttemptRoll = floatRoll(0, 1);
-
-      if(sacrificeAttemptRoll > sacrificeAttemptThreshold){
-        
-        //Sacrifice rolling
-        const sacrificeThreshold = getThreshold(game_id, 'SACRIFICE');
-
-        const sacrificeRoll = floatRoll(0, 1);
+      if(getThreshold('SACRIFICEATTEMPT')){
 
         //Checking to see if the sacrifice goes throught
           //First see if the sacrifice failed
-        if(sacrificeRoll > sacrificeThreshold){
+        if(getThreshold('SACRIFICE')){
           //Because the sacrifice didn't work, we need to remove the furthest
             //logic is that the batter attempted to get themselves out first to avoid the more important player
             //And if the scenario failed the fielder would tag them out as well
-          var { bases_occupied, base_count } = await getGameOccupiedBases(game_id);
 
           //Getting the bases that have people on them
           const last_player_base = bases_occupied.filer(base => base).pop();
@@ -373,10 +354,10 @@ function createEvent(game_id){
 
           //Advance all other players
             //Sending fielder id to mark a ground out
-          let { base_arr } = advanceBasesOut(game_id, bases_occupied, base_count, chosenFielder, true);
+          advanceBasesOut(true, true);
 
           //We know intuitivly that
-          params.bases_occupied = base_arr;
+          params.bases_occupied = bases_occupied;
           
           send_game_event(game_id, 'FIELDERS_CHOICE', params);
 
@@ -386,10 +367,14 @@ function createEvent(game_id){
         }
 
         //This is the case where the sacrifice went through
-        //Advance all other players
-          //Sending fielder id to mark a ground out
-        let params = advanceBasesOut(game_id, bases_occupied, base_count, chosenFielder, false);
-        params.fielder_id = chosenFielder;
+          //Advance all other players
+            //Sending fielder id to mark a ground out
+        let params = {
+          bases_occupied: bases_occupied,
+          runs: '',
+          fielder_id: chosenFielder
+        }
+        params.runs = advanceBasesOut(false, true);
 
         send_game_event(game_id, 'SACRIFICE', params);
 
@@ -401,8 +386,12 @@ function createEvent(game_id){
       //TODO: add roll for debt after the ground out
 
       //This is the scenario where it's a normal advancement on a ground out
-      let params = advanceBasesOut(game_id, bases_occupied, base_count, chosenFielder, false);
-      params.fielder_id = chosenFielder;
+      let params = {
+        bases_occupied: bases_occupied,
+        runs: '',
+        fielder_id: chosenFielder
+      }
+      params.runs = advanceBasesOut(false, true);
 
       send_game_event(game_id, 'GROUNDOUT', params);
 
@@ -411,11 +400,15 @@ function createEvent(game_id){
       return;
     }
     //Because this would be the final out of the inning, it can only be a groundout
-    let params = advanceBasesOut(game_id, bases_occupied, base_count, chosenFielder, false);
+    advanceBasesOut(false, true);
+
+    let params = {
+      bases_occupied: bases_occupied,
+      runs: '',
+      fielder_id: chosenFielder
+    }
     //Because this is the final out of the inning
     //Baserunners cannot score
-    params.runs = '';
-    params.fielder_id = chosenFielder;
 
     send_game_event(game_id, 'GROUNDOUT', params);
     
@@ -424,25 +417,35 @@ function createEvent(game_id){
     //Because the outs are equal to the total outs
     //Change the inning
       //Evalutates if its a top/bottom switch, or a total inning increase
-    changeInning(game_id);
+    changeInning();
 
     return;
   }
   //The ball was not caught
     //Advance as normal
 
-  const homerunThreshold = getThreshold(game_id, 'HOMERUN');
+  //We check for base advances in most significant to least significant
+    //HomeRuns
+    //In theory - games with four bases before home could have a Fourth
+    //Triple
+    //Double
+    //Single is the default
 
-  const homerunRoll = floatRoll(0, 1);
+  if(getThreshold('HOMERUN')){
 
-  if(homerunRoll < homerunThreshold){
+    const batter_id = getBatter();
 
-    const batter_id = getBatter(game_id);
-    const { base_count, bases_occupied } = await getGameOccupiedBases(game_id);
+    let params;
 
-    const params = advanceBasesHit(game_id, base_arr, base_count, base_count, batter_id);
+    params.runs = advanceBasesHit(base_count, batter_id);
+    params.bases_occupied = bases_occupied;
 
-    send_game_event(game_id, 'HOMERUN', params);
+    if(getThreshold('BUCKETS')){
+      //Adding the batter ID to the end of the runs
+      params.runs.push(runs[runs.length - 1]);
+    }
+
+    send_game_event(game_id, 'HOME_RUN', params);
 
     send_game_event(game_id, 'BATTER_UP');
 
@@ -450,21 +453,55 @@ function createEvent(game_id){
   }
 
   //We've already rolled for fielder
-    //If we were entirly sim accurate then it would go here as well
+    //If we were entirely sim accurate then it would go here as well
 
-  const tripleThreshold = getThreshold(game_id, 'TRIPLE', chosenFielder);
+  if(getThreshold('TRIPLE')){
+    const batter_id = getBatter();
 
-  const tripleRoll = floatRoll(0, 1);
+    let params;
 
-  if(tripleRoll < tripleThreshold){
+    params.runs = advanceBasesHit(3, batter_id);
+    params.bases_occupied = bases_occupied;
 
+    send_game_event(game_id, 'TRIPLE', params);
+
+    send_game_event(game_id, 'BATTER_UP');
+
+    return;
   }
+
+  
+  if(getThreshold('DOUBLE')){
+    const batter_id = getBatter();
+
+    let params;
+
+    params.runs = advanceBasesHit(2, batter_id);
+    params.bases_occupied = bases_occupied;
+
+    send_game_event(game_id, 'DOUBLE', params);
+
+    send_game_event(game_id, 'BATTER_UP');
+
+    return;
+}
+
+  const batter_id = getBatter();
+
+  let params;
+
+  params.runs = advanceBasesHit(1, batter_id);
+  params.bases_occupied = bases_occupied;
+
+  send_game_event(game_id, 'SINGLE', params);
+
+  send_game_event(game_id, 'BATTER_UP');
 
   return;
 }
 
 
-function getThreshold(game_id, thresholdType, params){
+function getThreshold(thresholdType, params){
   //Getting the most commonly used values
   const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
 
@@ -472,7 +509,7 @@ function getThreshold(game_id, thresholdType, params){
 
   switch(thresholdType){
     case 'PITCH':
-      threshold = get_strike_threshold(batter, batting_team, pitcher, pitching_team, game_id);
+      threshold = 1 - get_strike_threshold(batter, batting_team, pitcher, pitching_team, game_id);
       break;
 
     case 'SWING':
@@ -506,36 +543,53 @@ function getThreshold(game_id, thresholdType, params){
       break;
 
     case 'FOUL':
-      threshold = get_foul_threshold(batter, batting_team, game_id);
+      //If it's a foul we want to invert the threshold 
+        //Math.random < threshold = Math.random > 1 - threshold
+        //Getting the value under the line than over the line
+      threshold = 1 - get_foul_threshold(batter, batting_team, game_id);
       break;
 
     case 'CATCH':
-      threshold = await get_out_threshold(batter, pitcher, params, batting_team, pitching_team, game_id);
+      threshold = await get_out_threshold(batter, pitcher, fielder_id, batting_team, pitching_team, game_id);
       break;
 
     case 'FLYGROUND':
-      threshold = get_fly_ground_threshold(batter, pitcher, batting_team, pitching_team, game_id);
+      threshold = 1 - get_fly_ground_threshold(batter, pitcher, batting_team, pitching_team, game_id);
       break;
 
     case 'DOUBLEPLAY':
-      threshold = get_double_play_threshold(batter, pitcher, params, batting_team, pitching_team, game_id);
+      threshold = 1 - get_double_play_threshold(batter, pitcher, fielder_id, batting_team, pitching_team, game_id);
       break;
     
     case 'SACRIFICE':
-      threshold = get_sacrifice(batter, batter_team, game_id);
+      threshold = 1 - get_sacrifice(batter, batter_team, game_id);
       break;
+
     case 'SACRIFICEATTEMPT':
-      threshold = get_sacrifice_attempt_threshold(batter, pitcher, params, batting_team, pitching_team, game_id);
+      threshold = get_sacrifice_attempt_threshold(batter, pitcher, fielder_id, batting_team, pitching_team, game_id);
       break;
+
+    case 'HOMERUN':
+      threshold = 1 - get_homerun_threshold(batter, pitcher, batting_team, pitching_team, game_id);
+      break;
+
+    case 'BUCKETS':
+      threshold = 1 - get_big_buckets_threshold(batter, batting_team, game_id);
+      break;
+
     case 'TRIPLE':
-      threshold = get_triple_threshold(batter, pitcher, params, batter_team, pitching_team, game_id);
+      threshold = 1 - get_triple_threshold(batter, pitcher, fielder_id, batter_team, pitching_team, game_id);
+      break;
+
+    case 'BASEADVANCEMENT':
+      threshold = 1 - get_base_advancement_threshold(params, fielder_id, batter_team, pitching_team, game_id);
       break;
   }
 
-  return threshold;
+  return Math.random() > threshold;
 }
 
-function selectFielder(game_id){
+function selectFielder(){
   const pitching_team = await getPitchingTeam(game_id);
 
   //Getting the batters who are present
@@ -551,71 +605,8 @@ function selectFielder(game_id){
   return fielder_ids[fielderRoll];
 }
 
-/*
-function advanceBases(game_id, base_arr, base_forward, base_count, advance_type, fielder_id){
-  const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
 
-  //Getting the id of a player if they scored
-  let runScored = '';
-
-  const batting_team = getBattingTeam(game_id);
-
-  //Looping through the base array backwards to prevent "clogging" up the advancements
-    //Basecount minus one because the final one is the home plate
-  for(let i = base_count - 1; i >= 0; i--){
-    //If there is someone on the current base
-    if(base_arr[i] != ''){
-      //Checking to see if they can advance
-        //Switching between the different secnarios 
-      let advanceThreshold;
-
-      switch(advance_type){
-        case 'GROUNDOUT':
-          advanceThreshold = get_advance_base_out_ground(base_arr[i], fielder_id, batting_team, pitching_team, game_id);
-          break;
-        case 'FLYOUT':
-          advanceThreshold = get_advance_base_out_fly(base_arr[i], batting_team, i, game_id);
-          break;
-        case 'SINGLE':
-          break;
-        case 'DOUBLE':
-          break;
-        case 'HOMERUN':
-          break;
-        
-      }
-
-      //const advanceThreshold = get_advance_base_out(base_arr[i], batting_team, i, game_id);
-
-      const advanceRoll = floatRoll(0, 1);
-
-      if(advanceRoll < advanceThreshold){
-        //If advancing bases means they're going home or beyond
-        if((i + base_forward) >= base_count){
-          //Run scored
-          runScored.push(base_arr[i]);
-          base_arr[i] = '';
-        }
-        //Checking that the base they're moving to is empty
-        else if(base[i + base_forward] == ''){
-          //Moving the player up one base
-          base_arr[i + base_forward] = base_arr[i];
-          base_arr[i] = '';
-        }
-      }
-    }
-  }
-
-  const params = {
-    runs: runScored,
-    base_arr: base_arr
-  }
-
-  return params;
-}
-  */
-
-function advanceBasesOut(game_id, base_arr, base_count, fielder_id, batter_advance){
+function advanceBasesOut(batter_advance, groundout){
   const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
   //Getting the id of a player if they scored
   let runScored = '';
@@ -623,16 +614,16 @@ function advanceBasesOut(game_id, base_arr, base_count, fielder_id, batter_advan
   const batting_team = getBattingTeam(game_id);
 
   //Looping through the base array backwards to prevent "clogging" up the advancements
-  for(let i = base_arr.length - 1; i >= 0; i--){
+  for(let i = bases_occupied.length - 1; i >= 0; i--){
     //If there is someone on the current base
-    if(base_arr[i] != ''){
+    if(bases_occupied[i] != ''){
       //Checking to see what advancement threshold we use 
       let advanceThreshold;
-      if(fielder_id != '') {
-        advanceThreshold = get_advance_base_out_ground(base_arr[i], fielder_id, batting_team, pitching_team, game_id);
+      if(groundout) {
+        advanceThreshold = get_advance_base_out_ground(bases_occupied[i], fielder_id, batting_team, pitching_team, game_id);
       }
       else {
-        advanceThreshold = get_advance_base_out_fly(base_arr[i], batting_team, i, game_id);
+        advanceThreshold = get_advance_base_out_fly(bases_occupied[i], batting_team, i, game_id);
       }
 
       const advanceRoll = floatRoll(0, 1);
@@ -641,40 +632,40 @@ function advanceBasesOut(game_id, base_arr, base_count, fielder_id, batter_advan
         //If advancing bases means they're going home
         if(i+1 == base_count){
           //Run scored
-          runScored.push(base_arr[i]);
-          base_arr[i] = '';
+          runScored.push(bases_occupied[i]);
+          bases_occupied[i] = '';
         }
         //Checking that the base they're moving to is empty
         else if(base[i+1] == ''){
           //Moving the player up one base
-          base_arr[i+1] = base_arr[i];
-          base_arr[i] = '';
+          bases_occupied[i+1] = bases_occupied[i];
+          bases_occupied[i] = '';
         }
       }
     }
   }
 
   if(batter_advance){
-    if(base_arr[0] == ''){
-      base_arr[0] = batter; 
+    if(bases_occupied[0] == ''){
+      bases_occupied[0] = batter; 
     }
     else{
       //Getting the first un ocupied base
-      const i = base_arr.indexOf('');
+      const i = bases_occupied.indexOf('');
       if(i != -1){
         //Removing the unocupied base
         //And adding the batter to the front
           //This shifts everyone up
-        base_arr.splice(i, 1);
-        base_arr.unshift(batter);
+        bases_occupied.splice(i, 1);
+        bases_occupied.unshift(batter);
       }
       else{
         //This means that all the bases are occupied
         //So we add the final base runner to the runs array
         //Then shift everyone up one
-        runScored.push(base_arr[base_arr.length - 1]);
-        base_arr.pop();
-        base_arr.unshift(batter);
+        runScored.push(bases_occupied[bases_occupied.length - 1]);
+        bases_occupied.pop();
+        bases_occupied.unshift(batter);
       }
     }
   }
@@ -683,41 +674,47 @@ function advanceBasesOut(game_id, base_arr, base_count, fielder_id, batter_advan
   //TODO: changing the runs to an array will probably cause some issues later
     //Have to change any instances of runs to loop throught the array and increase the runs
     //Also have to deal with the event message
-  const params = {
-    runs: runScored,
-    base_arr: base_arr
-  }
 
-  return params;
+  return runScored;
 }
 
-function advanceBasesHit(game_id, base_arr, bases_forward, base_count, batter_id){
-  let runs;
+function advanceBasesHit(bases_forward, batter_id){
+  let runScored;
 
   //Moving all players forward by the know amount
-  for(let i = 0; i < bases_forward - 1; i++){
-    base_arr.shift('');
+  for(let i = 0; i < bases_forward; i++){
+    bases_occupied.shift('');
+
+    //Getting the last index of the array to pop
+      //Check to see if someone made it home
+      //Add them to the score if they did
+    if(bases_occupied[bases_occupied.length - 1] != ''){
+      runScored.push(bases_occupied[bases_occupied.length - 1]);
+    }
+
+    bases_occupied.pop();
   }
 
   //Getting all the values that are over the "active" bases
-  for(let j = base_arr.length; j < base_count; j--){
-    //If an 
-    if(base_arr[j] != ''){
-      runs.push(base_arr[j]);
+  for(let j = bases_occupied.length - 1; j > 0; j--){
+    if(bases_occupied[j] != '' && bases_occupied[j + 1] == '' && getThreshold('BASEADVANCEMENT', bases_occupied[j])){
+      bases_occupied[j + 1] = bases_occupied[j];
+      bases_occupied[j] = '';
     }
-    base_arr.pop();
   }
 
-  const result = {
-    runs: runs,
-    base_arr: base_arr
+  //If someone on third advanced to home after the inital advancement shifts
+  if (bases_occupied.length == base_count){
+    runScored.push(bases_occupied[bases_occupied.length - 1]);
+
+    bases_occupied.pop();
   }
 
-  return result;
+  return runScored;
 }
 
 
-function changeInning(game_id){
+function changeInning(){
   //If it is currently the top of the inning
   //Switch it to the bottom of the inning
   //Otherwise increase the inning
@@ -732,36 +729,6 @@ function changeInning(game_id){
   }
   return;
 }
-/**
-*
-      if batter has debt, result is a simple ground out or flyout, and assigned fielder is not already observed:
-        roll for debt (threshold TODO)
-    else:  # not an out
-      roll for home run (threshold known)
-      if home run:
-        result is home run
-        roll buckets (threshold unknown)
-      else:  # base hit
-        roll for fielder (known)
-        roll for double (threshold known)
-        roll for triple (threshold known)
-        if triples roll passed:
-          result is triple
-        else if doubles roll passed:
-          result is double
-        else:
-          result is single
-        apply automatic advancement based on the hit type
-        for each runner in reverse order:
-          if the next base is open:
-            roll for extra runner advancement (threshold TODO)
-if batter is reverberating and this event ends the PA and it wasn't a hit or HR:
-  roll for reverberating (threshold TODO)
-if the attractor async thing happened:  # idk ask astrid
-  roll for attractor's fake stars (formula known)
- */
-
-
 
 
 module.export = {

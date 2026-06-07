@@ -66,15 +66,20 @@ function send_game_event(game_id, event_type, params){
         case 'GROUNDOUT':
             await sendGroundOut(game_id, params);
             break;
-        case 'GAME_START':
+        case 'HOME_RUN':
+            await sendHomeRun(game_id, params);
             break;
-        case 'GAME_START':
+        case 'TRIPLE':
+            await sendTriple(game_id, params);
             break;
-        case 'GAME_START':
+        case 'DOUBLE':
+            await sendTriple(game_id, params);
             break;
-        case 'GAME_START':
+        case 'SINGLE':
+            await sendTriple(game_id, params);
             break;
-        case 'GAME_START':
+        case 'GAME_END':
+            await sendGameEnd(game_id, params);
             break;
     }
 

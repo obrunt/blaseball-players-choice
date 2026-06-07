@@ -418,7 +418,7 @@ async function sendFieldersChoice(game_id, params){
 
 
 async function sendSacrifice(game_id, params){
-  const { runs, base_arr, fielder_id } = params;
+  const { runs, bases_occupied, fielder_id } = params;
 
   let result = await getPreviousRow(game_id);
 
@@ -465,9 +465,8 @@ async function sendSacrifice(game_id, params){
 }
 
 
-
 async function sendGroundOut(game_id, params){
-  const { runs, base_arr, fielder_id } = params;
+  const { runs, bases_occupied, fielder_id } = params;
 
   let result = await getPreviousRow(game_id);
 
@@ -514,11 +513,171 @@ async function sendGroundOut(game_id, params){
 }
 
 
+//TODO: add solo and plural management for the event text
+
+async function sendHomeRun(game_id, parmas) {
+
+  const { runs, bases_occupied } = params;
+
+  let result = await getPreviousRow(game_id);
+
+  //Updating universial cases
+  result.event_index += 1;
+  result.balls = 0;
+  result.strikes = 0;
+  result.bases_occupied = bases_occupied;
+
+  //Getting the batter name
+  const batterName = await getPlayerStat('full_name', result.batter_id);
+
+  result.event_type = 'HOME_RUN';
+  result.event_text = `${batterName} hits a ${runs.length}-run home run.`;
+  
+  const playerTeam = await getPlayerTeam(runs[i]);
+  if(playerTeam == result.home_team){
+    result.home_score += runs.length;
+  }
+  else if(playerTeam == result.away_team){
+    result.away_score += runs.length;
+  }
+
+
+  result.event_text += `\n ${runs.length} Runs scored!`;
+
+
+  const ok = await sendNewRow(result);
+
+  return;
+}
+
+async function sendTriple(game_id, parmas) {
+
+  const { runs, bases_occupied } = params;
+
+  let result = await getPreviousRow(game_id);
+
+  //Updating universial cases
+  result.event_index += 1;
+  result.balls = 0;
+  result.strikes = 0;
+  result.bases_occupied = bases_occupied;
+
+  //Getting the batter name
+  const batterName = await getPlayerStat('full_name', result.batter_id);
+
+  result.event_type = 'TRIPLE';
+  result.event_text = `${batterName} hits a Triple!`;
+  
+  if(runs){
+    const runnerName = await getPlayerStat('full_name', runs[0]);
+
+    result.event_text += ` ${runnerName} scores!`;
+
+    const playerTeam = await getPlayerTeam(runs[0]);
+
+    if(playerTeam == result.home_team){
+      result.home_score += runs.length;
+    }
+    else if(playerTeam == result.away_team){
+      result.away_score += runs.length;
+    }
+
+    result.event_text += `\n ${runs.length} Runs scored!`;
+  }
+
+  const ok = await sendNewRow(result);
+
+  return;
+}
+
+async function sendDouble(game_id, parmas) {
+
+  const { runs, bases_occupied } = params;
+
+  let result = await getPreviousRow(game_id);
+
+  //Updating universial cases
+  result.event_index += 1;
+  result.balls = 0;
+  result.strikes = 0;
+  result.bases_occupied = bases_occupied;
+
+  //Getting the batter name
+  const batterName = await getPlayerStat('full_name', result.batter_id);
+
+  result.event_type = 'DOUB:E';
+  result.event_text = `${batterName} hits a Double!`;
+  
+  if(runs){
+    const runnerName = await getPlayerStat('full_name', runs[0]);
+
+    result.event_text += ` ${runnerName} scores!`;
+
+    const playerTeam = await getPlayerTeam(runs[0]);
+
+    if(playerTeam == result.home_team){
+      result.home_score += runs.length;
+    }
+    else if(playerTeam == result.away_team){
+      result.away_score += runs.length;
+    }
+
+    result.event_text += `\n ${runs.length} Runs scored!`;
+  }
+
+  const ok = await sendNewRow(result);
+
+  return;
+}
+
+
+
+async function sendSingle(game_id, parmas) {
+
+  const { runs, bases_occupied } = params;
+
+  let result = await getPreviousRow(game_id);
+
+  //Updating universial cases
+  result.event_index += 1;
+  result.balls = 0;
+  result.strikes = 0;
+  result.bases_occupied = bases_occupied;
+
+  //Getting the batter name
+  const batterName = await getPlayerStat('full_name', result.batter_id);
+
+  result.event_type = 'SINGLE';
+  result.event_text = `${batterName} hits a Single!`;
+  
+  if(runs){
+    const runnerName = await getPlayerStat('full_name', runs[0]);
+
+    result.event_text += ` ${runnerName} scores!`;
+
+    const playerTeam = await getPlayerTeam(runs[0]);
+
+    if(playerTeam == result.home_team){
+      result.home_score += runs.length;
+    }
+    else if(playerTeam == result.away_team){
+      result.away_score += runs.length;
+    }
+
+    result.event_text += `\n ${runs.length} Runs scored!`;
+  }
+
+  const ok = await sendNewRow(result);
+
+  return;
+}
 
 
 
 
-async function increaseResult(game_id, countVar){
+
+
+function increaseResult(game_id, countVar){
   //Getting the counts for the current inning
   const gameCounts = await getGameCounts(game_id);
 
