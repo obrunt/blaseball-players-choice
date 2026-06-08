@@ -1,10 +1,10 @@
 
 const { getMultiplier } = require("./getMultiplier");
 
-//const { getVibes, getPlayerStat } = require("../database/fetchPlayerInfo");
-//const { getGameSeason, getGameDay } = require("../database/fetchSeasonDayGames");
-//const { getGameStadium, getGameInning, getPlayersTeams } = require("../database/fetchGameInfo");
-//const { getStadiumStat } = require("../database/fetchStadiumInfo");
+const { getVibes, getPlayerStat } = require("../database/fetchPlayerInfo");
+const { getGameSeason, getGameDay } = require("../database/fetchSeasonDayGames");
+const { getGameStadium, getGameInning, getPlayersTeams } = require("../database/fetchGameInfo");
+const { getStadiumStat } = require("../database/fetchStadiumInfo");
 
 //TODO: change all the get requireed info at the beginning to maybe a helper function
     //This would be used by almost all of the formula files
@@ -53,7 +53,7 @@ async function get_homerun_threshold(game_id){
                     - 0.08 * overpowerment_supressed
                     - 0.18 * ballpark_sum;
 
-    return threshold;
+    return parseFloat(threshold.toFixed(4));
 }
 
 
@@ -71,10 +71,10 @@ async function get_triple_threshold(fielder_id, game_id){
     const fielder_vibes = await getVibes(fielder_id, day);
 
     let hype = await getStadiumStat('hype', stadium_id);
+
     if(!inning.top_of_inning){
         hype *= -1;
     }
-
 
     let multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'ground_friction');
     const batter_ground_friction = (((await getPlayerStat('ground_friction', batter)) * multiplier) - 0.2 * hype ) * (1 + 0.2 * batter_vibes);
@@ -118,11 +118,11 @@ async function get_triple_threshold(fielder_id, game_id){
                     + 0.1 * ballpark_sum;
     }
 
-    return threshold;
+    return parseFloat(threshold.toFixed(4));
 }
 
 
-async function get_double_threshold(game_id){
+async function get_double_threshold(fielder_id, game_id){
 
     const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
 
@@ -182,7 +182,7 @@ async function get_double_threshold(game_id){
                     + ballpark_sum;
     }
 
-    return threshold;
+    return parseFloat(threshold.toFixed(4));
 }
 
 async function get_base_advancement_threshold(runner_id, fielder_id, game_id){
@@ -206,24 +206,14 @@ async function get_base_advancement_threshold(runner_id, fielder_id, game_id){
     multiplier = getMultiplier(fielder_id, pitching_team, stadium_id, game_id, season, day, 'tenaciousnes');
     const fielder_tenaciousnes = (await getPlayerStat('tenaciousnes', fielder_id)) * multiplier * (1 + 0.2 * fielder_vibes);
     
-
     const threshold = 0.7 - 1.0 * fielder_tenaciousnes + 0.6 * runner_continuation;
 
     //Making sure the value is between 0.01 and 0.95
-    return min(max(threshold, 0.01), 0.95);
-}
-
-
-async function sum(a, b) {
-    const mult = await getMultiplier();
-
-    return (a + b) * mult;
+    return Math.min(Math.max(parseFloat(threshold.toFixed(4)), 0.01), 0.95);
 }
 
 
 module.exports = {
-    sum,
-
     get_homerun_threshold,
     get_triple_threshold,
     get_double_threshold,

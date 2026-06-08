@@ -2,11 +2,11 @@ const { getMultiplier } = require("./getMultiplier");
 
 const { getVibes, getPlayerStat } = require("../database/fetchPlayerInfo");
 const { getGameSeason, getGameDay } = require("../database/fetchSeasonDayGames");
-const { getGameStadium, getGameInning } = require("../database/fetchGameInfo");
+const { getGameStadium, getGameInning, getPlayersTeams } = require("../database/fetchGameInfo");
 const { getStadiumStat } = require("../database/fetchStadiumInfo");
 
 
-function get_out_threshold(game_id){
+async function get_out_threshold(fielder_id, game_id){
 
     const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
     
@@ -83,11 +83,11 @@ function get_out_threshold(game_id){
             + 0.02 * stadium_sum;
     }
 
-    return threshold;
+    return parseFloat(threshold.toFixed(4));
 }
 
 
-function get_fly_ground_threshold(game_id){
+async function get_fly_ground_threshold(game_id){
 
     const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
 
@@ -120,12 +120,12 @@ function get_fly_ground_threshold(game_id){
 
     const threshold = 0.18 + 0.3 * (batter_buoyancy + 0.2 * stadium_hype) - 0.16 * (pitcher_suppression + 0.2 * stadium_hype) - 0.1 * stadium_ominousness;
 
-    return max(threshold, 0.01);
+    return Math.max(parseFloat(threshold.toFixed(4)), 0.01);
 }
 
 
 
-function get_advance_base_out_fly(runner_id, base_index, game_id){
+async function get_advance_base_out_fly(runner_id, base_index, game_id){
 
     const { batting_team } = await getPlayersTeams(game_id);
 
@@ -174,11 +174,11 @@ function get_advance_base_out_fly(runner_id, base_index, game_id){
             - 0.10 * stadium_inconvenience;
     }
 
-    return threshold;
+    return parseFloat(threshold.toFixed(4));
 }
 
 
-function get_advance_base_out_ground(runner_id, fielder_id, game_id){
+async function get_advance_base_out_ground(runner_id, fielder_id, game_id){
 
     const { batting_team, pitching_team } = await getPlayersTeams(game_id);
 
@@ -210,7 +210,7 @@ function get_advance_base_out_ground(runner_id, fielder_id, game_id){
                 - 0.10 * stadium_inconvenience
                 - 0.10 * stadium_elongation;
 
-    return threshold;
+    return parseFloat(threshold.toFixed(4));
 }
 
 
