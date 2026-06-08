@@ -42,8 +42,18 @@ async function getStadiumStat(stat, stadium){
 
 }
 
+function setStadiumStat(value){
+  getStadiumStat = value;
+}
+
+function setStadiumMods(value){
+  getStadiumMods = value;
+}
 
 module.exports = {
-    getStadiumStat,
-    getStadiumMods
+  getStadiumStat,
+  getStadiumMods,
+
+  setStadiumMods,
+  setStadiumStat
 }

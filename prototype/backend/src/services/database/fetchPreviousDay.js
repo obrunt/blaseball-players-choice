@@ -3,7 +3,7 @@ const { roll } = require("../../../middleware/randomRoll");
 
 
 //Getting all of the teams within the layers of the subleague
-async function getLateGameDate(){
+async function getLastGameDate(){
 
   //This is getting the previous season and day so that we can use it later
     //Including picher check because pitchers are decided day off
@@ -28,10 +28,15 @@ async function getLateGameDate(){
 }
 
 function fetch_previous_date(){
-  return await getLateGameDate();
+  return await getLastGameDate();
 }
 
+function setLastGameDate(value){
+  getLastGameDate = value;
+}
 
 module.exports = {
-  fetch_previous_date
+  fetch_previous_date,
+
+  setLastGameDate
 };

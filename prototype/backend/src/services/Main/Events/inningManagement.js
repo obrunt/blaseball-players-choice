@@ -1,7 +1,7 @@
 const { pool } = require("../../../../config/db");
 const { roll } = require("../../../middleware/randomRoll");
 
-const { getPositionRosterLength, getPlayerFromIndex, getTeamStat } = require("../../database/fetchTeamInfo"); 
+const { getTeamStat } = require("../../database/fetchTeamInfo"); 
 const { getPreviousBatter } = require("batterManagement");
 
 

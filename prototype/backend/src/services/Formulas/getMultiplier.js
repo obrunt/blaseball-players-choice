@@ -1,4 +1,5 @@
-const { getBattingTeam, isMaximumBaseball, getBatterAppearanceCount, getGameWeather } = require("../database/fetchGameInfo");
+const { getBattingTeam, getBatterAppearanceCount, getGameWeather } = require("../database/fetchGameInfo");
+const { isMaximumBaseball } = require("../database/fetchGameMisc");
 const { getPlayerMods, getPlayerTeam, getPlayerPosition } = require("../database/fetchPlayerInfo");
 const { getTeamMods, getTeamActivePlayers } = require("../database/fetchTeamInfo");
 
@@ -263,3 +264,12 @@ function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, att
 }
 
 
+function setMultiplier(value){
+    getMultiplier = value;
+}
+
+module.exports = {
+    getMultiplier,
+
+    setMultiplier
+}

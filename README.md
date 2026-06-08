@@ -29,14 +29,22 @@ Planned workflow:
 
 - [ ] Create a basic baseball sim
     - [ ] Create game logic
+        - [x] Assign game order
+        - [x] Formulas
+        - [ ] Event outcomes
+        - [ ] Actual baseball rules
+    - [ ] Handle post season and assign championship
+- [ ] Create unit test for the different parts of the function
+    - [ ] Game logic
+    - [ ] Event flow order
+    - [ ] Formulas
+    - [ ] Event async order
+    - [ ] Postseason
+- [ ] Create database and inserts
     - [ ] Create components of play
         - [ ] Create teams function
         - [ ] Create players function
-        - [x] Assign game order
-    - [ ] Handle post season and assign championship
-- [ ] Create test suites to run whenever the program is compiled
-    - [ ] Game logic
-    - [ ] Event flow order
+- [ ] Create more tests for the database and new functions
     - [ ] Player Creation
     - [ ] Team Creation
     - [ ] Database

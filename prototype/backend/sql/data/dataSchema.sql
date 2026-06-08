@@ -116,7 +116,6 @@ ALTER TABLE ONLY data.divisions ALTER COLUMN division_db_id SET DEFAULT nextval(
 
 
 
-
 CREATE TABLE IF NOT EXISTS data.teams
 (
     id INT NOT NULL,
@@ -127,34 +126,42 @@ CREATE TABLE IF NOT EXISTS data.teams
     valid_from TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     valid_until TIMESTAMP,
     hash VARCHAR(36) DEFAULT (UUID()),
-    url_slug VARCHAR,
+    url_slug VARCHAR(30),
     card_id INT,
     stadium_id VARCHAR(36),
     team_abbreviation VARCHAR(10),
     team_main_color VARCHAR(10),
     team_secondary_color VARCHAR(10),
-    team_emoji VARCHAR,
-    team_slogan VARCHAR,
+    team_emoji VARCHAR(1),
+    team_slogan VARCHAR(50),
     deceased BOOL NOT NULL DEFAULT false,
 	
 	CONSTRAINT teams_pkey PRIMARY KEY (id),
     CONSTRAINT teams_no_dupes UNIQUE (team_id, valid_from),
 
 	CONSTRAINT teams_card_id_fkey FOREIGN KEY (card_id)
-        REFERENCES taxa.card (card_id) MATCH SIMPLE,	
-)
+        REFERENCES taxa.card (card_id) MATCH SIMPLE
+);
 
+CREATE TRIGGER team_insert
+    AFTER INSERT
+    ON data.teams FOR EACH ROW
+		UPDATE data.teams 
+        SET url_slug = REPLACE(REGEXP_REPLACE(LOWER(REPLACE(nickname,'&','and')), '[^A-Za-z'' ]', '','g'),' ','-')
+		WHERE url_slug IS NULL;	
+
+
+
+/*
 CREATE OR ALTER TRIGGER team_insert
     AFTER INSERT
     ON data.teams
     FOR EACH ROW
     BEGIN
-		UPDATE data.teams SET url_slug = 'crabs-2' WHERE team_id = '9494152b-99f6-4adb-9573-f9e084bc813f';
-		UPDATE data.teams SET url_slug = 'artists-2' WHERE team_id = 'd6a352fc-b675-40a0-864d-f4fd50aaeea0'; 
 		UPDATE data.teams SET url_slug = replace(regexp_replace(lower(unaccent(replace(new.nickname,'&','and'))), '[^A-Za-z'' ]', '','g'),' ','-')
 			WHERE coalesce(url_slug,'') = '';	
 	END;
-
+*/
 
 
 
@@ -176,7 +183,7 @@ CREATE TABLE IF NOT EXISTS data.team_modifications
 
     CONSTRAINT team_modifications_pkey PRIMARY KEY (team_modifications_id),
 	CONSTRAINT teams_modification_fkey FOREIGN KEY (modification)
-        REFERENCES taxa.modifications (modification) MATCH SIMPLE,
+        REFERENCES taxa.modifications (modification) MATCH SIMPLE
 )
 
 

@@ -1,7 +1,7 @@
 const { getMultiplier } = require("getMultiplier");
 
 const { getVibes, getPlayerStat } = require("../database/fetchPlayerInfo");
-const { fetchGameSeason, fetchGameDay } = require("../database/fetchSeasonDayGames");
+const { getGameSeason, getGameDay } = require("../database/fetchSeasonDayGames");
 const { getGameStadium, getGameInning } = require("../database/fetchGameInfo");
 const { getStadiumStat } = require("../database/fetchStadiumInfo");
 
@@ -13,8 +13,8 @@ function get_swing_strike_threshold(game_id){
     const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
 
 
-    const season = await fetchGameSeason(game_id);
-    const day = await fetchGameDay(game_id);
+    const season = await getGameSeason(game_id);
+    const day = await getGameDay(game_id);
     const stadium_id = await getGameStadium(game_id);
     const inning = await getGameInning(game_id);
     
@@ -69,8 +69,8 @@ function get_swing_ball_threshold(game_id){
 
     const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
 
-    const season = await fetchGameSeason(game_id);
-    const day = await fetchGameDay(game_id);
+    const season = await getGameSeason(game_id);
+    const day = await getGameDay(game_id);
     const stadium_id = await getGameStadium(game_id);
     const inning = await getGameInning(game_id);
     

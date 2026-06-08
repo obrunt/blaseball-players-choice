@@ -2,7 +2,7 @@ const { pool } = require("../../../../config/db");
 const { roll } = require("../../../middleware/randomRoll");
 
 const { getPlayerStat } = require("../../database/fetchPlayerInfo");
-const { getTeamStat, getPlayerFromIndex, getPositionRosterLength } = require("../../database/fetchTeamInfo");
+const { getTeamStat, getTeamPlayerFromIndex, getTeamPositionRosterLength } = require("../../database/fetchTeamInfo");
 
 
 async function getPreviousBatter(game_id, team_id){
@@ -52,13 +52,13 @@ async function sendBatterUp(game_id){
   //if it does, then the same batter is a batter up
 
   //Getting how many batters the team has, so that we can loop the array
-  const batterLength = await getPositionRosterLength(result.batting_team_id, 0);
+  const batterLength = await getTeamPositionRosterLength(result.batting_team_id, 0);
 
   //Increasing the index position, then modding to include wrap around scenarios
   result.batter_position = (result.batter_position + 1) % batterLength;
 
   //Getting a new batter from the roster where the player position is a batter
-  result.batter_id = await getPlayerFromIndex(result.batting_team_id, 0, result.batter_position);
+  result.batter_id = await getTeamPlayerFromIndex(result.batting_team_id, 0, result.batter_position);
 
   //Player and team name for the event text
   const playerName = await getPlayerStat('full_name', result.batter_id);

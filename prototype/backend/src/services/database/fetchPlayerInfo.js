@@ -147,11 +147,44 @@ async function isFlinching(player_id, game_id){
 }
 
 
+
+function setVibes(value){
+  getVibes = value;
+}
+
+function setPlayerMods(value){
+  getPlayerMods = value;
+}
+
+function setPlayerStat(value){
+  getPlayerStat = value;
+}
+
+function setPlayerTeam(value){
+  getPlayerTeam = value;
+}
+
+function setPlayerPosition(value){
+  getPlayerPosition = value;
+}
+
+function setFlinching(value){
+  isFlinching = value;
+}
+
+
 module.exports = {
   getVibes,
   getPlayerMods,
   getPlayerStat,
   getPlayerTeam,
   getPlayerPosition,
-  isFlinching
+  isFlinching,
+
+  setVibes,
+  setPlayerMods,
+  setPlayerStat,
+  setPlayerTeam,
+  setPlayerPosition,
+  setFlinching
 };

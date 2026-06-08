@@ -118,7 +118,7 @@ async function getTeamStat(stat, team_id){
 
 }
 
-async function getPositionRosterLength(team_id, position_type){
+async function getTeamPositionRosterLength(team_id, position_type){
     //Getting the maximum index position from the team roster
  const query = `
     SELECT position_id FROM data.team_roster
@@ -139,7 +139,7 @@ async function getPositionRosterLength(team_id, position_type){
   }
 }
 
-async function getPlayerFromIndex(team_id, position_type, position_index){
+async function getTeamPlayerFromIndex(team_id, position_type, position_index){
    const query = `
     SELECT player_id FROM data.team_roster
     WHERE team_id = ?
@@ -200,12 +200,60 @@ async function getTeamCounts(team_id){
   }
 }
 
+
+
+function setTeamMods(value){
+  getTeamMods = value;
+}
+
+function setTeamActivePlayers(value){
+  getTeamActivePlayers = value;
+}
+
+function setTeamPresentPlayers(value){
+  getTeamPresentPlayers = value;
+}
+
+
+function setTeamStat(value){
+  getTeamStat = value;
+}
+
+
+function setTeamPositionRosterLength(value){
+  getTeamPositionRosterLength = value;
+}
+
+
+function setTeamPlayerFromIndex(value){
+  getTeamPlayerFromIndex = value;
+}
+
+
+function setTeamCounts(value){
+  getTeamCounts = value;
+}
+
+
+
+
+
 module.exports = {
     getTeamMods,
     getTeamCounts,
     getTeamStat,
     
     getTeamActivePlayers,
-    getPositionRosterLength,
-    getPlayerFromIndex
+    getTeamPresentPlayers,
+    getTeamPositionRosterLength,
+    getTeamPlayerFromIndex,
+
+    setTeamMods,
+    setTeamCounts,
+    setTeamStat,
+
+    setTeamActivePlayers,
+    setTeamPresentPlayers,
+    setTeamPositionRosterLength,
+    setTeamPlayerFromIndex
 }

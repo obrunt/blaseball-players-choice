@@ -3,7 +3,7 @@ const { roll } = require("../../../middleware/randomRoll");
 
 
 
-async function fetchGameDay(game_id){
+async function getGameDay(game_id){
   
   const query = `
     SELECT day FROM data.games
@@ -22,7 +22,7 @@ async function fetchGameDay(game_id){
   }
 }
 
-async function fetchGameSeason (game_id){
+async function getGameSeason (game_id){
   
   const query = `
     SELECT season FROM data.games
@@ -65,9 +65,26 @@ function fetch_game_order(season, day){
   return await getSeasonDayGames(day, season);
 }
 
+function setGameDay(value){
+  getGameDay = value;
+}
+
+function setGameSeason(value){
+  getGameDay = value;
+}
+
+
+function setSeasonDayGames(value){
+  getSeasonDayGames = value;
+}
 
 module.exports = {
   fetch_game_order,
-  fetchGameDay,
-  fetchSeasonDay
+  getGameDay,
+  getGameSeason,
+  getSeasonDayGames,
+
+  setGameDay,
+  setGameSeason,
+  setGameSeason
 };
