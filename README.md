@@ -32,15 +32,18 @@ Planned workflow:
     - [ ] Create components of play
         - [ ] Create teams function
         - [ ] Create players function
-        - [ ] Assign game order
+        - [x] Assign game order
     - [ ] Handle post season and assign championship
-- [ ] A whole lot of testing
+- [ ] Create test suites to run whenever the program is compiled
     - [ ] Game logic
     - [ ] Event flow order
     - [ ] Player Creation
     - [ ] Team Creation
     - [ ] Database
-- [ ] Refactor
+        - [ ] Table creation
+        - [ ] Data insertation
+- [ ] Refactor anything possible
+    - [ ] Refer to chapter three in the textbook
 - [ ] Beginning to add more blaseball events
     - [ ] Weather Events
     - [ ] Team Modifiers

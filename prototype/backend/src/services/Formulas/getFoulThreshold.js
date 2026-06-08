@@ -6,22 +6,25 @@ const { getGameStadium, getGameInning } = require("../database/fetchGameInfo");
 const { getStadiumStat } = require("../database/fetchStadiumInfo");
 
 
-function get_foul_threshold(batter_id, batter_team, game_id){
+function get_foul_threshold(game_id){
+
+    const { batter, batting_team } = await getPlayersTeams(game_id);
+
     const season = await fetchGameSeason(game_id);
     const day = await fetchGameDay(game_id);
     const stadium_id = await getGameStadium(game_id);
     const inning = await getGameInning(game_id);
     
 
-    const batter_vibes = await getVibes(batter_id, day);
+    const batter_vibes = await getVibes(batter, day);
 
     
-    let multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'musclitude');
-    const batter_musclitude = (await getPlayerStat('musclitude', batter_id)) * multiplier * (1 + 0.2 * batter_vibes);
-    multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'thwackability');
-    const batter_thwackability = (await getPlayerStat('thwackability', batter_id)) * multiplier * (1 + 0.2 * batter_vibes);
-    multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'divinity');
-    const batter_divinity = (await getPlayerStat('divinity', batter_id)) * multiplier * (1 + 0.2 * batter_vibes);
+    let multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'musclitude');
+    const batter_musclitude = (await getPlayerStat('musclitude', batter)) * multiplier * (1 + 0.2 * batter_vibes);
+    multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'thwackability');
+    const batter_thwackability = (await getPlayerStat('thwackability', batter)) * multiplier * (1 + 0.2 * batter_vibes);
+    multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'divinity');
+    const batter_divinity = (await getPlayerStat('divinity', batter)) * multiplier * (1 + 0.2 * batter_vibes);
 
     const batter_sum = (batter_musclitude + batter_thwackability + batter_divinity) / 3;
 

@@ -229,27 +229,30 @@ const strike_threshold_look_up_table = [
 
 
 
-function get_strike_threshold(batter_id, pitcher_id, batter_team, pitcher_team, game_id){
+function get_strike_threshold(game_id){
+
+    const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
+
     const season = await fetchGameSeason(game_id);
     const day = await fetchGameDay(game_id);
     const stadium_id = await getGameStadium(game_id);
     const inning = await getGameInning(game_id);
     
 
-    const pitcher_vibes = await getVibes(pitcher_id, day);
+    const pitcher_vibes = await getVibes(pitcher, day);
 
     //Getting all of the multiplied stats for the pitcher
-    let multiplier = getMultiplier(pitcher_id, pitcher_team, stadium_id, game_id, season, day, 'ruthlessness');
-    const pitcher_ruthlessness = (await getPlayerStat('ruthlessness', pitcher_id)) * multiplier;
-    multiplier = getMultiplier(pitcher_id, pitcher_team, stadium_id, game_id, season, day, 'coldness');
-    const pitcher_coldness = (await getPlayerStat('coldness', pitcher_id)) * multiplier;
+    let multiplier = getMultiplier(pitcher, pitching_team, stadium_id, game_id, season, day, 'ruthlessness');
+    const pitcher_ruthlessness = (await getPlayerStat('ruthlessness', pitcher)) * multiplier;
+    multiplier = getMultiplier(pitcher, pitching_team, stadium_id, game_id, season, day, 'coldness');
+    const pitcher_coldness = (await getPlayerStat('coldness', pitcher)) * multiplier;
     
     
     //Getting all of the multiplied stats for the batter
-    multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'musclitude');
-    const batter_musclitude = (await getPlayerStat('musclitude', batter_id)) * multiplier;
-    multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'moxie');
-    const batter_moxie = (await getPlayerStat('moxie', batter_id)) * multiplier;
+    multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'musclitude');
+    const batter_musclitude = (await getPlayerStat('musclitude', batter)) * multiplier;
+    multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'moxie');
+    const batter_moxie = (await getPlayerStat('moxie', batter)) * multiplier;
     
     const stadium_forwardness = await getStadiumStat('forwardness', stadium_id);
 
@@ -266,7 +269,7 @@ function get_strike_threshold(batter_id, pitcher_id, batter_team, pitcher_team, 
 
     let factors = strike_threshold_look_up_table[season];
 
-    if (isFlinching(batter_id, game_id)){
+    if (isFlinching(batter, game_id)){
         factors.constant += 0.2;
     }
 

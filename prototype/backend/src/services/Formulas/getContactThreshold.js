@@ -7,7 +7,7 @@ const { getStadiumStat } = require("../database/fetchStadiumInfo");
 
 
 
-//Assume that the unknown season were just the most/lest recent
+//Assume that the unknown season were just the most/least recent
 const strike_threshold_look_up_table = [
     {       //Season 1
         constant: 0.8,
@@ -132,7 +132,7 @@ const strike_threshold_look_up_table = [
 ];
 
 
-//Assume that the unknown season were just the most/lest recent
+//Assume that the unknown season were just the most/least recent
 const ball_threshold_look_up_table = [
     {       //Season 1
         constant: 0.35,
@@ -257,29 +257,32 @@ const ball_threshold_look_up_table = [
 ];
 
 
-function get_contact_strike_threshold(batter_id, pitcher_id, batter_team, pitcher_team, game_id){
+function get_contact_strike_threshold(game_id){
+
+    const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
+
     const season = await fetchGameSeason(game_id);
     const day = await fetchGameDay(game_id);
     const stadium_id = await getGameStadium(game_id);    
 
-    const pitcher_vibes = await getVibes(pitcher_id, day);
-    const batter_vibes = await getVibes(batter_id, day);
+    const pitcher_vibes = await getVibes(pitcher, day);
+    const batter_vibes = await getVibes(batter, day);
 
     
-    let multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'divinity');
-    const batter_divinity = (await getPlayerStat('divinity', batter_id)) * multiplier;
-    multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'musclitude');
-    const batter_musclitude = (await getPlayerStat('musclitude', batter_id)) * multiplier;
-    multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'thwackability');
-    const batter_thwackability = (await getPlayerStat('thwackability', batter_id)) * multiplier;
-    multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'patheticism');
-    const batter_patheticism = (await getPlayerStat('patheticism', batter_id)) * (1 / multiplier);
+    let multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'divinity');
+    const batter_divinity = (await getPlayerStat('divinity', batter)) * multiplier;
+    multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'musclitude');
+    const batter_musclitude = (await getPlayerStat('musclitude', batter)) * multiplier;
+    multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'thwackability');
+    const batter_thwackability = (await getPlayerStat('thwackability', batter)) * multiplier;
+    multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'patheticism');
+    const batter_patheticism = (await getPlayerStat('patheticism', batter)) * (1 / multiplier);
 
-    const combined_batting = ((batter_divinity + batter_musclitude + batter_thwackability - batter_patheticism) / 2) * (a + 0.2 * batter_vibes);
+    const combined_batting = ((batter_divinity + batter_musclitude + batter_thwackability - batter_patheticism) / 2) * (1 + 0.2 * batter_vibes);
     
 
-    multiplier = getMultiplier(pitcher_id, pitcher_team, stadium_id, game_id, season, day, 'ruthlessness');
-    const pitcher_ruthlessness = (await getPlayerStat('ruthlessness', pitcher_id)) * multiplier * (1 + 0.2 * pitcher_vibes);
+    multiplier = getMultiplier(pitcher, pitching_team, stadium_id, game_id, season, day, 'ruthlessness');
+    const pitcher_ruthlessness = (await getPlayerStat('ruthlessness', pitcher)) * multiplier * (1 + 0.2 * pitcher_vibes);
     
     
     const stadium_fortification = await getStadiumStat('fortification', stadium_id) - 0.5;
@@ -296,22 +299,25 @@ function get_contact_strike_threshold(batter_id, pitcher_id, batter_team, pitche
 }
 
 
-function get_contact_ball_threshold(batter_id, pitcher_id, batter_team, pitcher_team, game_id){
+function get_contact_ball_threshold(game_id){
+
+    const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
+
     const season = await fetchGameSeason(game_id);
     const day = await fetchGameDay(game_id);
     const stadium_id = await getGameStadium(game_id);    
 
-    const pitcher_vibes = await getVibes(pitcher_id, day);
-    const batter_vibes = await getVibes(batter_id, day);
+    const pitcher_vibes = await getVibes(pitcher, day);
+    const batter_vibes = await getVibes(batter, day);
 
     
-    let multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'patheticism');
-    const batter_patheticism = (await getPlayerStat('patheticism', batter_id)) * (1 / multiplier);
+    let multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'patheticism');
+    const batter_patheticism = (await getPlayerStat('patheticism', batter)) * (1 / multiplier);
     const inverted_patheticism = max((1 - batter_patheticism) * (1 + 0.2 * batter_vibes), 0);
     
 
-    multiplier = getMultiplier(pitcher_id, pitcher_team, stadium_id, game_id, season, day, 'ruthlessness');
-    const pitcher_ruthlessness = (await getPlayerStat('ruthlessness', pitcher_id)) * multiplier * (1 + 0.2 * pitcher_vibes);
+    multiplier = getMultiplier(pitcher, pitching_team, stadium_id, game_id, season, day, 'ruthlessness');
+    const pitcher_ruthlessness = (await getPlayerStat('ruthlessness', pitcher)) * multiplier * (1 + 0.2 * pitcher_vibes);
     
     
     const stadium_fortification = await getStadiumStat('fortification', stadium_id) - 0.5;

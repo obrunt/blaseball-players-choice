@@ -8,11 +8,13 @@ function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, att
 
     let multiplier = 1;
 
+    //TODO: include way to get item mods that the player has
+        //Also include it in the all mods array
     const playerMods = await getPlayerMods(player_id);
     const teamMods = await getTeamMods(team_id);
 
     //Combining all of the mods and removing duplicates to prevent problems
-    let allMods = [...new Set(player_mods.concat(team_mods))];
+    const allMods = [...new Set(player_mods.concat(team_mods))];
 
 
     for(mod in allMods){

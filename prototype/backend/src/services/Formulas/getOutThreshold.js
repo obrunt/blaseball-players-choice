@@ -6,23 +6,26 @@ const { getGameStadium, getGameInning } = require("../database/fetchGameInfo");
 const { getStadiumStat } = require("../database/fetchStadiumInfo");
 
 
-function get_out_threshold(batter_id, pitcher_id, fielder_id, batter_team, pitcher_team, game_id){
+function get_out_threshold(game_id){
+
+    const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
+    
     const season = await fetchGameSeason(game_id);
     const day = await fetchGameDay(game_id);
     const stadium_id = await getGameStadium(game_id);    
 
-    const pitcher_vibes = await getVibes(pitcher_id, day);
-    const batter_vibes = await getVibes(batter_id, day);
+    const pitcher_vibes = await getVibes(pitcher, day);
+    const batter_vibes = await getVibes(batter, day);
     const fielder_vibes = await getVibes(fielder_id, day);
 
 
-    let multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'thwackability');
-    const batter_thwackability = (await getPlayerStat('thwackability', batter_id)) * multiplier * (1 + 0.2 * batter_vibes);
+    let multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'thwackability');
+    const batter_thwackability = (await getPlayerStat('thwackability', batter)) * multiplier * (1 + 0.2 * batter_vibes);
 
-    multiplier = getMultiplier(pitcher_id, pitcher_team, stadium_id, game_id, season, day, 'unthwackability');
-    const pitcher_unthwackability = (await getPlayerStat('unthwackability', pitcher_id)) * multiplier * (1 + 0.2 * pitcher_vibes);
+    multiplier = getMultiplier(pitcher, pitching_team, stadium_id, game_id, season, day, 'unthwackability');
+    const pitcher_unthwackability = (await getPlayerStat('unthwackability', pitcher)) * multiplier * (1 + 0.2 * pitcher_vibes);
 
-    multiplier = getMultiplier(fielder_id, pitcher_team, stadium_id, game_id, season, day, 'omniscience');
+    multiplier = getMultiplier(fielder_id, pitching_team, stadium_id, game_id, season, day, 'omniscience');
     const fielder_omniscience = (await getPlayerStat('omniscience', fielder_id)) * multiplier * (1 + 0.2 * fielder_vibes);
 
 
@@ -84,14 +87,17 @@ function get_out_threshold(batter_id, pitcher_id, fielder_id, batter_team, pitch
 }
 
 
-function get_fly_ground_threshold(batter_id, pitcher_id, batter_team, pitcher_team, game_id){
+function get_fly_ground_threshold(game_id){
+
+    const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
+
     const season = await fetchGameSeason(game_id);
     const day = await fetchGameDay(game_id);
     const stadium_id = await getGameStadium(game_id);
     const inning = await getGameInning(game_id);
 
-    let multiplier = getMultiplier(batter_id, batter_team, stadium_id, game_id, season, day, 'buoyancy');
-    const batter_buoyancy = (await getPlayerStat('buoyancy', batter_id)) * (1 / multiplier);
+    let multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'buoyancy');
+    const batter_buoyancy = (await getPlayerStat('buoyancy', batter)) * (1 / multiplier);
     
 
     //As per the formula
@@ -100,8 +106,8 @@ function get_fly_ground_threshold(batter_id, pitcher_id, batter_team, pitcher_te
         //So it's likely that it was intended to be getting the pitchers stat
         //So I've taken the liberty to just make that change
         //Even if it's not sim accurate
-    multiplier = getMultiplier(pitcher_id, pitcher_team, stadium_id, game_id, season, day, 'suppression');
-    const pitcher_suppression = (await getPlayerStat('suppression', pitcher_id)) * multiplier;
+    multiplier = getMultiplier(pitcher, pitching_team, stadium_id, game_id, season, day, 'suppression');
+    const pitcher_suppression = (await getPlayerStat('suppression', pitcher)) * multiplier;
     
 
     const stadium_ominousness = (await getStadiumStat('ominousness', stadium_id)) - 0.5;
@@ -119,7 +125,10 @@ function get_fly_ground_threshold(batter_id, pitcher_id, batter_team, pitcher_te
 
 
 
-function get_advance_base_out_fly(runner_id, batter_team, base_index, game_id){
+function get_advance_base_out_fly(runner_id, base_index, game_id){
+
+    const { batting_team } = await getPlayersTeams(game_id);
+
     const season = await fetchGameSeason(game_id);
     const day = await fetchGameDay(game_id);
     const stadium_id = await getGameStadium(game_id);
@@ -129,7 +138,7 @@ function get_advance_base_out_fly(runner_id, batter_team, base_index, game_id){
     const runner_vibes = await getVibes(runner_id, day);
 
     
-    let multiplier = getMultiplier(runner_id, batter_team, stadium_id, game_id, season, day, 'indulgence');
+    let multiplier = getMultiplier(runner_id, batting_team, stadium_id, game_id, season, day, 'indulgence');
     const runner_indulgence = (await getPlayerStat('indulgence', runner_id)) * multiplier * (1 + 0.2 * runner_vibes);
 
     
@@ -169,7 +178,10 @@ function get_advance_base_out_fly(runner_id, batter_team, base_index, game_id){
 }
 
 
-function get_advance_base_out_ground(runner_id, fielder_id, batter_team, pitcher_team, game_id){
+function get_advance_base_out_ground(runner_id, fielder_id, game_id){
+
+    const { batting_team, pitching_team } = await getPlayersTeams(game_id);
+
     const season = await fetchGameSeason(game_id);
     const day = await fetchGameDay(game_id);
     const stadium_id = await getGameStadium(game_id);
@@ -180,10 +192,10 @@ function get_advance_base_out_ground(runner_id, fielder_id, batter_team, pitcher
     const fielder_vibes = await getVibes(fielder_id, day);
 
     
-    let multiplier = getMultiplier(runner_id, batter_team, stadium_id, game_id, season, day, 'indulgence');
+    let multiplier = getMultiplier(runner_id, batting_team, stadium_id, game_id, season, day, 'indulgence');
     const runner_indulgence = (await getPlayerStat('indulgence', runner_id)) * multiplier * (1 + 0.2 * runner_vibes);
 
-    multiplier = getMultiplier(fielder_id, pitcher_team, stadium_id, game_id, season, day, 'tenaciousness');
+    multiplier = getMultiplier(fielder_id, pitching_team, stadium_id, game_id, season, day, 'tenaciousness');
     const fielder_tenaciousness = (await getPlayerStat('tenaciousness', fielder_id)) * multiplier * (1 + 0.2 * fielder_vibes);
 
 

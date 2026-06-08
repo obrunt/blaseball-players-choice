@@ -106,7 +106,7 @@ function run(games){
   .then(() => {
     console.log('Games initlized');
   });
-
+4
 
   var gamesComplete = new Promise((resolve, reject) => {
     games.forEach(game => {

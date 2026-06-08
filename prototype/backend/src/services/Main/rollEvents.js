@@ -5,7 +5,7 @@ const { floatRoll, intRoll } = require("../../middleware/randomRoll");
 const { get_strike_threshold } = require("../formulas/getStrikeThreshold");
 const { get_swing_strike_threshold, get_swing_ball_threshold } = require("../formulas/getSwingThreshold");
 const { get_contact_ball_threshold, get_contact_strike_threshold } = require("../formulas/getContactThreshold");
-const { get_out_threshold, get_fly_ground_threshold} = require("../formulas/getOutThreshold");
+const { get_out_threshold, get_fly_ground_threshold, get_advance_base_out_ground} = require("../formulas/getOutThreshold");
 
 const { getGameStadium, getBattingTeam, getPitchingTeam, getBatter, getPitcher, getGameOccupiedBases, getGameCounts } = require("../database/fetchGameInfo");
 const { pitcherAcidicBlood, get_big_buckets_threshold } = require("../database/fetchGameMisc");
@@ -502,9 +502,6 @@ function createEvent(game_id){
 
 
 function getThreshold(thresholdType, params){
-  //Getting the most commonly used values
-  const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
-
   let threshold;
 
   switch(thresholdType){
@@ -518,16 +515,16 @@ function getThreshold(thresholdType, params){
 
       //This is an automatic no-swing
       if(batFlinch && gameCount.strikes == 0){
-        return 0.00;
+        threshold = 0.00;
       }
 
       if(params = 'strike'){
-        threshold = get_swing_strike_threshold(batter, batting_team, pitcher, pitching_team, game_id);
+        threshold = get_swing_strike_threshold(game_id);
       }
       //Technically this isn't needed
         //Keep for readability
       else if(params = 'ball'){
-        threshold = get_swing_ball_threshold(batter, batting_team, pitcher, pitching_team, game_id);
+        threshold = get_swing_ball_threshold(game_id);
       }
       break;
 
@@ -550,27 +547,34 @@ function getThreshold(thresholdType, params){
       break;
 
     case 'CATCH':
-      threshold = await get_out_threshold(batter, pitcher, fielder_id, batting_team, pitching_team, game_id);
+      threshold = await get_out_threshold(game_id);
       break;
 
     case 'FLYGROUND':
-      threshold = 1 - get_fly_ground_threshold(batter, pitcher, batting_team, pitching_team, game_id);
+      threshold = 1 - get_fly_ground_threshold(game_id);
+      break;
+    
+    case 'FLYADVANCE':
+      threshold = 1 - get_advance_base_out_fly(params.runner_id, params.base_index, game_id);
       break;
 
+    case 'GROUNDADVANCE':
+      threshold = 1 - get_advance_base_out_ground(params.runner_id, fielder_id, game_id);
+
     case 'DOUBLEPLAY':
-      threshold = 1 - get_double_play_threshold(batter, pitcher, fielder_id, batting_team, pitching_team, game_id);
+      threshold = 1 - get_double_play_threshold(fielder_id, game_id);
       break;
     
     case 'SACRIFICE':
-      threshold = 1 - get_sacrifice(batter, batter_team, game_id);
+      threshold = 1 - get_sacrifice(game_id);
       break;
 
     case 'SACRIFICEATTEMPT':
-      threshold = get_sacrifice_attempt_threshold(batter, pitcher, fielder_id, batting_team, pitching_team, game_id);
+      threshold = get_sacrifice_attempt_threshold(fielder_id, game_id);
       break;
 
     case 'HOMERUN':
-      threshold = 1 - get_homerun_threshold(batter, pitcher, batting_team, pitching_team, game_id);
+      threshold = 1 - get_homerun_threshold(game_id);
       break;
 
     case 'BUCKETS':
@@ -578,11 +582,14 @@ function getThreshold(thresholdType, params){
       break;
 
     case 'TRIPLE':
-      threshold = 1 - get_triple_threshold(batter, pitcher, fielder_id, batter_team, pitching_team, game_id);
+      threshold = 1 - get_triple_threshold(fielder_id, game_id);
       break;
+    
+    case 'DOUBLE':
+      threshold = 1 - get_double_threshold(fielder_id, game_id);
 
     case 'BASEADVANCEMENT':
-      threshold = 1 - get_base_advancement_threshold(params, fielder_id, batter_team, pitching_team, game_id);
+      threshold = 1 - get_base_advancement_threshold(params, fielder_id, game_id);
       break;
   }
 
@@ -607,28 +614,15 @@ function selectFielder(){
 
 
 function advanceBasesOut(batter_advance, groundout){
-  const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
   //Getting the id of a player if they scored
   let runScored = '';
-
-  const batting_team = getBattingTeam(game_id);
 
   //Looping through the base array backwards to prevent "clogging" up the advancements
   for(let i = bases_occupied.length - 1; i >= 0; i--){
     //If there is someone on the current base
     if(bases_occupied[i] != ''){
-      //Checking to see what advancement threshold we use 
-      let advanceThreshold;
-      if(groundout) {
-        advanceThreshold = get_advance_base_out_ground(bases_occupied[i], fielder_id, batting_team, pitching_team, game_id);
-      }
-      else {
-        advanceThreshold = get_advance_base_out_fly(bases_occupied[i], batting_team, i, game_id);
-      }
 
-      const advanceRoll = floatRoll(0, 1);
-
-      if(advanceRoll < advanceThreshold){
+      if(getAdvancementThresholdOutcome(i, groundout)){
         //If advancing bases means they're going home
         if(i+1 == base_count){
           //Run scored
@@ -646,30 +640,8 @@ function advanceBasesOut(batter_advance, groundout){
   }
 
   if(batter_advance){
-    if(bases_occupied[0] == ''){
-      bases_occupied[0] = batter; 
-    }
-    else{
-      //Getting the first un ocupied base
-      const i = bases_occupied.indexOf('');
-      if(i != -1){
-        //Removing the unocupied base
-        //And adding the batter to the front
-          //This shifts everyone up
-        bases_occupied.splice(i, 1);
-        bases_occupied.unshift(batter);
-      }
-      else{
-        //This means that all the bases are occupied
-        //So we add the final base runner to the runs array
-        //Then shift everyone up one
-        runScored.push(bases_occupied[bases_occupied.length - 1]);
-        bases_occupied.pop();
-        bases_occupied.unshift(batter);
-      }
-    }
+    runScored = batterAdvance(runScored);
   }
-
 
   //TODO: changing the runs to an array will probably cause some issues later
     //Have to change any instances of runs to loop throught the array and increase the runs
@@ -679,10 +651,17 @@ function advanceBasesOut(batter_advance, groundout){
 }
 
 function advanceBasesHit(bases_forward, batter_id){
+  const batter_id = getBatter(game_id);
+
   let runScored;
 
+  //Adding the batter
+  runScored = batterAdvance(runScored);
+
   //Moving all players forward by the know amount
-  for(let i = 0; i < bases_forward; i++){
+    //This is would only be used for doubles, triple and quadrouples
+    //Because the bases forward - 1 takes away singles
+  for(let i = 0; i < bases_forward - 1; i++){
     bases_occupied.shift('');
 
     //Getting the last index of the array to pop
@@ -695,7 +674,44 @@ function advanceBasesHit(bases_forward, batter_id){
     bases_occupied.pop();
   }
 
+  runScored = furtherHitAdvancement(runScored);
+
+
+  return runScored;
+}
+
+
+function batterAdvance(runScored){
+  const batter = getBatter(game_id);
+
+  if(bases_occupied[0] == ''){
+    bases_occupied[0] = batter; 
+  }
+  else{
+    //Getting the first un ocupied base
+    const i = bases_occupied.indexOf('');
+    if(i != -1){
+      //Removing the unocupied base
+      //And adding the batter to the front
+        //This shifts everyone up
+      bases_occupied.splice(i, 1);
+      bases_occupied.unshift(batter);
+    }
+    else{
+      //This means that all the bases are occupied
+      //So we add the final base runner to the runs array
+      //Then shift everyone up one
+      runScored.push(bases_occupied[bases_occupied.length - 1]);
+      bases_occupied.pop();
+      bases_occupied.unshift(batter);
+    }
+  }
+  return runScored;
+}
+
+function furtherHitAdvancement(runsScored){
   //Getting all the values that are over the "active" bases
+  //Checking to see if there's another base advanced after the initial advancement
   for(let j = bases_occupied.length - 1; j > 0; j--){
     if(bases_occupied[j] != '' && bases_occupied[j + 1] == '' && getThreshold('BASEADVANCEMENT', bases_occupied[j])){
       bases_occupied[j + 1] = bases_occupied[j];
@@ -710,8 +726,26 @@ function advanceBasesHit(bases_forward, batter_id){
     bases_occupied.pop();
   }
 
-  return runScored;
+  return runsScored;
 }
+
+function getAdvancementThresholdOutcome(index, groundout){
+
+  //Checking to see what advancement threshold we use 
+
+  let params = {
+    runner_id: bases_occupied[index],
+    base_index: index
+  }
+
+  if(groundout) {
+    return getThreshold('GROUNDADVANCE', params);
+  }
+    
+  return thresholdOutcome = getThreshold('FLYADVANCE', params);
+
+}
+
 
 
 function changeInning(){
