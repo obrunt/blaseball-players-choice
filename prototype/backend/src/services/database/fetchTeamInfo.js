@@ -1,4 +1,4 @@
-const { pool } = require("../../../../config/db");
+const { pool } = require("../../../config/db");
 
 async function getTeamMods(team_id){
     //We want to get all the mods that the team has

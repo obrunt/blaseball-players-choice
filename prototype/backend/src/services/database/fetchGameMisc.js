@@ -1,5 +1,5 @@
-const { pool } = require("../../../../config/db");
-const { getGameCounts } = require('fetchGameInfo');
+const { pool } = require("../../../config/db");
+const { getGameCounts } = require('./fetchGameInfo');
 
 
 function pitcherAcidicBlood(game_id){

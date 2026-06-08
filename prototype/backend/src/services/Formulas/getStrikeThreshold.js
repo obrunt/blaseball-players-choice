@@ -1,4 +1,4 @@
-const { getMultiplier } = require("getMultiplier");
+const { getMultiplier } = require("./getMultiplier");
 
 const { getVibes, getPlayerStat, isFlinching } = require("../database/fetchPlayerInfo");
 const { getGameSeason, getGameDay } = require("../database/fetchSeasonDayGames");

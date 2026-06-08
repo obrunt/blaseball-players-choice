@@ -1,3 +1,5 @@
+
+
 const { getBattingTeam, getBatterAppearanceCount, getGameWeather } = require("../database/fetchGameInfo");
 const { isMaximumBaseball } = require("../database/fetchGameMisc");
 const { getPlayerMods, getPlayerTeam, getPlayerPosition } = require("../database/fetchPlayerInfo");
@@ -5,14 +7,33 @@ const { getTeamMods, getTeamActivePlayers } = require("../database/fetchTeamInfo
 
 
 
-function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, attribute){
+async function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, attribute) {
 
     let multiplier = 1;
+
+    return 2;
 
     //TODO: include way to get item mods that the player has
         //Also include it in the all mods array
     const playerMods = await getPlayerMods(player_id);
     const teamMods = await getTeamMods(team_id);
+
+
+    const weather = await getGameWeather(game_id);
+    const runnersOnBase = await getBaseSpots(game_id);
+
+    //Checking to see where the player should be
+    const position = await getPlayerPosition(player_id, team_id);
+    const inning = await getGameInning(game_id);
+
+    const battingTeam = await getBattingTeam(team_id);
+
+    const maxBall = await isMaximumBaseball(game_id);
+
+
+    //Getting the length of the active roster
+    const rosterSize = (await getTeamActivePlayers()).length;
+
 
     //Combining all of the mods and removing duplicates to prevent problems
     const allMods = [...new Set(player_mods.concat(team_mods))];
@@ -41,9 +62,6 @@ function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, att
                 multiplier += min(0.05, 0.05 * (day / 99));
                 break;
             case 'HIGH_PRESSURE':
-                const weather = await getGameWeather(game_id);
-                const runnersOnBase = await getBaseSpots(game_id);
-                const position = await getPlayerPosition(player_id, team_id);
 
                 //Checking to see if there are people on the bases while weather is flooding
                     //Need to check that this doesn't apply to pitchers
@@ -57,10 +75,6 @@ function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, att
                 //Apperntly the travelling mod never applied to players even when it should
                 //Will just be applying regardless
                     //Only once if both player and team have it because duplicates are removed
-                
-                //Checking to see where the player should be
-                const position = await getPlayerPosition(player_id, team_id);
-                const inning = await getGameInning(game_id);
 
                 if(
                     inning.top_of_inning && position == 0 ||  //If the player is a batter on away team
@@ -76,20 +90,13 @@ function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, att
                     //If there are, then remove the position check for bottom of the inning situation
                 break;
             case 'SINKING_SHIP':
-                //Getting the length of the active roster
-                const rosterSize = (await getTeamActivePlayers()).length;
-
                 //Does go negative, but that's the point
                     //No need to add limiter
                 multiplier += (14 - rosterSize) * 0.01;
                 break;
             case 'AFFINITY_FOR_CROWS':
-                const weather = await getGameWeather(game_id);
-
                 //Checking that weather is birds first
                 if(weather == 11){
-                    const position = await getPlayerPosition(player_id, team_id);
-                    const battingTeam = await getBattingTeam(team_id);
 
                     if(
                         (position == 0 && battingTeam == team_id) || //If they're an active batter
@@ -103,7 +110,6 @@ function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, att
                 }
                 break;
             case 'CHUNKY':
-                const weather = await getGameWeather(game_id);
 
                 //Checking that weather is peanuts first
                 if(weather == 10){
@@ -119,7 +125,6 @@ function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, att
                 }
                 break;
             case 'SMOOTH':
-                const weather = await getGameWeather(game_id);
 
                 //Checking that weather is peanuts first
                 if(weather == 10){
@@ -156,22 +161,16 @@ function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, att
                 }
                 break;
             case 'MINIMALIST':
-                const maxBall = await isMaximumBaseball(game_id);
-
                 if(maxBall){
                     multiplier -= 0.75;
                 }
                 break;
             case 'MAXIMALIST':
-                const maxBall = await isMaximumBaseball(game_id);
-
                 if(maxBall){
                     multiplier += 2.5;
                 }
                 break;
             case 'SLOW_BUILD':
-                const position = await getPlayerPosition(player_id, team_id);
-
                 //Checking if the player is a batter
                 if(position == 0){
                     //Getting the times they've been batter up events in the game
@@ -182,9 +181,6 @@ function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, att
                 }
                 break;
             case 'SHELLED':
-                const position = await getPlayerPosition(player_id, team_id);
-                const battingTeam = await getBattingTeam(team_id);
-
                 //Cheking to see if they're a fielder
                 if(position == 0 && team_id != battingTeam){
                     return 0;
@@ -222,8 +218,6 @@ function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, att
 
                 break;
             case 'NIGHT_VISION':
-                const weather = await getGameWeather(game_id);
-
                 if(weather == 7){
                     multiplier += 0.5;
                 }
@@ -236,7 +230,6 @@ function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, att
                 //The formulas might be dividing by this, so just set it to be very, very small
                 return 0.00001;
             case 'GREEN_LIGHT':
-                const weather = await getGameWeather(game_id);
 
                 //Polarity plus
                 if(weather == 20){
@@ -264,12 +257,6 @@ function getMultiplier(player_id, team_id, stadium_id, game_id, season, day, att
 }
 
 
-function setMultiplier(value){
-    getMultiplier = value;
-}
-
 module.exports = {
-    getMultiplier,
-
-    setMultiplier
+    getMultiplier
 }

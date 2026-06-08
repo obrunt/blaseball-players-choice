@@ -2,7 +2,7 @@
 const { send_game_event } = require("sendEvent");
 
 const { fetch_previous_date } = require("../database/fetchPreviousDay");
-const { fetch_game_order } = require("../database/fetchSeasonDayGames");
+const { getSeasonDayGames } = require("../database/fetchSeasonDayGames");
 
 const { start_game_day } = require("../games/handleStartGame");
 
@@ -25,7 +25,7 @@ function start(){
   date.day += 1;
 
   //Fetching the currently constructed games
-  let games = fetch_game_order(date.season, date.day);
+  let games = await getSeasonDayGames(date.season, date.day);
 
   games.forEach(game => {
     //This sets up

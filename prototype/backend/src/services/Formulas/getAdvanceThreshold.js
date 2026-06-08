@@ -1,14 +1,16 @@
-const { getMultiplier } = require("getMultiplier");
 
-const { getVibes, getPlayerStat } = require("../database/fetchPlayerInfo");
-const { getGameSeason, getGameDay } = require("../database/fetchSeasonDayGames");
-const { getGameStadium, getGameInning, getPlayersTeams } = require("../database/fetchGameInfo");
-const { getStadiumStat } = require("../database/fetchStadiumInfo");
+const { getMultiplier } = require("./getMultiplier");
+
+//const { getVibes, getPlayerStat } = require("../database/fetchPlayerInfo");
+//const { getGameSeason, getGameDay } = require("../database/fetchSeasonDayGames");
+//const { getGameStadium, getGameInning, getPlayersTeams } = require("../database/fetchGameInfo");
+//const { getStadiumStat } = require("../database/fetchStadiumInfo");
 
 //TODO: change all the get requireed info at the beginning to maybe a helper function
     //This would be used by almost all of the formula files
 
-function get_homerun_threshold(game_id){
+    
+async function get_homerun_threshold(game_id){
 
     const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
 
@@ -55,7 +57,7 @@ function get_homerun_threshold(game_id){
 }
 
 
-function get_triple_threshold(fielder_id, game_id){
+async function get_triple_threshold(fielder_id, game_id){
 
     const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
 
@@ -120,7 +122,7 @@ function get_triple_threshold(fielder_id, game_id){
 }
 
 
-function get_double_threshold(game_id){
+async function get_double_threshold(game_id){
 
     const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
 
@@ -183,7 +185,7 @@ function get_double_threshold(game_id){
     return threshold;
 }
 
-function get_base_advancement_threshold(runner_id, fielder_id, game_id){
+async function get_base_advancement_threshold(runner_id, fielder_id, game_id){
     const { batting_team, pitching_team } = await getPlayersTeams(game_id);
 
     const season = await getGameSeason(game_id);
@@ -212,33 +214,18 @@ function get_base_advancement_threshold(runner_id, fielder_id, game_id){
 }
 
 
+async function sum(a, b) {
+    const mult = await getMultiplier();
 
-function set_homerun_threshold(value){
-    get_homerun_threshold = value;
+    return (a + b) * mult;
 }
-
-function set_triple__threshold(value){
-    get_triple__threshold = value;
-}
-
-function set_double_threshold(value){
-    get_double_threshold = value;
-}
-
-function set_base_advancement_threshold(value){
-    get_base_advancement_threshold = value;
-}
-
 
 
 module.exports = {
+    sum,
+
     get_homerun_threshold,
     get_triple_threshold,
     get_double_threshold,
-    get_base_advancement_threshold,
-
-    set_homerun_threshold,
-    set_triple__threshold,
-    set_double_threshold,
-    set_base_advancement_threshold
+    get_base_advancement_threshold
 }

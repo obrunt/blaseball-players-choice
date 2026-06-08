@@ -7,7 +7,7 @@ const { get_swing_strike_threshold, get_swing_ball_threshold } = require("../for
 const { get_contact_ball_threshold, get_contact_strike_threshold } = require("../formulas/getContactThreshold");
 const { get_out_threshold, get_fly_ground_threshold, get_advance_base_out_ground} = require("../formulas/getOutThreshold");
 
-const { getGameStadium, getBattingTeam, getPitchingTeam, getBatter, getPitcher, getGameOccupiedBases, getGameCounts } = require("../database/fetchGameInfo");
+const { getGameOccupiedBases, getGameCounts } = require("../database/fetchGameInfo");
 const { pitcherAcidicBlood, get_big_buckets_threshold } = require("../database/fetchGameMisc");
 const { increaseResult } = require("./Events/countManagement");
 const { get_homerun_threshold, get_triple_threshold, get_double_threshold } = require("../formulas/getAdvanceThreshold");

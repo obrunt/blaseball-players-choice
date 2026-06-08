@@ -1,4 +1,4 @@
-const { fetch_game_order } = require("../database/fetchSeasonDayGames");
+const { getSeasonDayGames } = require("../database/fetchSeasonDayGames");
 const { fetch_pitcher, set_pitcher } = require("../../games/handleGamePitchers");
 const { set_weather } = require("../../games/handleWeatherSet");
 
@@ -11,7 +11,7 @@ function start_game_day(season, day){
     console.log(`Starting game day s${season+1}d${day+1}`);
 
     //Getting the set games for the day and season
-    let current_game_order = fetch_game_order(season, day);
+    let current_game_order = await getSeasonDayGames(season, day);
 
     //Looping through the games to set the pitchers for each team
     for(game in current_game_order){
@@ -57,7 +57,7 @@ function start_game_day(season, day){
     if(day < 98){
 
         //Getting the games for the next day
-        let upcoming_game_order = fetch_game_order(season, day+1);
+        let upcoming_game_order = await getSeasonDayGames(season, day+1);
 
         //Looping through the next games
         for(next_game in upcoming_game_order){
