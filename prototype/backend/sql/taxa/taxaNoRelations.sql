@@ -127,11 +127,3 @@ CREATE TABLE taxa.vibe_to_arrows (
     min_vibe FLOAT,
     max_vibe FLOAT
 );
-
-INSERT INTO taxa.vibe_to_arrows (vibe_to_arrow_id, arrow_count, min_vibe, max_vibe) VALUES (1, 3, 0.8, 999);
-    INSERT INTO taxa.vibe_to_arrows (vibe_to_arrow_id, arrow_count, min_vibe, max_vibe) VALUES (2, 2, 0.4, 0.8);
-    INSERT INTO taxa.vibe_to_arrows (vibe_to_arrow_id, arrow_count, min_vibe, max_vibe) VALUES (3, 1, 0.1, 0.4);
-    INSERT INTO taxa.vibe_to_arrows (vibe_to_arrow_id, arrow_count, min_vibe, max_vibe) VALUES (4, 0, -0.1, 0.1);
-    INSERT INTO taxa.vibe_to_arrows (vibe_to_arrow_id, arrow_count, min_vibe, max_vibe) VALUES (5, -1, -0.4, -0.1);
-    INSERT INTO taxa.vibe_to_arrows (vibe_to_arrow_id, arrow_count, min_vibe, max_vibe) VALUES (6, -2, -0.8, -0.4);
-    INSERT INTO taxa.vibe_to_arrows (vibe_to_arrow_id, arrow_count, min_vibe, max_vibe) VALUES (7, 0, -999, -0.8);
