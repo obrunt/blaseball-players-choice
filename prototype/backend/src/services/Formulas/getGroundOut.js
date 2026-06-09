@@ -1,14 +1,14 @@
 const { getMultiplier } = require("./getMultiplier");
 
-const { getVibes, getPlayerStat, isFlinching } = require("../database/fetchPlayerInfo");
+const { getVibes, getPlayerStat } = require("../database/fetchPlayerInfo");
 const { getGameSeason, getGameDay } = require("../database/fetchSeasonDayGames");
-const { getGameStadium, getGameInning } = require("../database/fetchGameInfo");
+const { getGameStadium, getGameInning, getPlayersTeams } = require("../database/fetchGameInfo");
 const { getStadiumStat } = require("../database/fetchStadiumInfo");
 
 
 
 
-function get_double_play_threshold(game_id){
+async function get_double_play_threshold(fielder_id, game_id){
 
     const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
 
@@ -25,7 +25,7 @@ function get_double_play_threshold(game_id){
 
     let multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'tragicness');
     const batter_tragicness = (await getPlayerStat('tragicness', batter)) * (1 / multiplier);
-    const inverted_tragicness = max((1 - batter_tragicness), 0);
+    const inverted_tragicness = Math.max((1 - batter_tragicness), 0);
 
     multiplier = getMultiplier(pitcher, pitching_team, stadium_id, game_id, season, day, 'shakespearianism');
     const pitcher_shakespearianism = (await getPlayerStat('shakespearianism', pitcher)) * multiplier * (1 + 0.2 * pitcher_vibes);
@@ -42,7 +42,7 @@ function get_double_play_threshold(game_id){
                     + 0.10 * fielder_tenaciousness
                     - 0.16 * stadium_elongation;
 
-    return max(threshold, 0.001);
+    return Math.max(parseFloat(threshold.toFixed(4)), 0.001);
 }
 
 //This forumal is just made up wholecloth
@@ -51,7 +51,7 @@ function get_double_play_threshold(game_id){
     //Needed some way that it would check to see if the batter even attempted a sacrifice
     //Because moving the fielders/sacrifice outside of the runner on first base check
     //Means that without this check there would only be a regular ground out when there was one out left in the inning
-function get_sacrifice_attempt_threshold(fielder_id, game_id){
+async function get_sacrifice_attempt_threshold(fielder_id, game_id){
 
     const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
 
@@ -67,7 +67,7 @@ function get_sacrifice_attempt_threshold(fielder_id, game_id){
 
     let multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'martyrdom');
     const batter_martyrdom = (await getPlayerStat('martyrdom', batter)) * (1 / multiplier);
-    const inverted_martyrdom = max((1 - batter_martyrdom), 0);
+    const inverted_martyrdom = Math.max((1 - batter_martyrdom), 0);
 
     multiplier = getMultiplier(pitcher, pitching_team, stadium_id, game_id, season, day, 'shakespearianism');
     const pitcher_shakespearianism = (await getPlayerStat('shakespearianism', pitcher)) * multiplier * (1 + 0.2 * pitcher_vibes);
@@ -84,10 +84,10 @@ function get_sacrifice_attempt_threshold(fielder_id, game_id){
                     + 0.10 * fielder_watchfulness
                     - 0.16 * stadium_elongation;
 
-    return max(threshold, 0.001);
+    return Math.max(parseFloat(threshold.toFixed(4)), 0.001);
 }
 
-function get_sacrifice(game_id){
+async function get_sacrifice(game_id){
 
     const { batter, batting_team } = await getPlayersTeams(game_id);
 
@@ -124,7 +124,7 @@ function get_sacrifice(game_id){
         threshold = 0.05 + 0.25 * batter_martyrdom - 0.035 * hype;
     }
     
-    return threshold;
+    return Math.max(parseFloat(threshold.toFixed(4)), 0.001);
 }
 
 module.exports = {

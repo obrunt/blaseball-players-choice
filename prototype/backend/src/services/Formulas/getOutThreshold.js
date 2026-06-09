@@ -96,6 +96,12 @@ async function get_fly_ground_threshold(game_id){
     const stadium_id = await getGameStadium(game_id);
     const inning = await getGameInning(game_id);
 
+    let stadium_hype = await getStadiumStat('hype', stadium_id);
+    if(!inning.top_of_inning){
+        stadium_hype *= -1;
+    }
+
+
     let multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'buoyancy');
     const batter_buoyancy = (await getPlayerStat('buoyancy', batter)) * (1 / multiplier);
     
@@ -111,12 +117,6 @@ async function get_fly_ground_threshold(game_id){
     
 
     const stadium_ominousness = (await getStadiumStat('ominousness', stadium_id)) - 0.5;
-
-    let stadium_hype = await getStadiumStat('hype', stadium_id);
-    if(!inning.top_of_inning){
-        stadium_hype *= -1;
-    }
-
 
     const threshold = 0.18 + 0.3 * (batter_buoyancy + 0.2 * stadium_hype) - 0.16 * (pitcher_suppression + 0.2 * stadium_hype) - 0.1 * stadium_ominousness;
 
@@ -174,7 +174,7 @@ async function get_advance_base_out_fly(runner_id, base_index, game_id){
             - 0.10 * stadium_inconvenience;
     }
 
-    return parseFloat(threshold.toFixed(4));
+    return Math.max(parseFloat(threshold.toFixed(4)), 0.001);
 }
 
 

@@ -5,9 +5,16 @@ const {
     get_advance_base_out_ground
 } = require('../../../../backend/src/services/formulas/getOutThreshold');
 
+const {
+    get_double_play_threshold,
+    get_sacrifice,
+    get_sacrifice_attempt_threshold
+} = require('../../../../backend/src/services/formulas/getGroundOut');
+
+
 
 const { getMultiplier } = require('../../../../backend/src/services/formulas/getMultiplier');
-const { getVibes, getPlayerStat } = require('../../../../backend/src/services/database/fetchPlayerInfo');
+const { getVibes, getPlayerStat, getPlayerTeam } = require('../../../../backend/src/services/database/fetchPlayerInfo');
 const { getGameSeason, getGameDay } = require('../../../../backend/src/services/database/fetchSeasonDayGames');
 const { getGameStadium, getGameInning, getPlayersTeams } = require('../../../../backend/src/services/database/fetchGameInfo');
 const { getStadiumStat } = require('../../../../backend/src/services/database/fetchStadiumInfo');
@@ -34,7 +41,7 @@ getGameSeason.mockReturnValue(0);
 getGameStadium.mockReturnValue('');
 
 
-function setDefaultValueHomerun(multiplier, batter, pitcher, stadium, vibes){
+function setDefaultValueOut(multiplier, batter, pitcher, stadium, vibes){
     getMultiplier.mockReturnValue(multiplier);
     getPlayerStat.mockReturnValueOnce(batter).mockReturnValue(pitcher);
     getStadiumStat.mockReturnValue(stadium);
@@ -58,7 +65,7 @@ function allFunctionsCalled(){
 
 
 test('Out threshold - Baseline', async () => {
-    setDefaultValueHomerun(0, 0, 0, 0.5, 0);
+    setDefaultValueOut(0, 0, 0, 0.5, 0);
 
     const moduleUnderTest = await get_out_threshold('');
     
@@ -68,7 +75,7 @@ test('Out threshold - Baseline', async () => {
 });
 
 test('Out threshold - 0.0', async () => {
-    setDefaultValueHomerun(0, 0, 0, 0, 0);
+    setDefaultValueOut(0, 0, 0, 0, 0);
 
     const moduleUnderTest = await get_out_threshold('');
     
@@ -78,7 +85,7 @@ test('Out threshold - 0.0', async () => {
 });
 
 test('Out threshold - 0.5', async () => {
-    setDefaultValueHomerun(0.5, 0.5, 0.5, 0.5, 0.5);
+    setDefaultValueOut(0.5, 0.5, 0.5, 0.5, 0.5);
 
     const moduleUnderTest = await get_out_threshold('');
     
@@ -88,7 +95,7 @@ test('Out threshold - 0.5', async () => {
 });
 
 test('Out threshold - 1.0', async () => {
-    setDefaultValueHomerun(1, 1, 1, 1, 1);
+    setDefaultValueOut(1, 1, 1, 1, 1);
 
     const moduleUnderTest = await get_out_threshold('');
     
@@ -98,11 +105,11 @@ test('Out threshold - 1.0', async () => {
 });
 
 test('Out - Batter & Pitcher No vibes', async () => {
-    setDefaultValueHomerun(1, 0, 1, 0.5, 0);
+    setDefaultValueOut(1, 0, 1, 0.5, 0);
 
     const pitcherBetter = await get_out_threshold('');
     
-    setDefaultValueHomerun(1, 1, 0, 0.5, 0);
+    setDefaultValueOut(1, 1, 0, 0.5, 0);
 
     const batterBetter = await get_out_threshold('');
     
@@ -112,11 +119,11 @@ test('Out - Batter & Pitcher No vibes', async () => {
 });
 
 test('Out - Batter & Pitcher Vibes', async () => {
-    setDefaultValueHomerun(1, 0, 1, 0.5, 1);
+    setDefaultValueOut(1, 0, 1, 0.5, 1);
 
     const pitcherBetter = await get_out_threshold('');
     
-    setDefaultValueHomerun(1, 1, 0, 0.5, 0);
+    setDefaultValueOut(1, 1, 0, 0.5, 0);
 
     const batterBetter = await get_out_threshold('');
     
@@ -126,11 +133,11 @@ test('Out - Batter & Pitcher Vibes', async () => {
 });
 
 test('Out - Vibes Comparison', async () => {
-    setDefaultValueHomerun(1, 0.5, 0.5, 0.5, 0);
+    setDefaultValueOut(1, 0.5, 0.5, 0.5, 0);
 
     const excludeVibes = await get_out_threshold('');
     
-    setDefaultValueHomerun(1, 0.5, 0.5, 0.5, 0);
+    setDefaultValueOut(1, 0.5, 0.5, 0.5, 0);
 
     const includeVibes = await get_out_threshold('');
     
@@ -145,8 +152,8 @@ test('Out - Vibes Comparison', async () => {
 
 
 
-/*
-function setDefaultValueTriple(multiplier, batter, pitcher, stadium, vibes, inning){
+
+function setDefaultValueFlyGround(multiplier, batter, pitcher, stadium, vibes, inning){
     getMultiplier.mockReturnValue(multiplier);
     getPlayerStat.mockReturnValueOnce(batter).mockReturnValue(pitcher);
     getStadiumStat.mockReturnValueOnce(0).mockReturnValue(stadium);
@@ -154,52 +161,52 @@ function setDefaultValueTriple(multiplier, batter, pitcher, stadium, vibes, inni
     getGameInning.mockReturnValue({top_of_inning: inning});
 }
 
-test('Triple threshold - Baseline', async () => {
-    setDefaultValueTriple(0, 0, 0, 0.5, 0);
+test('Fly ground threshold - Baseline', async () => {
+    setDefaultValueFlyGround(1, 0, 0, 0.5, 0);
 
     const moduleUnderTest = await get_fly_ground_threshold('');
     
     allFunctionsCalled();
 
-    expect(moduleUnderTest).toEqual(0.05);
+    expect(moduleUnderTest).toEqual(0.18);
 });
 
-test('Triple threshold - 0.0', async () => {
-    setDefaultValueTriple(0, 0, 0, 0, 0);
+test('Fly ground threshold - 0.0', async () => {
+    setDefaultValueFlyGround(0, 0, 0, 0, 0);
 
     const moduleUnderTest = await get_fly_ground_threshold('');
     
     allFunctionsCalled();
 
-    expect(moduleUnderTest).toEqual(0.0133);
+    expect(moduleUnderTest).toEqual(NaN);
 });
 
-test('Triple threshold - 0.5', async () => {
-    setDefaultValueTriple(0.5, 0.5, 0.5, 0.5, 0.5);
+test('Fly ground threshold - 0.5', async () => {
+    setDefaultValueFlyGround(0.5, 0.5, 0.5, 0.5, 0.5);
 
     const moduleUnderTest = await get_fly_ground_threshold('');
     
     allFunctionsCalled();
 
-    expect(moduleUnderTest).toEqual(0.0775);
+    expect(moduleUnderTest).toEqual(0.44);
 });
 
-test('Triple threshold - 1.0', async () => {
-    setDefaultValueTriple(1, 1, 1, 1, 1);
+test('Fly ground threshold - 1.0', async () => {
+    setDefaultValueFlyGround(1, 1, 1, 1, 1);
 
     const moduleUnderTest = await get_fly_ground_threshold('');
     
     allFunctionsCalled();
 
-    expect(moduleUnderTest).toEqual(0.2067);
+    expect(moduleUnderTest).toEqual(0.27);
 });
 
-test('Triple - Batter & Pitcher No vibes', async () => {
-    setDefaultValueTriple(1, 0, 1, 0.5, 0);
+test('Fly ground - Batter & Pitcher No vibes', async () => {
+    setDefaultValueFlyGround(1, 0, 1, 0.5, 0);
 
     const pitcherBetter = await get_fly_ground_threshold('');
     
-    setDefaultValueTriple(1, 1, 0, 0.5, 0);
+    setDefaultValueFlyGround(1, 1, 0, 0.5, 0);
 
     const batterBetter = await get_fly_ground_threshold('');
     
@@ -208,12 +215,12 @@ test('Triple - Batter & Pitcher No vibes', async () => {
     expect(pitcherBetter).toBeLessThan(batterBetter);
 });
 
-test('Triple - Batter & Pitcher Vibes', async () => {
-    setDefaultValueTriple(1, 0, 1, 0.5, 1);
+test('Fly ground - Batter & Pitcher Vibes', async () => {
+    setDefaultValueFlyGround(1, 0, 1, 0.5, 1);
 
     const pitcherBetter = await get_fly_ground_threshold('');
     
-    setDefaultValueTriple(1, 1, 0, 0.5, 0);
+    setDefaultValueFlyGround(1, 1, 0, 0.5, 0);
 
     const batterBetter = await get_fly_ground_threshold('');
     
@@ -222,12 +229,12 @@ test('Triple - Batter & Pitcher Vibes', async () => {
     expect(pitcherBetter).toBeLessThan(batterBetter);
 });
 
-test('Triple - Vibes Comparison', async () => {
-    setDefaultValueTriple(1, 0.5, 0.5, 0.5, 0);
+test('Fly ground - Vibes Comparison', async () => {
+    setDefaultValueFlyGround(1, 0.5, 0.5, 0.5, 0);
 
     const excludeVibes = await get_fly_ground_threshold('');
     
-    setDefaultValueTriple(1, 0.5, 0.5, 0.5, 0);
+    setDefaultValueFlyGround(1, 0.5, 0.5, 0.5, 0);
 
     const includeVibes = await get_fly_ground_threshold('');
     
@@ -236,11 +243,12 @@ test('Triple - Vibes Comparison', async () => {
     expect(includeVibes).toEqual(excludeVibes);
 });
 
-*/
 
 
 
-function setDefaultValueAdvance(multiplier, batter, pitcher, stadium, vibes){
+
+
+function setDefaultValueAdvanceGround(multiplier, batter, pitcher, stadium, vibes){
     getMultiplier.mockReturnValue(multiplier);
     getPlayerStat.mockReturnValueOnce(batter).mockReturnValue(pitcher);
     getStadiumStat.mockReturnValue(stadium);
@@ -248,7 +256,7 @@ function setDefaultValueAdvance(multiplier, batter, pitcher, stadium, vibes){
 }
 
 test('Advance out ground threshold - Baseline', async () => {
-    setDefaultValueAdvance(0, 0, 0, 0.5, 0);
+    setDefaultValueOut(0, 0, 0, 0.5, 0);
 
     const moduleUnderTest = await get_advance_base_out_ground('');
     
@@ -257,8 +265,8 @@ test('Advance out ground threshold - Baseline', async () => {
     expect(moduleUnderTest).toEqual(0.5);
 });
 
-test('Advance out threshold - 0.0', async () => {
-    setDefaultValueAdvance(0, 0, 0, 0, 0);
+test('Advance out ground threshold - 0.0', async () => {
+    setDefaultValueOut(0, 0, 0, 0, 0);
 
     const moduleUnderTest = await get_advance_base_out_ground('');
     
@@ -268,7 +276,7 @@ test('Advance out threshold - 0.0', async () => {
 });
 
 test('Advance out ground threshold - 0.5', async () => {
-    setDefaultValueAdvance(0.5, 0.5, 0.5, 0.5, 0.5);
+    setDefaultValueOut(0.5, 0.5, 0.5, 0.5, 0.5);
 
     const moduleUnderTest = await get_advance_base_out_ground('');
     
@@ -278,7 +286,7 @@ test('Advance out ground threshold - 0.5', async () => {
 });
 
 test('Advance out ground threshold - 1.0', async () => {
-    setDefaultValueAdvance(1, 1, 1, 1, 1);
+    setDefaultValueOut(1, 1, 1, 1, 1);
 
     const moduleUnderTest = await get_advance_base_out_ground('');
     
@@ -288,7 +296,7 @@ test('Advance out ground threshold - 1.0', async () => {
 });
 
 test('Advance out ground - Min value', async () => {
-    setDefaultValueAdvance(1, 0, 1, 1, 0);
+    setDefaultValueOut(1, 0, 1, 1, 0);
 
     const pitcherBetter = await get_advance_base_out_ground('');
     
@@ -299,11 +307,310 @@ test('Advance out ground - Min value', async () => {
 });
 
 test('Advance out ground - Max value', async () => {
-    setDefaultValueAdvance(1, 1, 0, 0, 0);
+    setDefaultValueOut(1, 1, 0, 0, 0);
 
     const pitcherBetter = await get_advance_base_out_ground('');
     
     allFunctionsCalled();
 
     expect(pitcherBetter).toEqual(0.95);
+});
+
+
+
+
+
+
+function setDefaultValueAdvanceFly(multiplier, batter, stadium, vibes){
+    getMultiplier.mockReturnValue(multiplier);
+    getPlayerStat.mockReturnValue(batter);
+    getStadiumStat.mockReturnValue(stadium);
+    getVibes.mockReturnValue(vibes);
+}
+
+test('Advance out fly threshold - Baseline', async () => {
+    setDefaultValueAdvanceFly(0, 0, 0.5, 0);
+
+    const moduleUnderTest = await get_advance_base_out_fly('', 0);
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(0.001);
+});
+
+test('Advance out fly threshold - 1st base', async () => {
+    setDefaultValueAdvanceFly(0.5, 0.5, 0.5, 0.5);
+
+    const moduleUnderTest = await get_advance_base_out_fly('', 0);
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(0.001);
+});
+
+test('Advance out fly threshold - 2nd base', async () => {
+    setDefaultValueAdvanceFly(0.5, 0.5, 0.5, 0.5);
+
+    const moduleUnderTest = await get_advance_base_out_fly('', 1);
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(0.0856);
+});
+
+test('Advance out fly threshold - 3rd base', async () => {
+    setDefaultValueAdvanceFly(0.5, 0.5, 0.5, 0.5);
+
+    const moduleUnderTest = await get_advance_base_out_fly('', 2);
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(0.5463);
+});
+
+
+
+
+
+
+
+
+
+function setDefaultValueDoublePlay(multiplier, batter, pitcher, stadium, vibes){
+    getMultiplier.mockReturnValue(multiplier);
+    getPlayerStat.mockReturnValueOnce(batter).mockReturnValue(pitcher);
+    getStadiumStat.mockReturnValue(stadium);
+    getVibes.mockReturnValue(vibes);
+}
+
+
+test('Double play threshold - Baseline', async () => {
+    setDefaultValueOut(1, 0, 0, 0.5, 0);
+
+    const moduleUnderTest = await get_double_play_threshold('');
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(0.001);
+});
+
+test('Double play threshold - 0.0', async () => {
+    setDefaultValueOut(0, 0, 0, 0, 0);
+
+    const moduleUnderTest = await get_double_play_threshold('');
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(NaN);
+});
+
+test('Double play threshold - 0.5', async () => {
+    setDefaultValueOut(0.5, 0.5, 0.5, 0.5, 0.5);
+
+    const moduleUnderTest = await get_double_play_threshold('');
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(0.0875);
+});
+
+test('Double play threshold - 1.0', async () => {
+    setDefaultValueOut(1, 1, 1, 1, 1);
+
+    const moduleUnderTest = await get_double_play_threshold('');
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(0.47);
+});
+
+test('Double play - Batter & Pitcher No vibes', async () => {
+    setDefaultValueOut(1, 0, 1, 0.5, 0);
+
+    const pitcherBetter = await get_double_play_threshold('');
+    
+    setDefaultValueOut(1, 1, 0, 0.5, 0);
+
+    const batterBetter = await get_double_play_threshold('');
+    
+    allFunctionsCalled();
+
+    expect(pitcherBetter).toBeGreaterThan(batterBetter);
+});
+
+test('Double play - Batter & Pitcher Vibes', async () => {
+    setDefaultValueOut(1, 0, 1, 0.5, 1);
+
+    const pitcherBetter = await get_double_play_threshold('');
+    
+    setDefaultValueOut(1, 1, 0, 0.5, 0);
+
+    const batterBetter = await get_double_play_threshold('');
+    
+    allFunctionsCalled();
+
+    expect(pitcherBetter).toBeGreaterThan(batterBetter);
+});
+
+test('Double play - Vibes Comparison', async () => {
+    setDefaultValueOut(1, 0.5, 0.5, 0.5, 0);
+
+    const excludeVibes = await get_double_play_threshold('');
+    
+    setDefaultValueOut(1, 0.5, 0.5, 0.5, 0);
+
+    const includeVibes = await get_double_play_threshold('');
+    
+    allFunctionsCalled();
+
+    expect(includeVibes).toEqual(excludeVibes);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+test('Sacrifice attempt threshold - Baseline', async () => {
+    setDefaultValueOut(1, 0, 0, 0.5, 0);
+
+    const moduleUnderTest = await get_sacrifice_attempt_threshold('');
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(0.001);
+});
+
+test('Sacrifice attempt threshold - 0.0', async () => {
+    setDefaultValueOut(0, 0, 0, 0, 0);
+
+    const moduleUnderTest = await get_sacrifice_attempt_threshold('');
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(NaN);
+});
+
+test('Sacrifice attempt threshold - 0.5', async () => {
+    setDefaultValueOut(0.5, 0.5, 0.5, 0.5, 0.5);
+
+    const moduleUnderTest = await get_sacrifice_attempt_threshold('');
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(0.0875);
+});
+
+test('Sacrifice attempt threshold - 1.0', async () => {
+    setDefaultValueOut(1, 1, 1, 1, 1);
+
+    const moduleUnderTest = await get_sacrifice_attempt_threshold('');
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(0.47);
+});
+
+test('Sacrifice attempt - Batter & Pitcher No vibes', async () => {
+    setDefaultValueOut(1, 0, 1, 0.5, 0);
+
+    const pitcherBetter = await get_sacrifice_attempt_threshold('');
+    
+    setDefaultValueOut(1, 1, 0, 0.5, 0);
+
+    const batterBetter = await get_sacrifice_attempt_threshold('');
+    
+    allFunctionsCalled();
+
+    expect(pitcherBetter).toBeGreaterThan(batterBetter);
+});
+
+test('Sacrifice attempt - Batter & Pitcher Vibes', async () => {
+    setDefaultValueOut(1, 0, 1, 0.5, 1);
+
+    const pitcherBetter = await get_sacrifice_attempt_threshold('');
+    
+    setDefaultValueOut(1, 1, 0, 0.5, 0);
+
+    const batterBetter = await get_sacrifice_attempt_threshold('');
+    
+    allFunctionsCalled();
+
+    expect(pitcherBetter).toBeGreaterThan(batterBetter);
+});
+
+test('Sacrifice attempt - Vibes Comparison', async () => {
+    setDefaultValueOut(1, 0.5, 0.5, 0.5, 0);
+
+    const excludeVibes = await get_sacrifice_attempt_threshold('');
+    
+    setDefaultValueOut(1, 0.5, 0.5, 0.5, 0);
+
+    const includeVibes = await get_sacrifice_attempt_threshold('');
+    
+    allFunctionsCalled();
+
+    expect(includeVibes).toEqual(excludeVibes);
+});
+
+
+
+
+
+test('Sacrifice threshold - Baseline', async () => {
+    setDefaultValueFlyGround(1, 0, 0, 0.5, 0);
+
+    const moduleUnderTest = await get_sacrifice('');
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(0.05);
+});
+
+test('Sacrifice threshold - 0.0', async () => {
+    setDefaultValueFlyGround(0, 0, 0, 0, 0);
+
+    const moduleUnderTest = await get_sacrifice('');
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(NaN);
+});
+
+test('Sacrifice threshold - 0.5', async () => {
+    setDefaultValueFlyGround(0.5, 0.5, 0.5, 0.5, 0.5);
+
+    const moduleUnderTest = await get_sacrifice('');
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(0.3);
+});
+
+test('Sacrifice threshold - 1.0', async () => {
+    setDefaultValueFlyGround(1, 1, 1, 1, 1);
+
+    const moduleUnderTest = await get_sacrifice('');
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(0.3);
+});
+
+test('Sacrifice threshold - Flat multiplier', async () => {
+    setDefaultValueFlyGround(1, 0.5, 0.5, 0.5, 0.5);
+
+    const moduleUnderTest = await get_sacrifice('');
+    
+    allFunctionsCalled();
+
+    expect(moduleUnderTest).toEqual(0.175);
 });
