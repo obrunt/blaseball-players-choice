@@ -311,3 +311,8 @@ function get_strike_threshold(game_id){
     threshold = min(threshold, factors.roll_cap);
     return threshold;
 }
+
+
+module.export = {
+    get_strike_threshold
+}

@@ -1,6 +1,6 @@
 # Blaseball: Player's Choice
 
-This is a project attempting to re-create the main functionality of blaseball, along with giving the user the chance to edit teams, players, and the assigned modifications. 
+This is a project attempting to re-create the main functionality of blaseball, along with giving the user the chance to edit teams, players, stadiums, leagues, and the assigned modifications. 
 
 Unlike projects like [Resim](https://github.com/xSke/resim) or [Sandbox](https://github.com/Society-for-Internet-Blaseball-Research/sandbox) this sim will _not_ be a perfect match for the flow following TGB's initial design. Rather, this is attempting to be Blaseball-enough for the purposes of allowing editability on the users end.
 
@@ -28,11 +28,11 @@ There are other projects that have been used in part, or heavily references whil
 Planned workflow:
 
 - [ ] Create a basic baseball sim
-    - [ ] Create game logic
+    - [x] Create game logic
         - [x] Assign game order
         - [x] Formulas
-        - [ ] Event outcomes
-        - [ ] Actual baseball rules
+        - [x] Event outcomes
+        - [x] Actual baseball rules
     - [ ] Handle post season and assign championship
 - [ ] Create unit test for the different parts of the function
     - [ ] Game logic
@@ -96,6 +96,7 @@ Non-specific timed actions:
 
 Beyond scope:
 
+- [ ] Custom modifications
 - [ ] Shops
 - [ ] Deity events
 - [ ] Peanuts/Tickets
