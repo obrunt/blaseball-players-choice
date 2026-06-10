@@ -2,7 +2,7 @@ const { getMultiplier } = require("./getMultiplier");
 
 const { getVibes, getPlayerStat, isFlinching } = require("../database/fetchPlayerInfo");
 const { getGameSeason, getGameDay } = require("../database/fetchSeasonDayGames");
-const { getGameStadium, getGameInning } = require("../database/fetchGameInfo");
+const { getGameStadium, getGameInning, getPlayersTeams } = require("../database/fetchGameInfo");
 const { getStadiumStat } = require("../database/fetchStadiumInfo");
 
 
@@ -229,7 +229,7 @@ const strike_threshold_look_up_table = [
 
 
 
-function get_strike_threshold(game_id){
+async function get_strike_threshold(game_id){
 
     const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
 
@@ -308,11 +308,11 @@ function get_strike_threshold(game_id){
         threshold = factors.constant + factors.ruth_factor * (pitcher_ruthlessness * (1 + 0.2 * pitcher_vibes)) + factors.fwd_factor * stadium_forwardness + factors.musc_factor * batter_musclitude;
     }
 
-    threshold = min(threshold, factors.roll_cap);
-    return threshold;
+    threshold = Math.min(threshold, factors.roll_cap);
+    return parseFloat(threshold.toFixed(4));
 }
 
 
-module.export = {
+module.exports = {
     get_strike_threshold
 }

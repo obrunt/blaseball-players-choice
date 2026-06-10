@@ -118,9 +118,11 @@ async function get_fly_ground_threshold(game_id){
 
     const stadium_ominousness = (await getStadiumStat('ominousness', stadium_id)) - 0.5;
 
-    const threshold = 0.18 + 0.3 * (batter_buoyancy + 0.2 * stadium_hype) - 0.16 * (pitcher_suppression + 0.2 * stadium_hype) - 0.1 * stadium_ominousness;
+    let threshold = 0.18 + 0.3 * (batter_buoyancy + 0.2 * stadium_hype) - 0.16 * (pitcher_suppression + 0.2 * stadium_hype) - 0.1 * stadium_ominousness;
 
-    return Math.max(parseFloat(threshold.toFixed(4)), 0.01);
+    threshold = threshold || 0;
+
+    return Math.max(parseFloat(threshold.toFixed(4)), 0.001);
 }
 
 

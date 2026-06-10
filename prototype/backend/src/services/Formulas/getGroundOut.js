@@ -36,11 +36,14 @@ async function get_double_play_threshold(fielder_id, game_id){
     const stadium_elongation = await getStadiumStat('elongation', stadium_id) - 0.5;
 
 
-    const threshold = -0.05
+    let threshold = -0.05
                     + 0.40 * pitcher_shakespearianism
                     - 0.18 * inverted_tragicness
                     + 0.10 * fielder_tenaciousness
                     - 0.16 * stadium_elongation;
+
+
+    threshold = threshold || 0;
 
     return Math.max(parseFloat(threshold.toFixed(4)), 0.001);
 }
@@ -78,11 +81,14 @@ async function get_sacrifice_attempt_threshold(fielder_id, game_id){
     const stadium_elongation = await getStadiumStat('elongation', stadium_id) - 0.5;
 
 
-    const threshold = -0.05
+    let threshold = -0.05
                     + 0.40 * pitcher_shakespearianism
                     - 0.18 * inverted_martyrdom
                     + 0.10 * fielder_watchfulness
                     - 0.16 * stadium_elongation;
+
+                    
+    threshold = threshold || 0;
 
     return Math.max(parseFloat(threshold.toFixed(4)), 0.001);
 }
@@ -123,6 +129,9 @@ async function get_sacrifice(game_id){
     else{
         threshold = 0.05 + 0.25 * batter_martyrdom - 0.035 * hype;
     }
+
+    
+    threshold = threshold || 0;
     
     return Math.max(parseFloat(threshold.toFixed(4)), 0.001);
 }

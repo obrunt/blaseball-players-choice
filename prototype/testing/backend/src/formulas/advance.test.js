@@ -1,5 +1,4 @@
 const {  
-    sum,
     get_homerun_threshold,
     get_triple_threshold,
     get_double_threshold,

@@ -178,7 +178,7 @@ test('Fly ground threshold - 0.0', async () => {
     
     allFunctionsCalled();
 
-    expect(moduleUnderTest).toEqual(NaN);
+    expect(moduleUnderTest).toEqual(0.001);
 });
 
 test('Fly ground threshold - 0.5', async () => {
@@ -401,7 +401,7 @@ test('Double play threshold - 0.0', async () => {
     
     allFunctionsCalled();
 
-    expect(moduleUnderTest).toEqual(NaN);
+    expect(moduleUnderTest).toEqual(0.001);
 });
 
 test('Double play threshold - 0.5', async () => {
@@ -496,7 +496,7 @@ test('Sacrifice attempt threshold - 0.0', async () => {
     
     allFunctionsCalled();
 
-    expect(moduleUnderTest).toEqual(NaN);
+    expect(moduleUnderTest).toEqual(0.001);
 });
 
 test('Sacrifice attempt threshold - 0.5', async () => {
@@ -582,7 +582,7 @@ test('Sacrifice threshold - 0.0', async () => {
     
     allFunctionsCalled();
 
-    expect(moduleUnderTest).toEqual(NaN);
+    expect(moduleUnderTest).toEqual(0.001);
 });
 
 test('Sacrifice threshold - 0.5', async () => {

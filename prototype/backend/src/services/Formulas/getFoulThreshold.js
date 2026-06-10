@@ -2,11 +2,11 @@ const { getMultiplier } = require("./getMultiplier");
 
 const { getVibes, getPlayerStat, isFlinching } = require("../database/fetchPlayerInfo");
 const { getGameSeason, getGameDay } = require("../database/fetchSeasonDayGames");
-const { getGameStadium, getGameInning } = require("../database/fetchGameInfo");
+const { getGameStadium, getGameInning, getPlayersTeams } = require("../database/fetchGameInfo");
 const { getStadiumStat } = require("../database/fetchStadiumInfo");
 
 
-function get_foul_threshold(game_id){
+async function get_foul_threshold(game_id){
 
     const { batter, batting_team } = await getPlayersTeams(game_id);
 

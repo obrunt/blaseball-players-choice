@@ -2,7 +2,7 @@ const { getMultiplier } = require("./getMultiplier");
 
 const { getVibes, getPlayerStat } = require("../database/fetchPlayerInfo");
 const { getGameSeason, getGameDay } = require("../database/fetchSeasonDayGames");
-const { getGameStadium } = require("../database/fetchGameInfo");
+const { getGameStadium, getPlayersTeams } = require("../database/fetchGameInfo");
 const { getStadiumStat } = require("../database/fetchStadiumInfo");
 
 
@@ -257,7 +257,7 @@ const ball_threshold_look_up_table = [
 ];
 
 
-function get_contact_strike_threshold(game_id){
+async function get_contact_strike_threshold(game_id){
 
     const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
 
@@ -268,15 +268,14 @@ function get_contact_strike_threshold(game_id){
     const pitcher_vibes = await getVibes(pitcher, day);
     const batter_vibes = await getVibes(batter, day);
 
-    
-    let multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'divinity');
+    let multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'patheticism');
+    const batter_patheticism = (await getPlayerStat('patheticism', batter)) * (1 / multiplier);    
+    multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'divinity');
     const batter_divinity = (await getPlayerStat('divinity', batter)) * multiplier;
     multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'musclitude');
     const batter_musclitude = (await getPlayerStat('musclitude', batter)) * multiplier;
     multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'thwackability');
     const batter_thwackability = (await getPlayerStat('thwackability', batter)) * multiplier;
-    multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'patheticism');
-    const batter_patheticism = (await getPlayerStat('patheticism', batter)) * (1 / multiplier);
 
     const combined_batting = ((batter_divinity + batter_musclitude + batter_thwackability - batter_patheticism) / 2) * (1 + 0.2 * batter_vibes);
     
@@ -291,15 +290,20 @@ function get_contact_strike_threshold(game_id){
 
     const ballpark_sum = (stadium_fortification + 3 * stadium_viscosity - 6 * stadium_forwardness) / 10;
 
+
+    
     let factors = strike_threshold_look_up_table[season];
 
-    const threshold = factors.constant - 0.08 * pitcher_ruthlessness + 0.16 * ballpark_sum + factors.batting_factor * (combined_batting**1.2);
+    let threshold = factors.constant - 0.08 * pitcher_ruthlessness + 0.16 * ballpark_sum + factors.batting_factor * (combined_batting**1.2);
 
-    return min(factors.cap, threshold);
+
+    threshold = threshold || 0.001;
+
+    return Math.min(factors.cap, parseFloat(threshold.toFixed(4)));
 }
 
 
-function get_contact_ball_threshold(game_id){
+async function get_contact_ball_threshold(game_id){
 
     const { batter, pitcher, batting_team, pitching_team } = await getPlayersTeams(game_id);
 
@@ -313,7 +317,7 @@ function get_contact_ball_threshold(game_id){
     
     let multiplier = getMultiplier(batter, batting_team, stadium_id, game_id, season, day, 'patheticism');
     const batter_patheticism = (await getPlayerStat('patheticism', batter)) * (1 / multiplier);
-    const inverted_patheticism = max((1 - batter_patheticism) * (1 + 0.2 * batter_vibes), 0);
+    const inverted_patheticism = Math.max((1 - batter_patheticism) * (1 + 0.2 * batter_vibes), 0);
     
 
     multiplier = getMultiplier(pitcher, pitching_team, stadium_id, game_id, season, day, 'ruthlessness');
@@ -329,9 +333,12 @@ function get_contact_ball_threshold(game_id){
 
     let factors = ball_threshold_look_up_table[season];
 
-    const threshold = factors.constant - 0.1 * pitcher_ruthlessness + batting_factor * (inverted_patheticism**1.5) + 0.14 * ballpark_sum;
 
-    return min(factors.cap, threshold);
+    let threshold = factors.constant - 0.1 * pitcher_ruthlessness + factors.batting_factor * (inverted_patheticism**1.5) + 0.14 * ballpark_sum;
+
+    threshold = threshold || 0.001;
+
+    return Math.min(factors.cap, parseFloat(threshold.toFixed(4)));
 }
 
 module.exports = {

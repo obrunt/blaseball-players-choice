@@ -37,7 +37,7 @@ Planned workflow:
 - [ ] Create unit test for the different parts of the function
     - [ ] Game logic
     - [ ] Event flow order
-    - [ ] Formulas
+    - [x] Formulas
     - [ ] Event async order
     - [ ] Postseason
 - [ ] Create database and inserts
