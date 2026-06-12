@@ -258,18 +258,37 @@ async function getGameCounts(game_id){
     //Need to get all of the outs, balls and fouls for the team that is currently up to bat
     //Also get the counts for each team so that comparison can be done for when rool overs happen
 
-    const query =  `
-    SELECT bases_occupied, strikes, outs, balls
+    const query = `
+    SELECT bases_occupied, strikes, outs, balls,
     CASE
-        WHEN batter_team_id = home_team_id
-        THEN home_ball_count AS 'ball_count', home_base_count AS 'base_count', home_out_count AS 'out_count', home_strike_count AS 'strike_count'
-        WHEN batter_team_id = away_team_id
-        THEN away_ball_count AS 'ball_count', away_base_count AS 'base_count', away_out_count AS 'out_count', away_strike_count AS 'strike_count'
+      WHEN home_team_id = batter_team_id
+      THEN home_ball_count
+      WHEN away_team_id = batter_team_id
+      THEN away_ball_count
+    END AS ball_count,
+    CASE
+      WHEN home_team_id = batter_team_id
+      THEN home_strike_count
+      WHEN away_team_id = batter_team_id
+      THEN away_strike_count
+    END AS strike_count,
+    CASE
+      WHEN home_team_id = batter_team_id
+      THEN home_base_count
+      WHEN away_team_id = batter_team_id
+      THEN away_base_count
+    END AS base_count,
+    CASE
+      WHEN home_team_id = batter_team_id
+      THEN home_out_count
+      WHEN away_team_id = batter_team_id
+      THEN away_out_count
+    END AS base_count
     FROM data.game_events
     WHERE game_id = ?
     ORDER BY event_index DESC
     LIMIT 1;
-  `;
+    `;
 
   try {
     const result = await pool.query(query, [game_id]);
@@ -282,53 +301,6 @@ async function getGameCounts(game_id){
 }
 
 
-function setGameStat(value){
-  getGameStat = value;
-}
-
-function setGameWeather(value){
-  getGameWeather = value;
-}
-
-function setGameStadium(value){
-  getGameStadium = value;
-}
-
-function setGameInning(value){
-  getGameInning = value;
-}
-
-function setBattingTeam(value){
-  getBattingTeam = value;
-}
-
-function setPitchingTeam(value){
-  getPitchingTeam = value;
-}
-
-function setSetPitchers(value){
-  getSetPitchers = value;
-}
-
-function setPitcher(value){
-  getPitcher = value;
-}
-
-function setBatter(value){
-  getBatter = value;
-}
-
-function setGameOccupiedBases(value){
-  getGameOccupiedBases = value;
-}
-
-function setBatterApperananceCount(value){
-  getBatterAppearanceCount = value;
-}
-
-function setGameCounts(value){
-  getGameCounts = value;
-}
 
 module.exports = {
   getGameStat,
@@ -345,18 +317,5 @@ module.exports = {
   getPitcher,
   getSetPitchers,
 
-  getBatterAppearanceCount,
-
-  setBatter,
-  setBatterApperananceCount,
-  setBattingTeam,
-  setGameCounts,
-  setGameInning,
-  setGameOccupiedBases,
-  setGameStadium,
-  setGameStat,
-  setGameWeather,
-  setPitcher,
-  setPitchingTeam,
-  setSetPitchers
+  getBatterAppearanceCount
 };

@@ -743,3 +743,25 @@ ALTER SEQUENCE data.game_event_base_runners_id_seq
     OWNED BY data.game_event_base_runners.id;
 
 ALTER TABLE ONLY data.outcomes ALTER COLUMN id SET DEFAULT nextval('data.player_events_id_seq');
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE data.post_season_rounds(
+    round_count INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    round_name VARCHAR(30),
+    games_to_win INT DEFAULT 0,
+    games_played INT DEFAULT 0,
+    home_team VARCHAR(36),
+    away_team VARCHAR(36),
+    home_team_wins INT DEFAULT 0,
+    away_team_wins INT DEFAULT 0,
+    game_id VARCHAR(36)
+);
+

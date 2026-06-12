@@ -21,7 +21,7 @@ function main (){
 function start(){
 
   //Getting the last game played so we can get the current day
-  let date = fetch_previous_date();
+  let date = await getLastGameDate();
   date.day += 1;
 
   //Fetching the currently constructed games
@@ -127,4 +127,26 @@ function run(games){
   });
 
   return;
+}
+
+
+
+function endGames(){
+ let { day } = await getLastGameDate();
+
+  if (day == 98){
+    var gamesSetUp = new Promise((resolve, reject) => {
+      games.forEach(game => {
+        
+        send_game_event(game.game_id, "GAME_START", game);
+        send_game_event(game.game_id, "INNING_TOP", game);
+        //Will still have to set up this up
+        send_game_event(game.game_id, "BATTER_UP", game);
+        resolve();
+      });
+    })
+    .then(() => {
+      console.log('Games initlized');
+    });
+  }
 }

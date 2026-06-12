@@ -27,16 +27,8 @@ async function getLastGameDate(){
   }
 }
 
-function fetch_previous_date(){
-  return await getLastGameDate();
-}
 
-function setLastGameDate(value){
-  getLastGameDate = value;
-}
 
 module.exports = {
-  fetch_previous_date,
-
-  setLastGameDate
+  getLastGameDate
 };
