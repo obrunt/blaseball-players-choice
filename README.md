@@ -34,6 +34,9 @@ Planned workflow:
         - [x] Event outcomes
         - [x] Actual baseball rules
     - [ ] Handle post season and assign championship
+        - [x] Get championship order
+        - [ ] Set up games
+        - [ ] Something something handle the different day asynchronous
 - [ ] Create unit test for the different parts of the function
     - [ ] Game logic
     - [ ] Event flow order
@@ -52,6 +55,8 @@ Planned workflow:
         - [ ] Data insertation
 - [ ] Refactor anything possible
     - [ ] Refer to chapter three in the textbook
+    - [ ] Biggest current "hacky" system is the creation of the post season
+        - [ ] Make wildcards more generic to handle different number of wildcards
 - [ ] Beginning to add more blaseball events
     - [ ] Weather Events
     - [ ] Team Modifiers

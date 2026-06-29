@@ -58,6 +58,25 @@ async function getSeasonDayGames(season, day){
   }
 }
 
+async function getPostSeasonDayGames(season, day){
+  const query = `
+    SELECT * FROM data.games
+    WHERE season = ?
+    AND day = ?;
+  `;
+
+  try {
+    const result = await pool.query(query, [season, day]);
+
+    //Returns an array of objects for the different rows of the current league table
+    return result[0];
+
+  } catch (err){
+    console.log(err);
+  }
+
+}
+
 function setGameDay(value){
   getGameDay = value;
 }

@@ -7,25 +7,45 @@ const { getSeasonDayGames } = require("../database/fetchSeasonDayGames");
 const { start_game_day } = require("../games/handleStartGame");
 
 
-function main (){
+//Everything here is what's needed to run just one day of the game simulation
+//It would need to be continously until it receives a false from the end games
+  //From there it then starts the output of the sim
+
+
+function main(){
     //Start day
         //This is under handle misc
     let todayGames = start();
     //Run day
     run(todayGames);
+
+    let continueSim = endGames(todayGames);
     //End day
-        //This is under handle misc
+      //There needs to be a way to send the trigger that the championship has been decided
+  return continueSim;
 }
 
 
 function start(){
 
   //Getting the last game played so we can get the current day
-  let date = await getLastGameDate();
-  date.day += 1;
+  let { day, season } = await getLastGameDate();
+  day += 1;
 
-  //Fetching the currently constructed games
-  let games = await getSeasonDayGames(date.season, date.day);
+  let games;
+  //TODO: check to see if this is actually useful, or just some straight nonsense
+    //Creating games should be done after the previous 
+
+  //This tells us if we're in the post season
+  /*if(day > 98){
+    games = await getPostSeasonDayGames(season, day);
+  }
+  //These are just normal season games
+  else{*/
+    //Fetching the currently constructed games
+    games = await getSeasonDayGames(season, day);
+  //}
+
 
   games.forEach(game => {
     //This sets up
@@ -131,22 +151,31 @@ function run(games){
 
 
 
-function endGames(){
- let { day } = await getLastGameDate();
+function endGames(games){
+  const day = games[0].day;
 
   if (day == 98){
-    var gamesSetUp = new Promise((resolve, reject) => {
-      games.forEach(game => {
-        
-        send_game_event(game.game_id, "GAME_START", game);
-        send_game_event(game.game_id, "INNING_TOP", game);
-        //Will still have to set up this up
-        send_game_event(game.game_id, "BATTER_UP", game);
-        resolve();
-      });
+    var postSeasonSetUp = new Promise((resolve, reject) => {
+      
+      
+      resolve();
     })
     .then(() => {
-      console.log('Games initlized');
+      console.log('Continue season games');
     });
+
+    return false;
   }
+  //Have to update the current face offs, carry over any round wins or end the series
+  else if (day > 98){
+
+    return false;
+  }
+  //Just update the games and prep the next ones(?)
+  else{
+    //Nothing needs to happen
+    //Except pass a continue
+
+  }
+  return true;
 }

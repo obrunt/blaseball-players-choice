@@ -127,3 +127,8 @@ CREATE TABLE taxa.vibe_to_arrows (
     min_vibe FLOAT,
     max_vibe FLOAT
 );
+
+CREATE TABLE taxa.post_season_names (
+    round_number INT DEFAULT 0,
+    round_name TEXT
+)

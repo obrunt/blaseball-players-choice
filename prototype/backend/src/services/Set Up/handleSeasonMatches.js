@@ -31,14 +31,14 @@ async function getActiveDivisionTeams(){
 async function setSeasonGameMatches(day, season, home_team, away_team){
 
   const query = `
-    INSERT INTO data.games (day, season, home_team, away_team, series_length, is_postseason) VALUES () {
+    INSERT INTO data.games (day, season, home_team, away_team, series_length, is_postseason) VALUES (
       ?,
       ?,
       ?,
       ?,
       3,
       false
-    };
+    );
   `;
 
   try {
@@ -93,6 +93,38 @@ function returnInsideDivision(divisionTeams, chodenTeamDivision, teamID){
   return teamIDs;
 }
 
+function setTeamMatchup(divisionTeams){
+  
+  //Within sub league 20 / 32
+  //Outside of sub league 11 / 32
+  //Outside of league 1 / 32 
+  //Home or away is a coin flip
+
+  //Getting a random number
+  let num = intRoll(0,32);
+
+  let avalibleTeams;
+  //This means that the team is playing outside their subleague
+  if (num == 0) {
+    avalibleTeams = returnOutsideSubleague(divisionTeams, divisionTeams[i].subleague_id);
+  }
+  //This means that the team is playing outside their division
+  else if (num < 12) {
+    avalibleTeams = returnOutsideDivision(divisionTeams, divisionTeams[i].subleague_id, divisionTeams[i].division_id);
+  }
+  //This means that the team is playing inside their division
+  else {
+    avalibleTeams = returnInsideDivision(divisionTeams, divisionTeams[i].subleague_id, divisionTeams[i].team_id);
+  }
+
+
+    //Roll a number for the index of the avalible teams
+    //All area equally weighted within the chosen section
+    num = intRoll(0, avalibleTeams.length);
+
+  return avalibleTeams[num];
+}
+
 function decide_game_play_order(season){
     
   let divisionTeams = await getActiveDivisionTeams();
@@ -107,51 +139,20 @@ function decide_game_play_order(season){
         continue;
       }
 
-      //Within sub league 20 / 32
-      //Outside of sub league 11 / 32
-      //Outside of league 1 / 32 
-      //Home or away is a coin flip
-
-      //Getting a random number
-      let num = intRoll(0,32);
-
-      //This means that the team is playing outside their subleague
-      if (num == 0) {
-        let avalibleTeams = returnOutsideSubleague(divisionTeams, divisionTeams[i].subleague_id);
-      }
-      //This means that the team is playing outside their division
-      else if (num < 12) {
-        let avalibleTeams = returnOutsideDivision(divisionTeams, divisionTeams[i].subleague_id, divisionTeams[i].division_id);
-      }
-      //This means that the team is playing inside their division
-      else {
-        let avalibleTeams = returnInsideDivision(divisionTeams, divisionTeams[i].subleague_id, divisionTeams[i].team_id);
-      }
-
-
-      //Roll a number for the index of the avalible teams
-      //All area equally weighted within the chosen section
-      num = roll(0, avalibleTeams.length - 1);
       //Select a team
-      let chosenTeam = avalibleTeams[num];
+      let chosenTeam = setTeamMatchup(divisionTeams);
 
 
-      //Getting a decide if the first team is playing home or away
-      num = intRoll(0,2);
-      
-      switch (num){
-
+      //Getting a decide if the first team is playing home or away      
+      if(Math.random() > 0.5){
         //First team is the home team
-        case 0:
-          teams.push(divisionTeams[i].team_id);
-          teams.push(chosenTeam);
-          break;
-
+        teams.push(divisionTeams[i].team_id);
+        teams.push(chosenTeam);
+      }
+      else{
         //First team is the away team
-        case 1:
-          teams.push(chosenTeam);
-          teams.push(divisionTeams[i].team_id);
-          break;
+        teams.push(chosenTeam);
+        teams.push(divisionTeams[i].team_id);
       }
     }
 
@@ -170,5 +171,5 @@ function decide_game_play_order(season){
 }
 
 module.export = {
-    decide_game_play_order
+  decide_game_play_order
 }

@@ -455,6 +455,13 @@ INSERT INTO taxa.vibe_to_arrows (vibe_to_arrow_id, arrow_count, min_vibe, max_vi
 
 
 
+INSERT INTO taxa.post_season_names (round_number, round_name) VALUES (0, 'Wild Card Games');
+    INSERT INTO taxa.post_season_names (round_number, round_name) VALUES (1, 'Division Series');
+    INSERT INTO taxa.post_season_names (round_number, round_name) VALUES (2, 'Championship Series');
+    INSERT INTO taxa.post_season_names (round_number, round_name) VALUES (3, 'Internet Series');
+
+
+
 
 
 
